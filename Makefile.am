@@ -1,2 +1,2 @@
 bin_PROGRAMS = NESRomTool
-NESRomTool_SOURCES = main.cpp NESutils.c NESutils.h
+NESRomTool_SOURCES = src/main.cpp src/NESutils.c src/NESutils.h
