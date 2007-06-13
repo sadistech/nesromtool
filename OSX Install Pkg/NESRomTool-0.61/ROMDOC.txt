@@ -1,0 +1,94 @@
+The .nes (NES ROM files) rundown. 
+
+(by spike <spike@sadistech.com>)
+
+First, some terminology:
+
+Header: Every .nes file has a 16 byte header. The first 4 characters are "NES\0x01a" Offsets 4 and 5 specify the number of PRG and CHR banks, respectively.
+
+Bank: Data is stored in blocks. Each type of data has a specific size of block that it's stored in. If it doesn't fill the block, the remaining space is filled with zeros.
+
+PRG: Program data. All ROMs must contain at least one bank of PRG data. This is the executable code that is stored for games/ demos. Each bank is exactly 16K (16384 bytes)
+
+CHR: Character data. Here be sprites. CHR data is just a block of sprites. Each CHR bank can contain up to 512 sprites. Since CHR banks are 8K each (8192 bytes), you can understand that each sprite is stored in 16 bytes, which brings us to our next topic. A ROM may not have any CHR banks (ie zelda, contra), ROMs such as these have the sprites stored in the PRG banks. I haven't yet looked into extraction from there.
+
+Sprites: A sprite is stored in a ROM file in the CHR bank. Again, there can be up to 512 sprites per bank. Each sprite is an 8x8 pixel tile. I will explain how the sprite data is stored in the ROM later in this text. Characters, when drawn on-screen in a game, are usually made up of several tiles (Mario, in Super Mario Brothers 1, for instance, when super-sized, is made up of 2 columns of 4 tiles for a total of 8).
+
+Title data: Title data is similar to ID3 tags in mp3 files- meta data to give a more desciptive title for the ROM and to protect against a filename change. It's a block of data (128 bytes) that's appended to the end of a ROM. If the title that is attached to a ROM is less than 128 bytes, the remaining block is filled with zeros.
+
+ANATOMY:
+
+      4     |     4     |     4     |     4    
++-----------------------------------------------+
+| NES\0x01a | PC CC X X |  X X X X  |  X X X X  |  HEADER
++-----------------------------------------------+
+|  PRG_data                                     |
+|             PRG_data                          |
+|                     PRG_data                  |  PRG_data bank (16K)
+|                             PRG_data          |
+|                                     PRG_data  |
++-----------------------------------------------+
+|  PRG_data                                     |
+|             PRG_data                          |
+|                     PRG_data                  |  PRG_data bank (16K)
+|                             PRG_data          |
+|                                     PRG_data  |
++-----------------------------------------------+
+|  CHR_data                                     |
+|             CHR_data                          |
+|                     CHR_data                  |  CHR_data bank (8K)
+|                             CHR_data          |
+|                                     CHR_data  |
++-----------------------------------------------+
+|  CHR_data                                     |
+|             CHR_data                          |
+|                     CHR_data                  |  CHR_data bank (8K)
+|                             CHR_data          |
+|                                     CHR_data  |
++-----------------------------------------------+
+|    TITLE_data                                 |  TITLE_data (128 bytes)
++-----------------------------------------------+
+
+PC: PRG bank count
+CC: CHR bank count
+
+The remaining bytes of the header are usually zeros, but some ROMs seem to have other values. I haven't yet figured out what that represents, if anything.
+
+SPRITES:
+
+Sprites are 8x8 pixel bitmap graphics stored in 16 byte blocks in the CHR data banks. Those 16 bytes are stored as 2 channels of 8 bytes each. Since a byte is 8 bits, each byte of the channel represents one row of the sprite.
+
+When the channels are combined, channel B has a "weight" of 2. Truth table of how to determine the composite image (ChannelA, ChannelB, Composite):
+
+A / B = C
+---------
+0 / 0 = 0
+1 / 0 = 1
+0 / 1 = 2
+1 / 1 = 3
+
+I hope that makes sense. ;) It's the only way I can think of explaining this. No other guides really do a decent job of explaining this. If you've got any experience with neural computing, this should be a piece of cake. :P
+
+ChannelA is the first 8 bytes, ChannelB is the second.
+
+Brief example of how sprites are stored in a ROM file:
+
+how it looks in hex:
+F0 F0 F0 F0  0F 0F 0F 0F  00 00 FF FF  00 00 FF FF
+
+ChannelA  +  ChannelB  ->  Composite
+
+11110000  +  00000000  ->  11110000
+11110000  +  00000000  ->  11110000
+11110000  +  11111111  ->  33332222
+11110000  +  11111111  ->  33332222
+00001111  +  00000000  ->  00001111
+00001111  +  00000000  ->  00001111
+00001111  +  11111111  ->  11113333
+00001111  +  11111111  ->  11113333
+
+Assuming colors 0 through 3 are black, red, green, and blue, respectively, this example composite should look like a series of rectangles in the different colors.
+
+Generally where the 0s are in the composite, it will be transparent. Color palettes seem to be generated on the fly, so I'm not sure how to find out exactly what colors are used for graphics and when.
+
+Please let me know if any of this isn't clear.

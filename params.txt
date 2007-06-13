@@ -1,0 +1,46 @@
+Possible Parameters:
+
+INFO/VERIFY:
+
+-i	(info)
+
+-v	(verify)
+
+-pc	(PRG Count)
+
+-cc	(CHR Count)
+
+EXTRACTION:
+
+-xp	(extract PRG)
+
+-xc 	(extract CHR)
+
+-xs	(extract sprites from CHR)
+
+-xsp	(extract sprites from PRG)
+
+
+INJECTION:
+
+-ip	(inject PRG)
+
+-ic	(inject CHR)
+
+-is	(inject sprites into CHR)
+
+-isp	(inject sprites into PRG)
+
+TITLES:
+
+-st	(set title)
+
+-rt	(remove title)
+
+-pt	(print title)
+
+MISC:
+
+-ds	(draw sprites)
+
+-f	(set source file)
