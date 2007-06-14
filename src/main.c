@@ -347,7 +347,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 			
 			filepath = argv[2];
 			startIndex = 1;
-			endIndex = NES_spritesPerChr;
+			endIndex = NES_MAX_SPRITES_CHR;
 			isMulti = 1;
 			
 			if (all) {
@@ -431,7 +431,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				}
 				
 				for (i = 1; i <= (int)NESGetChrBankCount(srcFile); i++) { //the chr loop
-					for (j = 1; j <= NES_spritesPerChr; j++) { //the sprite loop
+					for (j = 1; j <= NES_MAX_SPRITES_CHR; j++) { //the sprite loop
 						char filename[256];
 						
 						sprintf(filename, "%s.%d-%d.raw", srcFilename, i, j);
@@ -475,7 +475,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				
 				int i = 0;
 				
-				for (i = 1; i <= NES_spritesPerChr; i++) {
+				for (i = 1; i <= NES_MAX_SPRITES_CHR; i++) {
 					char filename[256];
 					
 					sprintf(filename, "%s.%d-%d.raw", srcFilename, chrIndex, i);
@@ -577,7 +577,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 					printf("\tfile:\t%s\t", filename);
 				}
 				
-				int dataSize = (toIndex - fromIndex + 1) * NES_rawSpriteSize;
+				int dataSize = (toIndex - fromIndex + 1) * NES_RAW_SPRITE_LENGTH;
 				
 				FILE *ofile;
 				
@@ -642,7 +642,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 					cleanUp("Invalid CHR index.", 1);
 				}
 				
-				if (startIndex < 1 || endIndex > NES_spritesPerChr) {
+				if (startIndex < 1 || endIndex > NES_MAX_SPRITES_CHR) {
 					cleanUp("Invalid index for extracting a range sprite data.", 1);
 				}
 				
@@ -747,7 +747,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 			printf("Extracting prg sprite (BEWARE!!!!! RAHHH!\n");
 		}
 								
-		int dataSize = (toIndex - fromIndex + 1) * NES_rawSpriteSize;
+		int dataSize = (toIndex - fromIndex + 1) * NES_RAW_SPRITE_LENGTH;
 		
 		FILE *ofile;
 		
@@ -988,7 +988,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				cleanUp("Invalid chrIndex for injection of sprites!", 1);
 			}
 			
-			if (spriteIndex < 1 || spriteIndex > NES_spritesPerChr) {
+			if (spriteIndex < 1 || spriteIndex > NES_MAX_SPRITES_CHR) {
 				cleanUp("Invalid spriteIndex!", 1);
 			}
 			
@@ -1055,7 +1055,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 					cleanUp("Can't get chrData!!!", 1);
 				}
 				
-				for (j = 1; j < NES_spritesPerChr; j++) {
+				for (j = 1; j < NES_MAX_SPRITES_CHR; j++) {
 					char *spriteData = NESGetSpriteDataFromChrBank(chrData, j);
 					
 					if (!spriteData) {
@@ -1068,7 +1068,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 						printf("Sprite:\t%d\n", j);
 					}
 					
-					printSpriteData(spriteData, 1, NES_rawSpriteSize, mono);
+					printSpriteData(spriteData, 1, NES_RAW_SPRITE_LENGTH, mono);
 					
 					printf("\n");
 					
@@ -1129,14 +1129,14 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 					cleanUp("Can't get sprite data!", 1);
 				}
 				
-				char *compSprite = NESMakeCompoundSprite(spriteData, (toIndex - fromIndex + 1) * NES_rawSpriteSize, columns, mode);
+				char *compSprite = NESMakeCompoundSprite(spriteData, (toIndex - fromIndex + 1) * NES_RAW_SPRITE_LENGTH, columns, mode);
 				free(spriteData);
 				
 				if (!compSprite) {
 					cleanUp("Can't make compound sprite!", 1);
 				}
 				
-				printSpriteData(compSprite, (toIndex - fromIndex + 1) * NES_rawSpriteSize, columns, mono);
+				printSpriteData(compSprite, (toIndex - fromIndex + 1) * NES_RAW_SPRITE_LENGTH, columns, mono);
 				
 			} else if (strcmp(argv[1 + mono], kOptStrip) == 0) {
 				#pragma mark --strip of sprites
@@ -1169,14 +1169,14 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 					cleanUp("Can't get sprite data!", 1);
 				}
 				
-				char *compSprite = NESMakeCompoundSprite(spriteData, (toIndex - fromIndex + 1) * NES_rawSpriteSize, 1, nesHMode);
+				char *compSprite = NESMakeCompoundSprite(spriteData, (toIndex - fromIndex + 1) * NES_RAW_SPRITE_LENGTH, 1, nesHMode);
 				free(spriteData);
 				
 				if (!compSprite) {
 					cleanUp("Can't make compound sprite!", 1);
 				}
 				
-				printSpriteData(compSprite, (toIndex - fromIndex + 1) * NES_rawSpriteSize, 1, mono);
+				printSpriteData(compSprite, (toIndex - fromIndex + 1) * NES_RAW_SPRITE_LENGTH, 1, mono);
 				
 			} else {
 				#pragma mark -specific chr, range of sprites
@@ -1217,7 +1217,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 						printf("Sprite:\t%d\n", i);
 					}
 					
-					printSpriteData(spriteData, NES_rawSpriteSize, 1, mono);
+					printSpriteData(spriteData, NES_RAW_SPRITE_LENGTH, 1, mono);
 					
 					printf("\n");
 					
@@ -1243,7 +1243,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 			
 			char *chrData = NESGetChrBank(srcFile, chrIndex);
 			
-			for (i = 1; i <= NES_spritesPerChr; i++) {
+			for (i = 1; i <= NES_MAX_SPRITES_CHR; i++) {
 				char *spriteData = NESGetSpriteDataFromChrBank(chrData, i);
 				
 				if (!spriteData) {
@@ -1256,7 +1256,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 					printf("Sprite:\t%d\n", i);
 				}
 				
-				printSpriteData(spriteData, NES_rawSpriteSize, 1, mono);
+				printSpriteData(spriteData, NES_RAW_SPRITE_LENGTH, 1, mono);
 				
 				printf("\n");
 				
@@ -1296,7 +1296,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				printf("Sprite:\t%d\n", spriteIndex);
 			}
 			
-			printSpriteData(spriteData, NES_rawSpriteSize, 1, mono);
+			printSpriteData(spriteData, NES_RAW_SPRITE_LENGTH, 1, mono);
 				
 			printf("\n");
 				
@@ -1620,7 +1620,7 @@ void printSpriteData(char *spriteData, int dataSize, int columns, int mono) {
 		
 		printf("\033[m");
 		
-		if ((i + 1) % (columns * NES_spriteWidth) == 0) {
+		if ((i + 1) % (columns * NES_SPRITE_WIDTH) == 0) {
 			printf("\n");
 		}
 	}	

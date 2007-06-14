@@ -18,37 +18,30 @@ extern "C" {
 #endif
 
 //header stuff
-#define NES_headerPrefix "NES\x01a"
-#define NES_headerPrefixOffset 0
-#define NES_headerSize 16
+#define NES_HEADER_PREFIX 						"NES\x01a"		/* Magic Number for NES ROMs */
+#define NES_HEADER_PREFIX_OFFSET 			0							/* The offset in the file (in bytes) where the magic number is stored */
+#define NES_HEADER_SIZE 							16						/* the size of the entire file header */
 
-#define NES_prgCountOffset 4
-#define NES_chrCountOffset 5
+// PRG (program code) and CHR (graphic data) bank information
+#define NES_PRG_COUNT_OFFSET 					4							/* the offset in the file where the PRG_COUNT is located */
+#define NES_CHR_COUNT_OFFSET 					5							/* the offset in the file where the CHR_COUNT is located */
 
-//datasize from ROM file (.nes) - 16 bytes
-#define NES_romSpriteSize 16
+#define NES_ROM_SPRITE_LENGTH 				16						/* datalength of a sprite from ROM file (.nes) - 16 bytes */
 
-//half of the romSpriteSize (NES_romSpriteSize / 2) = 8 bytes
-#define NES_romSpriteChannelSize 8
+#define NES_ROM_SPRITE_CHANNEL_LENGTH 8							/* length of a single sprite channel, in bytes: (NES_ROM_SPRITE_LENGTH / 2) = 8 bytes */
 
-//datasize from RAW file (.raw) - 8 x 8 bytes
-#define NES_rawSpriteSize 64
+#define NES_RAW_SPRITE_LENGTH 				64						/* datalength for single-sprite RAW file (.raw) - 8 x 8 bytes (pixels) */
 
-#define NES_spriteWidth 8
-#define NES_spriteHeight 8
+#define NES_SPRITE_WIDTH 							8							/* width, in pixels, of a single sprite */
+#define NES_SPRITE_HEIGHT 						8							/* height, in pixels, of a single sprite */
 
-//the number of sprites stored in each CHR
-#define NES_spritesPerChr 512
-//the max number of sprites in each PRG (usually not completely filled)
-#define NES_spritesPerPrg 1024
+#define NES_MAX_SPRITES_CHR 					512						/* maximum number of sprites stored in a CHR bank */
+#define NES_MAX_SPRITES_PRG 					1024					/* maximum number of sprites in a PRG bank (usually not completely filled) */
 
-//PRG_bankSize is 16K	(program data (somtimes graphic))
-//CHR_bankSize is 8K	(graphic data)
-#define NES_prgBankSize 16384
-#define NES_chrBankSize 8192
+#define NES_PRG_BANK_SIZE 						16384					/* length (in bytes) of a PRG Bank: 16KB */
+#define NES_CHR_BANK_SIZE 						8192					/* length (in bytes) of a CHR Bank: 8KB */
 
-//for titling ROMs:
-#define NES_romTitleBlockSize 128
+#define NES_ROM_TITLE_BLOCK_SIZE 			128						/* the block size (including padding) of the title data that gets appended to the end of the file */
 
 //return values for functions
 typedef enum {
@@ -56,11 +49,14 @@ typedef enum {
 	nesNoErr = 0,
 } NESErrorCode;
 
+// sprite assembly modes
 typedef enum {
-	nesHMode = 0,
-	nesVMode = 1,
+	nesHMode = 0, // horizontal
+	nesVMode = 1, // vertical
 } NESSpriteMode;
 
+//check if bool is defined or not...
+#ifndef bool
 #define bool int
 
 #ifndef true
@@ -69,6 +65,8 @@ typedef enum {
 
 #ifndef false
 #define false 0
+#endif
+
 #endif
 
 //for converting between ROM sprite data and RAW sprite data

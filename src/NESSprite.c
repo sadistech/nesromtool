@@ -14,10 +14,10 @@ NESSprite *NESNewSprite(void) {
 	
 	if (!s) return NULL;
 	
-	s->width = NES_spriteWidth;
-	s->height = NES_spriteHeight;
+	s->width = NES_SPRITE_WIDTH;
+	s->height = NES_SPRITE_HEIGHT;
 
-	s->spriteData = (char*)malloc(NES_rawSpriteSize);
+	s->spriteData = (char*)malloc(NES_RAW_SPRITE_LENGTH);
 	if (!s->spriteData) {
 		free(s);
 		return NULL;
@@ -31,9 +31,9 @@ NESSprite *NESNewSpriteFromFile(FILE *ifile) {
 	
 	rewind(ifile);
 	
-	char *data = (char *)malloc(NES_rawSpriteSize);
+	char *data = (char *)malloc(NES_RAW_SPRITE_LENGTH);
 	
-	if (fread(data, 1, NES_rawSpriteSize, ifile) != NES_rawSpriteSize) {
+	if (fread(data, 1, NES_RAW_SPRITE_LENGTH, ifile) != NES_RAW_SPRITE_LENGTH) {
 		return NULL;
 	}
 	
