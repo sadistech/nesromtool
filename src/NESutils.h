@@ -38,8 +38,8 @@ extern "C" {
 #define NES_MAX_SPRITES_CHR 					512						/* maximum number of sprites stored in a CHR bank */
 #define NES_MAX_SPRITES_PRG 					1024					/* maximum number of sprites in a PRG bank (usually not completely filled) */
 
-#define NES_PRG_BANK_SIZE 						16384					/* length (in bytes) of a PRG Bank: 16KB */
-#define NES_CHR_BANK_SIZE 						8192					/* length (in bytes) of a CHR Bank: 8KB */
+#define NES_PRG_BANK_LENGTH 					16384					/* length (in bytes) of a PRG Bank: 16KB */
+#define NES_CHR_BANK_LENGTH 					8192					/* length (in bytes) of a CHR Bank: 8KB */
 
 #define NES_ROM_TITLE_BLOCK_SIZE 			128						/* the block size (including padding) of the title data that gets appended to the end of the file */
 
@@ -54,6 +54,8 @@ typedef enum {
 	nesHMode = 0, // horizontal
 	nesVMode = 1, // vertical
 } NESSpriteMode;
+
+typedef unsigned char uchar;
 
 //check if bool is defined or not...
 #ifndef bool
@@ -78,8 +80,8 @@ int NESGetPrgBankCount(FILE *ifile);
 int NESGetChrBankCount(FILE *ifile);
 
 //returns the PRG and CHR banks from a file
-char *NESGetPrgBank(FILE *ifile, int n);
-char *NESGetChrBank(FILE *ifile, int n);
+void NESGetPrgBank(uchar *buf, FILE *ifile, int n);
+void NESGetChrBank(uchar *buf, FILE *ifile, int n);
 
 //takes a PRG or CHR bank (full file) from ifile and puts it into the nth bank in ofile
 NESErrorCode NESInjectPrgBankData(FILE *ofile, char *prgData, int n);

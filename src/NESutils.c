@@ -16,50 +16,68 @@
 
 #pragma mark *** LOW LEVEL ***
 
-char *NESGetPrgBank(FILE *ifile, int n) {
-	//returns the nth PRG bank
+void NESGetPrgBank(uchar *buf, FILE *ifile, int n) {
+	/*
+	**	retreive the nth PRG bank and put the data into buf
+	**	buf needs to be allocated: malloc(NES_PRG_BANK_LENGTH + 1)
+	*/
 	
-	if (!ifile) {
-		return NULL;
+	//check to make sure that ifile and buf aren't NULL
+	if (!ifile || !buf) {
+		return;
 	}
 	
-	if (n < 1 || n > NESGetPrgBankCount(ifile)) return NULL;
+	//bail if we try to get a nonexistent PRG bank
+	if (n < 1 || n > NESGetPrgBankCount(ifile)) return;
 	
-	char *PRG_data = (char *)malloc(NES_PRG_BANK_SIZE);
+	uchar *PRG_data = (uchar *)malloc(NES_PRG_BANK_LENGTH + 1); //temporary placeholder for data
 	
-	fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_SIZE * (n - 1)), SEEK_SET);
+	//seek to proper offset
+	fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * (n - 1)), SEEK_SET);
 	
-	if (fread(PRG_data, 1, NES_PRG_BANK_SIZE, ifile) != NES_PRG_BANK_SIZE) {
+	//read to placeholder
+	if (fread(PRG_data, 1, NES_PRG_BANK_LENGTH, ifile) != NES_PRG_BANK_LENGTH) {
 		free(PRG_data);
-		return NULL;
+		return;
 	}
 	
-	return PRG_data;
+	//copy data into buf
+	memcpy(buf, PRG_data, NES_PRG_BANK_LENGTH);
 }
 
-char *NESGetChrBank(FILE *ifile, int n) {
-	if (!ifile) return NULL;
+void NESGetChrBank(uchar *buf, FILE *ifile, int n) {
+	/*
+	**	retreive the nth CHR bank and put the data into buf
+	**	buf needs to be allocated: malloc(NES_CHR_BANK_LENGTH + 1)
+	*/
 	
-	if (n < 1 || n > NESGetChrBankCount(ifile)) return NULL;
+	//check to make sure that ifile and buf aren't NULL
+	if (!ifile || !buf) return;
 	
-	char *chrData = (char *)malloc(NES_CHR_BANK_SIZE);
+	//bail if we try to get a nonexistent 
+	if (n < 1 || n > NESGetChrBankCount(ifile)) return;
+	
+	//temporary placeholder for data
+	uchar *chrData = (uchar *)malloc(NES_CHR_BANK_LENGTH);
 	
 	//move to necessary point in file
-	fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_SIZE * NESGetPrgBankCount(ifile)) + (NES_CHR_BANK_SIZE * (n - 1)), SEEK_SET);
+	fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ifile)) + (NES_CHR_BANK_LENGTH * (n - 1)), SEEK_SET);
 	
-	if (fread(chrData, 1, NES_CHR_BANK_SIZE, ifile) != NES_CHR_BANK_SIZE) {
+	//read data into placeholder
+	if (fread(chrData, 1, NES_CHR_BANK_LENGTH, ifile) != NES_CHR_BANK_LENGTH) {
 		free(chrData);
-		return NULL;
+		return;
 	}
 	
-	return chrData;
+	//copy data into buf
+	memcpy(buf, chrData, NES_CHR_BANK_LENGTH);
 }
 
 
 
 #pragma mark -
 
-char *NESGetSpriteDataFromChrData(char *chrData, int n) {
+/*char *NESGetSpriteDataFromChrData(char *chrData, int n) {
 	// gets the nth sprite from the CHR data and returns the composite data
 	// there's 512 sprites per CHR bank.
 	
@@ -89,7 +107,7 @@ char *NESGetSpriteDataFromChrData(char *chrData, int n) {
 	}
 	
 	return composite;*/
-}
+//}
 
 char *NESGetSpriteDataRangeFromChrData(char *chrData, int startIndex, int endIndex) {
 	if (!chrData || startIndex < 0 || endIndex > NES_MAX_SPRITES_CHR) return NULL;
@@ -105,13 +123,14 @@ char *NESGetSpriteDataRangeFromChrData(char *chrData, int startIndex, int endInd
 
 #pragma mark -
 
-NESErrorCode NESExtractSprite(FILE *ifile, FILE *ofile, int chrIndex, int n) {
+/*NESErrorCode NESExtractSprite(FILE *ifile, FILE *ofile, int chrIndex, int n) {
 	if (!ifile || !ofile) return nesErr;
 	
 	if (chrIndex < 1 || chrIndex > NESGetChrBankCount(ifile)) return nesErr;
 	if (n < 1 || n > NES_MAX_SPRITES_CHR) return nesErr;
 	
-	char *chrData = NESGetChrBank(ifile, chrIndex);
+	char *chrData = (char*)malloc(NES_CHR_BANK_LENGTH);
+	NESGetChrBank(chrData, ifile, chrIndex);
 	
 	if (!chrData) return nesErr; //error
 	
@@ -120,7 +139,7 @@ NESErrorCode NESExtractSprite(FILE *ifile, FILE *ofile, int chrIndex, int n) {
 	
 	if (!spriteData) return nesErr;
 	
-	char *compositeData = NESSpriteToComposite(spriteData, 
+	char *compositeData;// = NESSpriteToComposite(spriteData, 
 	
 	if (fwrite(NESGetSpriteDataFromChrBank(chrData, n), 1, NES_RAW_SPRITE_LENGTH, ofile) != NES_RAW_SPRITE_LENGTH) {
 		free(chrData);
@@ -129,15 +148,17 @@ NESErrorCode NESExtractSprite(FILE *ifile, FILE *ofile, int chrIndex, int n) {
 	
 	free(chrData);
 	return nesNoErr; //noErr
-}
+}*/
 
+/*
 NESErrorCode NESExtractSpriteRange(FILE *ifile, FILE *ofile, int chrIndex, int startIndex, int endIndex) {
 	if (!ifile || !ofile) return nesErr;
 	
 	if (chrIndex < 1 || chrIndex > NESGetChrBankCount(ifile)) return nesErr;
 	if (startIndex < 1 || startIndex > NES_MAX_SPRITES_CHR || endIndex < startIndex || endIndex > NES_MAX_SPRITES_CHR) return nesErr;
 	
-	char *chrData = NESGetChrBank(ifile, chrIndex);
+	char *chrData = (char*)malloc(NES_CHR_BANK_LENGTH);
+	NESGetChrBank(chrData, ifile, chrIndex);
 	
 	if (!chrData) return nesErr;
 	
@@ -148,7 +169,7 @@ NESErrorCode NESExtractSpriteRange(FILE *ifile, FILE *ofile, int chrIndex, int s
 	
 	free(chrData);
 	return nesNoErr;
-}
+}*/
 
 char *NESGetCompoundSpriteDataFromChrBank(char *chrData, NESSpriteMode mode, int columns, int startIndex, int endIndex) {
 	return NULL;
@@ -156,9 +177,9 @@ char *NESGetCompoundSpriteDataFromChrBank(char *chrData, NESSpriteMode mode, int
 
 
 NESErrorCode NESExtractCompoundSprite(FILE *ifile, FILE *ofile, int chrIndex, int fromIndex, int toIndex, int columns, NESSpriteMode mode) {
-	char *chrData = (char *)malloc(NES_CHR_BANK_SIZE);
+	uchar *chrData = (uchar *)malloc(NES_CHR_BANK_LENGTH);
 	
-	chrData = NESGetChrBank(ofile, chrIndex);
+	NESGetChrBank(chrData, ofile, chrIndex);
 	
 	if (!chrData) return nesErr;
 	
@@ -178,7 +199,7 @@ NESErrorCode NESExtractCompoundSpriteData(char *chrData, FILE *ofile, int fromIn
 	//copy those sprites into spriteRomData
 	memcpy(spriteRomData, chrData, (toIndex - fromIndex + 1) * NES_ROM_SPRITE_LENGTH);
 	
-	return NULL;
+	return 1;
 }
 
 #pragma mark -
@@ -222,7 +243,7 @@ NESErrorCode NESInjectSpriteData(FILE *ofile, char *spriteData, int chrIndex, in
 	
 	if (prgCount < 1 || chrIndex > NESGetChrBankCount(ofile)) return nesErr; //error
 	
-	fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_SIZE * prgCount) + (NES_CHR_BANK_SIZE * (chrIndex - 1)) + ((spriteIndex - 1) * NES_ROM_SPRITE_LENGTH), SEEK_SET);
+	fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * prgCount) + (NES_CHR_BANK_LENGTH * (chrIndex - 1)) + ((spriteIndex - 1) * NES_ROM_SPRITE_LENGTH), SEEK_SET);
 	
 	int i = 0;
 	
@@ -418,11 +439,13 @@ NESErrorCode NESExtractPrgBank(FILE *fromFile, FILE *toFile, int n) {
 	
 	//no need to do any error checking since it happens in NESGetPrgBank()
 
-	char *PRG_data = NESGetPrgBank(fromFile, n);
+	uchar *PRG_data = (uchar*)malloc(NES_PRG_BANK_LENGTH);
+	
+	NESGetPrgBank(PRG_data, fromFile, n);
 	
 	if (!PRG_data) return nesErr;
 	
-	if (fwrite(PRG_data, 1, NES_PRG_BANK_SIZE, toFile) != NES_PRG_BANK_SIZE) {
+	if (fwrite(PRG_data, 1, NES_PRG_BANK_LENGTH, toFile) != NES_PRG_BANK_LENGTH) {
 		free(PRG_data);
 		return nesErr;
 	}
@@ -435,11 +458,12 @@ NESErrorCode NESExtractChrBank(FILE *fromFile, FILE *toFile, int n) {
 	//extracts a CHRbank from a ROM into its own file
 	//all errorchecking occurs in NESGetChrBank()
 	
-	char *chrData = NESGetChrBank(fromFile, n);
+	uchar *chrData = (uchar*)malloc(NES_CHR_BANK_LENGTH);
+	NESGetChrBank(chrData, fromFile, n);
 	
 	if (!chrData) return nesErr;
 	
-	if (fwrite(chrData, 1, NES_CHR_BANK_SIZE, toFile) != NES_CHR_BANK_SIZE) {
+	if (fwrite(chrData, 1, NES_CHR_BANK_LENGTH, toFile) != NES_CHR_BANK_LENGTH) {
 		free(chrData);
 		return nesErr;
 	}
@@ -455,10 +479,10 @@ NESErrorCode NESInjectPrgBank(FILE *ofile, FILE *ifile, int n) {
 	if (n < 1 || n > NESGetPrgBankCount(ofile)) return nesErr; //error
 	
 	//move to nth PRG bank for writing...
-	fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_SIZE * (n - 1)), SEEK_SET);
+	fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * (n - 1)), SEEK_SET);
 	
-	char *prgData = (char *)malloc(NES_PRG_BANK_SIZE);
-	if (fread(prgData, 1, NES_PRG_BANK_SIZE, ifile) != NES_PRG_BANK_SIZE) {
+	char *prgData = (char *)malloc(NES_PRG_BANK_LENGTH);
+	if (fread(prgData, 1, NES_PRG_BANK_LENGTH, ifile) != NES_PRG_BANK_LENGTH) {
 		free(prgData);
 		return nesErr;
 	}
@@ -473,9 +497,9 @@ NESErrorCode NESInjectPrgBankData(FILE *ofile, char *prgData, int n) {
 	
 	if (n < 1 || n > NESGetPrgBankCount(ofile)) return nesErr;
 	
-	fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_SIZE * (n - 1)), SEEK_SET);
+	fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * (n - 1)), SEEK_SET);
 	
-	if (fwrite(prgData, 1, NES_PRG_BANK_SIZE, ofile) != NES_PRG_BANK_SIZE) {
+	if (fwrite(prgData, 1, NES_PRG_BANK_LENGTH, ofile) != NES_PRG_BANK_LENGTH) {
 		return nesErr;
 	}
 	
@@ -487,11 +511,11 @@ NESErrorCode NESInjectChrBank(FILE *ofile, FILE *ifile, int n) {
 	
 	if (n < 1 || n > NESGetChrBankCount(ofile)) return nesErr; //error
 	
-	fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_SIZE * NESGetPrgBankCount(ofile)) + (NES_CHR_BANK_SIZE * (n - 1)), SEEK_SET);
+	fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ofile)) + (NES_CHR_BANK_LENGTH * (n - 1)), SEEK_SET);
 	
-	char *chrData = (char *)malloc(NES_CHR_BANK_SIZE);
+	char *chrData = (char *)malloc(NES_CHR_BANK_LENGTH);
 	
-	if (fread(chrData, 1, NES_CHR_BANK_SIZE, ifile) != NES_CHR_BANK_SIZE) {
+	if (fread(chrData, 1, NES_CHR_BANK_LENGTH, ifile) != NES_CHR_BANK_LENGTH) {
 		free(chrData);
 		return nesErr;
 	}
@@ -506,9 +530,9 @@ NESErrorCode NESInjectChrBankData(FILE *ofile, char *chrData, int n) {
 	
 	if (n < 1 || n > NESGetChrBankCount(ofile)) return nesErr;
 	
-	fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_SIZE * NESGetPrgBankCount(ofile)) + (NES_CHR_BANK_SIZE * (n - 1)), SEEK_SET);
+	fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ofile)) + (NES_CHR_BANK_LENGTH * (n - 1)), SEEK_SET);
 	
-	if (fwrite(chrData, 1, NES_CHR_BANK_SIZE, ofile) != NES_CHR_BANK_SIZE) {
+	if (fwrite(chrData, 1, NES_CHR_BANK_LENGTH, ofile) != NES_CHR_BANK_LENGTH) {
 		return nesErr;
 	}
 	
@@ -526,7 +550,7 @@ bool NESHasTitle(FILE *ifile) {
 	int CHR_count = NESGetChrBankCount(ifile);
 	long filesize = NESGetFilesize(ifile);
 	
-	if (filesize >= (NES_HEADER_SIZE + PRG_count * NES_PRG_BANK_SIZE + CHR_count * NES_CHR_BANK_SIZE + NES_ROM_TITLE_BLOCK_SIZE)) {
+	if (filesize >= (NES_HEADER_SIZE + PRG_count * NES_PRG_BANK_LENGTH + CHR_count * NES_CHR_BANK_LENGTH + NES_ROM_TITLE_BLOCK_SIZE)) {
 		return true;
 	}
 	
@@ -542,7 +566,7 @@ char *NESGetTitle(FILE *ifile, bool strip) {
 	
 	char *titleData = (char *)malloc(NES_ROM_TITLE_BLOCK_SIZE + 1);
 	
-	fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_SIZE * NESGetPrgBankCount(ifile)) + (NES_CHR_BANK_SIZE * NESGetChrBankCount(ifile)), SEEK_SET);
+	fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ifile)) + (NES_CHR_BANK_LENGTH * NESGetChrBankCount(ifile)), SEEK_SET);
 	
 	int count = fread(titleData, 1, NES_ROM_TITLE_BLOCK_SIZE, ifile);
 	
@@ -569,7 +593,7 @@ char *NESGetTitle(FILE *ifile, bool strip) {
 NESErrorCode NESSetTitle(FILE *ofile, char *title) {
 	if(!ofile || !title) return nesErr;
 	
-	fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_SIZE * NESGetPrgBankCount(ofile)) + (NES_CHR_BANK_SIZE * NESGetChrBankCount(ofile)), SEEK_SET);
+	fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ofile)) + (NES_CHR_BANK_LENGTH * NESGetChrBankCount(ofile)), SEEK_SET);
 	
 	char *newTitle = (char*)malloc(NES_ROM_TITLE_BLOCK_SIZE);
 	
@@ -594,7 +618,7 @@ NESErrorCode NESRemoveTitle(FILE *ofile) {
 	
 	if (!NESHasTitle(ofile)) return nesErr;
 	
-	if (ftruncate(fileno(ofile), NES_HEADER_SIZE + (NESGetPrgBankCount(ofile) * NES_PRG_BANK_SIZE) + (NESGetChrBankCount(ofile) * NES_CHR_BANK_SIZE)) != 0) {
+	if (ftruncate(fileno(ofile), NES_HEADER_SIZE + (NESGetPrgBankCount(ofile) * NES_PRG_BANK_LENGTH) + (NESGetChrBankCount(ofile) * NES_CHR_BANK_LENGTH)) != 0) {
 		return nesErr;
 	}
 	
