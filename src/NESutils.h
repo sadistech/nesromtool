@@ -103,7 +103,7 @@ char *NESMakeCompoundSprite(char *spriteData, int size, int columns, NESSpriteMo
 
 //title functions
 bool NESHasTitle(FILE *ifile);
-char *NESGetTitle(FILE *ifile, int strip);
+void NESGetTitle(char *buf, FILE *ifile, int strip);
 NESErrorCode NESSetTitle(FILE *ofile, char *title);
 NESErrorCode NESRemoveTitle(FILE *ofile);
 

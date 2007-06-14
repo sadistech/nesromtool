@@ -544,12 +544,21 @@ NESErrorCode NESInjectChrBankData(FILE *ofile, char *chrData, int n) {
 #pragma mark *** TITLES ***
 
 bool NESHasTitle(FILE *ifile) {
+	/*
+	**	checks ifile (NES ROM) to see if it has title data
+	**	returns false if no title data or title data blank
+	**	returns true if title data exists
+	*/
 	if (!ifile) return false;
-
+	
+	//initialize some values
 	int PRG_count = NESGetPrgBankCount(ifile);
 	int CHR_count = NESGetChrBankCount(ifile);
 	long filesize = NESGetFilesize(ifile);
 	
+	//if the header_size + PRG_Banks + CHR_banks == filesize, then no titledata block...
+	// if there's additional data beyond that, it's safe to assume that titledata exists...
+	// TODO: check contents of titledata to see if it's empty and return false if so... (currently, we're just assuming there is title if there's allocated space)
 	if (filesize >= (NES_HEADER_SIZE + PRG_count * NES_PRG_BANK_LENGTH + CHR_count * NES_CHR_BANK_LENGTH + NES_ROM_TITLE_BLOCK_SIZE)) {
 		return true;
 	}
@@ -557,37 +566,48 @@ bool NESHasTitle(FILE *ifile) {
 	return false;
 }
 
-char *NESGetTitle(FILE *ifile, bool strip) {
-	if (!ifile) return NULL;
+void NESGetTitle(char *buf, FILE *ifile, bool strip) {
+	/*
+	**	reads ifile's titledata
+	**	sets the contents of buf to the title if it exists
+	**	if strip is set to true, remove all characters outside of 32-126
+	*/
 	
+	// check if ifile or buf are NULL, if so, bail
+	if (!ifile || !buf) return;
+	
+	//also bail if we don't have a titleblock
 	if (!NESHasTitle(ifile)) {
-		return NULL;
+		return;
 	}
 	
-	char *titleData = (char *)malloc(NES_ROM_TITLE_BLOCK_SIZE + 1);
+	//allocate the titleData
+	char *title_data = (char *)malloc(NES_ROM_TITLE_BLOCK_SIZE + 1);
 	
 	fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ifile)) + (NES_CHR_BANK_LENGTH * NESGetChrBankCount(ifile)), SEEK_SET);
 	
-	int count = fread(titleData, 1, NES_ROM_TITLE_BLOCK_SIZE, ifile);
+	//read the title_data... set count to the number of bytes read.
+	int count = fread(title_data, 1, NES_ROM_TITLE_BLOCK_SIZE, ifile);
 	
+	//yeah, I'm a little strict... this should probably be fixed so we're not quite as strict...
 	if (count != NES_ROM_TITLE_BLOCK_SIZE) {
-		free(titleData);
-		return NULL;
+		free(title_data);
+		return;
 	}
 	
 	//strip all non-normal characters (keep standard human-readable stuff)
 	//this is for display purposes only
 	if (strip) {
 		int i = 0;
-		for(i = 0; titleData[i]; i++) {
-			if (titleData[i] < 32 || titleData[i] > 126) {
-				titleData[i] = 0;
+		for(i = 0; title_data[i]; i++) { //stop when we hit a \0
+			if (title_data[i] < 32 || title_data[i] > 126) {
+				title_data[i] = 0;
 				break;
 			}
 		}
 	}
 	
-	return titleData;
+	return title_data;
 }
 
 NESErrorCode NESSetTitle(FILE *ofile, char *title) {
