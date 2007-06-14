@@ -1,6 +1,6 @@
-AC_INIT([NESRomTool], [0.61],
+AC_INIT([nesromtool], [1.00a],
 	[Spike Grobstein <spike@sadistech.com>],
-	[NESRomTool])
+	[nesromtool])
 AC_CONFIG_AUX_DIR(config)
 AM_INIT_AUTOMAKE([dist-bzip2])
 AC_PROG_CC
