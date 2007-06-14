@@ -43,6 +43,7 @@ void NESGetPrgBank(uchar *buf, FILE *ifile, int n) {
 	
 	//copy data into buf
 	memcpy(buf, PRG_data, NES_PRG_BANK_LENGTH);
+	free(PRG_data);
 }
 
 void NESGetChrBank(uchar *buf, FILE *ifile, int n) {
@@ -71,6 +72,7 @@ void NESGetChrBank(uchar *buf, FILE *ifile, int n) {
 	
 	//copy data into buf
 	memcpy(buf, chrData, NES_CHR_BANK_LENGTH);
+	free(chrData);
 }
 
 
@@ -607,7 +609,9 @@ void NESGetTitle(char *buf, FILE *ifile, bool strip) {
 		}
 	}
 	
-	return title_data;
+	//copy title_data into buf and free it
+	memcpy(buf, title_data, NES_ROM_TITLE_BLOCK_SIZE);
+	free(title_data);
 }
 
 bool NESSetTitle(FILE *ofile, char *title) {
@@ -672,18 +676,24 @@ bool NESRemoveTitle(FILE *ofile) {
 
 #pragma mark *** UTILITY ***
 
-int NESGetPrgBankCount(FILE *ifile) {
-	//returns the number of PRG banks in ifile
+char NESGetPrgBankCount(FILE *ifile) {
+	/*
+	**	returns the number of PRG Banks in ifile
+	**	returns -1 if an error occurrs
+	*/
 	
-	if (!ifile) return nesErr;
+	if (!ifile) return -1;
 	fseek(ifile, NES_PRG_COUNT_OFFSET, SEEK_SET);
-	return (int)fgetc(ifile);
+	return (char)fgetc(ifile);
 }
 
-int NESGetChrBankCount(FILE* ifile) {
-	//returns the number of CHR banks in ifile
+char NESGetChrBankCount(FILE* ifile) {
+	/*
+	**	returns the number of CHR banks in ifile
+	**	returns -1 if an error occurrs
+	*/
 
-	if (!ifile) return nesErr;
+	if (!ifile) return -1;
 	fseek(ifile, NES_CHR_COUNT_OFFSET, SEEK_SET);
 	return (int)fgetc(ifile);
 }

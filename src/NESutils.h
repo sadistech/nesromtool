@@ -76,8 +76,8 @@ char NESCombineBits(int a, int b, int n);
 char *NESBreakBits(char c);
 
 //returns the number of PRG and CHR banks respectively
-int NESGetPrgBankCount(FILE *ifile);
-int NESGetChrBankCount(FILE *ifile);
+char NESGetPrgBankCount(FILE *ifile);
+char NESGetChrBankCount(FILE *ifile);
 
 //returns the PRG and CHR banks from a file
 void NESGetPrgBank(uchar *buf, FILE *ifile, int n);
