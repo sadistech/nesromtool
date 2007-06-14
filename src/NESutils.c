@@ -610,11 +610,20 @@ void NESGetTitle(char *buf, FILE *ifile, bool strip) {
 	return title_data;
 }
 
-NESErrorCode NESSetTitle(FILE *ofile, char *title) {
-	if(!ofile || !title) return nesErr;
+bool NESSetTitle(FILE *ofile, char *title) {
+	/*
+	**	sets the title of the file to title
+	**	returns true on success
+	**	returns false on failure
+	*/
 	
+	//bail if anything is NULL
+	if(!ofile || !title) return false;
+	
+	//seek to the start of the title
 	fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ofile)) + (NES_CHR_BANK_LENGTH * NESGetChrBankCount(ofile)), SEEK_SET);
 	
+	//create a new titleblock
 	char *newTitle = (char*)malloc(NES_ROM_TITLE_BLOCK_SIZE);
 	
 	int i = 0;
@@ -625,24 +634,38 @@ NESErrorCode NESSetTitle(FILE *ofile, char *title) {
 	}
 	strcpy(newTitle, title);
 	
+	//write the titledata... bail if an error occurs
 	if (fwrite(newTitle, 1, NES_ROM_TITLE_BLOCK_SIZE, ofile) != NES_ROM_TITLE_BLOCK_SIZE) {
 		free(newTitle);
-		return nesErr;
+		return false;
 	}
 	
-	return nesNoErr;
+	//success!!!
+	return true;
 }
 
-NESErrorCode NESRemoveTitle(FILE *ofile) {
-	if (!ofile) return nesErr;
+bool NESRemoveTitle(FILE *ofile) {
+	/*
+	**	removes the title block if it exists
+	**	truncates the file and removes the title datablock
+	**	TODO: add truncate option to function... maybe we just want a blank title? although we could just NESSetTitle("") to do that
+	**	return true on success
+	** 	returns false on failure
+	*/
 	
-	if (!NESHasTitle(ofile)) return nesErr;
+	// check if the file is NULL... if so, bail
+	if (!ofile) return false;
 	
+	// if it doesn't have a title, bail... returns true because the title isn't there!
+	if (!NESHasTitle(ofile)) return true;
+	
+	// truncate the file to the proper size
+	// (header_size + prg_banks + chr_banks)
 	if (ftruncate(fileno(ofile), NES_HEADER_SIZE + (NESGetPrgBankCount(ofile) * NES_PRG_BANK_LENGTH) + (NESGetChrBankCount(ofile) * NES_CHR_BANK_LENGTH)) != 0) {
-		return nesErr;
+		return false;
 	}
 	
-	return nesNoErr;
+	return true;
 }
 
 #pragma mark -
