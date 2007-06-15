@@ -55,22 +55,6 @@ typedef enum {
 	nesVMode = 1, // vertical
 } NESSpriteMode;
 
-typedef unsigned char uchar;
-
-//check if bool is defined or not...
-#ifndef bool
-#define bool int
-
-#ifndef true
-#define true 1
-#endif
-
-#ifndef false
-#define false 0
-#endif
-
-#endif
-
 //for converting between ROM sprite data and RAW sprite data
 char NESCombineBits(int a, int b, int n);
 char *NESBreakBits(char c);

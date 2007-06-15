@@ -7,13 +7,27 @@
  *
  */
 
-#ifndef _GCM_TYPES_H_
-#define _GCM_TYPES_H_
+#ifndef _TYPES_H_
+#define _TYPES_H_
 
 typedef unsigned long u32;
 typedef unsigned short u16;
 
 typedef unsigned char uchar;
 
+//check if bool is defined or not...
+#ifndef bool
+#define bool int
+
+#ifndef true
+#define true 1
 #endif
+
+#ifndef false
+#define false 0
+#endif
+
+#endif
+
+#endif /* _TYPES_H_ */
 
