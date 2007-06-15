@@ -1,3 +1,8 @@
+//check if we have autoheader config.h, and include if necessary
+#ifdef HAVE_CONFIG
+#include <config.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

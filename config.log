@@ -30,8 +30,8 @@ Kernel configured for up to 2 processors.
 Processor type: i486 (Intel 80486)
 Processors active: 0 1
 Primary memory available: 2.00 gigabytes
-Default processor set: 95 tasks, 272 threads, 2 processors
-Load average: 0.91, Mach factor: 1.27
+Default processor set: 97 tasks, 272 threads, 2 processors
+Load average: 0.84, Mach factor: 1.14
 /bin/machine           = unknown
 /usr/bin/oslevel       = unknown
 /bin/universe          = unknown
@@ -50,130 +50,91 @@ PATH: /usr/local/bin
 ## Core tests. ##
 ## ----------- ##
 
-configure:1723: checking for a BSD-compatible install
-configure:1779: result: /usr/bin/install -c
-configure:1790: checking whether build environment is sane
-configure:1833: result: yes
-configure:1898: checking for gawk
-configure:1928: result: no
-configure:1898: checking for mawk
-configure:1928: result: no
-configure:1898: checking for nawk
-configure:1928: result: no
-configure:1898: checking for awk
-configure:1914: found /usr/bin/awk
-configure:1925: result: awk
-configure:1936: checking whether make sets $(MAKE)
-configure:1957: result: yes
-configure:2189: checking for gcc
-configure:2205: found /usr/bin/gcc
-configure:2216: result: gcc
-configure:2454: checking for C compiler version
-configure:2461: gcc --version >&5
+configure:1714: checking for a BSD-compatible install
+configure:1770: result: /usr/bin/install -c
+configure:1781: checking whether build environment is sane
+configure:1824: result: yes
+configure:1889: checking for gawk
+configure:1919: result: no
+configure:1889: checking for mawk
+configure:1919: result: no
+configure:1889: checking for nawk
+configure:1919: result: no
+configure:1889: checking for awk
+configure:1905: found /usr/bin/awk
+configure:1916: result: awk
+configure:1927: checking whether make sets $(MAKE)
+configure:1948: result: yes
+configure:2180: checking for gcc
+configure:2196: found /usr/bin/gcc
+configure:2207: result: gcc
+configure:2445: checking for C compiler version
+configure:2452: gcc --version >&5
 i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 (Apple Computer, Inc. build 5363)
 Copyright (C) 2005 Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-configure:2464: $? = 0
-configure:2471: gcc -v >&5
+configure:2455: $? = 0
+configure:2462: gcc -v >&5
 Using built-in specs.
 Target: i686-apple-darwin8
 Configured with: /private/var/tmp/gcc/gcc-5363.obj~28/src/configure --disable-checking -enable-werror --prefix=/usr --mandir=/share/man --enable-languages=c,objc,c++,obj-c++ --program-transform-name=/^[cg][^.-]*$/s/$/-4.0/ --with-gxx-include-dir=/include/c++/4.0.0 --with-slibdir=/usr/lib --build=powerpc-apple-darwin8 --with-arch=nocona --with-tune=generic --program-prefix= --host=i686-apple-darwin8 --target=i686-apple-darwin8
 Thread model: posix
 gcc version 4.0.1 (Apple Computer, Inc. build 5363)
-configure:2474: $? = 0
-configure:2481: gcc -V >&5
+configure:2465: $? = 0
+configure:2472: gcc -V >&5
 gcc: argument to `-V' is missing
-configure:2484: $? = 1
-configure:2507: checking for C compiler default output file name
-configure:2534: gcc    conftest.c  >&5
-configure:2537: $? = 0
-configure:2583: result: a.out
-configure:2588: checking whether the C compiler works
-configure:2598: ./a.out
-configure:2601: $? = 0
-configure:2618: result: yes
-configure:2625: checking whether we are cross compiling
-configure:2627: result: no
-configure:2630: checking for suffix of executables
-configure:2637: gcc -o conftest    conftest.c  >&5
-configure:2640: $? = 0
-configure:2664: result: 
-configure:2670: checking for suffix of object files
-configure:2696: gcc -c   conftest.c >&5
-configure:2699: $? = 0
-configure:2722: result: o
-configure:2726: checking whether we are using the GNU C compiler
-configure:2755: gcc -c   conftest.c >&5
-configure:2761: $? = 0
-configure:2768: test -z "$ac_c_werror_flag" || test ! -s conftest.err
-configure:2771: $? = 0
-configure:2778: test -s conftest.o
-configure:2781: $? = 0
-configure:2795: result: yes
-configure:2800: checking whether gcc accepts -g
-configure:2830: gcc -c -g  conftest.c >&5
-configure:2836: $? = 0
-configure:2843: test -z "$ac_c_werror_flag" || test ! -s conftest.err
-configure:2846: $? = 0
-configure:2853: test -s conftest.o
-configure:2856: $? = 0
-configure:2986: result: yes
-configure:3003: checking for gcc option to accept ISO C89
-configure:3077: gcc  -c -g -O2  conftest.c >&5
-configure:3083: $? = 0
-configure:3090: test -z "$ac_c_werror_flag" || test ! -s conftest.err
-configure:3093: $? = 0
-configure:3100: test -s conftest.o
-configure:3103: $? = 0
-configure:3123: result: none needed
-configure:3152: checking for style of include used by make
-configure:3180: result: GNU
-configure:3208: checking dependency style of gcc
-configure:3298: result: gcc3
-configure:3373: checking for g++
-configure:3389: found /usr/bin/g++
-configure:3400: result: g++
-configure:3431: checking for C++ compiler version
-configure:3438: g++ --version >&5
-i686-apple-darwin8-g++-4.0.1 (GCC) 4.0.1 (Apple Computer, Inc. build 5363)
-Copyright (C) 2005 Free Software Foundation, Inc.
-This is free software; see the source for copying conditions.  There is NO
-warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
-configure:3441: $? = 0
-configure:3448: g++ -v >&5
-Using built-in specs.
-Target: i686-apple-darwin8
-Configured with: /private/var/tmp/gcc/gcc-5363.obj~28/src/configure --disable-checking -enable-werror --prefix=/usr --mandir=/share/man --enable-languages=c,objc,c++,obj-c++ --program-transform-name=/^[cg][^.-]*$/s/$/-4.0/ --with-gxx-include-dir=/include/c++/4.0.0 --with-slibdir=/usr/lib --build=powerpc-apple-darwin8 --with-arch=nocona --with-tune=generic --program-prefix= --host=i686-apple-darwin8 --target=i686-apple-darwin8
-Thread model: posix
-gcc version 4.0.1 (Apple Computer, Inc. build 5363)
-configure:3451: $? = 0
-configure:3458: g++ -V >&5
-g++: argument to `-V' is missing
-configure:3461: $? = 1
-configure:3464: checking whether we are using the GNU C++ compiler
-configure:3493: g++ -c   conftest.cpp >&5
-configure:3499: $? = 0
-configure:3506: test -z "$ac_cxx_werror_flag" || test ! -s conftest.err
-configure:3509: $? = 0
-configure:3516: test -s conftest.o
-configure:3519: $? = 0
-configure:3533: result: yes
-configure:3538: checking whether g++ accepts -g
-configure:3568: g++ -c -g  conftest.cpp >&5
-configure:3574: $? = 0
-configure:3581: test -z "$ac_cxx_werror_flag" || test ! -s conftest.err
-configure:3584: $? = 0
-configure:3591: test -s conftest.o
-configure:3594: $? = 0
-configure:3724: result: yes
-configure:3749: checking dependency style of g++
-configure:3839: result: gcc3
-configure:3869: checking for a BSD-compatible install
-configure:3925: result: /usr/bin/install -c
-configure:4089: creating ./config.status
+configure:2475: $? = 1
+configure:2498: checking for C compiler default output file name
+configure:2525: gcc    conftest.c  >&5
+configure:2528: $? = 0
+configure:2574: result: a.out
+configure:2579: checking whether the C compiler works
+configure:2589: ./a.out
+configure:2592: $? = 0
+configure:2609: result: yes
+configure:2616: checking whether we are cross compiling
+configure:2618: result: no
+configure:2621: checking for suffix of executables
+configure:2628: gcc -o conftest    conftest.c  >&5
+configure:2631: $? = 0
+configure:2655: result: 
+configure:2661: checking for suffix of object files
+configure:2687: gcc -c   conftest.c >&5
+configure:2690: $? = 0
+configure:2713: result: o
+configure:2717: checking whether we are using the GNU C compiler
+configure:2746: gcc -c   conftest.c >&5
+configure:2752: $? = 0
+configure:2759: test -z "$ac_c_werror_flag" || test ! -s conftest.err
+configure:2762: $? = 0
+configure:2769: test -s conftest.o
+configure:2772: $? = 0
+configure:2786: result: yes
+configure:2791: checking whether gcc accepts -g
+configure:2821: gcc -c -g  conftest.c >&5
+configure:2827: $? = 0
+configure:2834: test -z "$ac_c_werror_flag" || test ! -s conftest.err
+configure:2837: $? = 0
+configure:2844: test -s conftest.o
+configure:2847: $? = 0
+configure:2977: result: yes
+configure:2994: checking for gcc option to accept ISO C89
+configure:3068: gcc  -c -g -O2  conftest.c >&5
+configure:3074: $? = 0
+configure:3081: test -z "$ac_c_werror_flag" || test ! -s conftest.err
+configure:3084: $? = 0
+configure:3091: test -s conftest.o
+configure:3094: $? = 0
+configure:3114: result: none needed
+configure:3143: checking for style of include used by make
+configure:3171: result: GNU
+configure:3199: checking dependency style of gcc
+configure:3289: result: gcc3
+configure:3319: checking for a BSD-compatible install
+configure:3375: result: /usr/bin/install -c
+configure:3502: creating ./config.status
 
 ## ---------------------- ##
 ## Running config.status. ##
@@ -190,27 +151,21 @@ generated by GNU Autoconf 2.60.  Invocation command line was
 
 on Meltphace.local
 
-config.status:606: creating Makefile
-config.status:791: executing depfiles commands
+config.status:617: creating Makefile
+config.status:617: creating config.h
+config.status:873: executing depfiles commands
 
 ## ---------------- ##
 ## Cache variables. ##
 ## ---------------- ##
 
 ac_cv_c_compiler_gnu=yes
-ac_cv_cxx_compiler_gnu=yes
-ac_cv_env_CCC_set=
-ac_cv_env_CCC_value=
 ac_cv_env_CC_set=
 ac_cv_env_CC_value=
 ac_cv_env_CFLAGS_set=
 ac_cv_env_CFLAGS_value=
 ac_cv_env_CPPFLAGS_set=
 ac_cv_env_CPPFLAGS_value=
-ac_cv_env_CXXFLAGS_set=
-ac_cv_env_CXXFLAGS_value=
-ac_cv_env_CXX_set=
-ac_cv_env_CXX_value=
 ac_cv_env_LDFLAGS_set=
 ac_cv_env_LDFLAGS_value=
 ac_cv_env_build_alias_set=
@@ -223,13 +178,10 @@ ac_cv_objext=o
 ac_cv_path_install='/usr/bin/install -c'
 ac_cv_prog_AWK=awk
 ac_cv_prog_ac_ct_CC=gcc
-ac_cv_prog_ac_ct_CXX=g++
 ac_cv_prog_cc_c89=
 ac_cv_prog_cc_g=yes
-ac_cv_prog_cxx_g=yes
 ac_cv_prog_make_make_set=yes
 am_cv_CC_dependencies_compiler_type=gcc3
-am_cv_CXX_dependencies_compiler_type=gcc3
 
 ## ----------------- ##
 ## Output variables. ##
@@ -248,11 +200,8 @@ CC='gcc'
 CCDEPMODE='depmode=gcc3'
 CFLAGS='-g -O2'
 CPPFLAGS=''
-CXX='g++'
-CXXDEPMODE='depmode=gcc3'
-CXXFLAGS='-g -O2'
 CYGPATH_W='echo'
-DEFS='-DPACKAGE_NAME=\"nesromtool\" -DPACKAGE_TARNAME=\"nesromtool\" -DPACKAGE_VERSION=\"1.00a\" -DPACKAGE_STRING=\"nesromtool\ 1.00a\" -DPACKAGE_BUGREPORT=\"Spike\ Grobstein\ \<spike@sadistech.com\>\" -DPACKAGE=\"nesromtool\" -DVERSION=\"1.00a\"'
+DEFS='-DHAVE_CONFIG_H'
 DEPDIR='.deps'
 ECHO_C=''
 ECHO_N='-n'
@@ -280,11 +229,8 @@ SHELL='/bin/sh'
 STRIP=''
 VERSION='1.00a'
 ac_ct_CC='gcc'
-ac_ct_CXX='g++'
 am__fastdepCC_FALSE='#'
 am__fastdepCC_TRUE=''
-am__fastdepCXX_FALSE='#'
-am__fastdepCXX_TRUE=''
 am__include='include'
 am__leading_dot='.'
 am__quote=''

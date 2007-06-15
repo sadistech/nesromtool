@@ -1,0 +1,83 @@
+nesromtool [options] <method> [command options] <file> [<file> <file>...]
+
+options:
+	verbose
+	help
+	version
+	
+commands:
+	info (prg/chr count, title)
+	title (set, remove, read)
+	extract (chr, prg, sprite(s))
+	inject (chr, prg, sprite(s))
+	view (sprite)
+	dump (chr, prg, header)
+	
+command notes:
+	info
+		prints info... no options
+	
+	title
+		-set <new_title>
+		-remove
+		-print (default)
+		
+	extract
+		-sprite
+			-chr (extract from chr bank, default)
+			-prg (extract from prg bank)
+			<bank index> (required; which bank to extract from, chr 1 is default)
+			<sprite index> (required; can be a range)
+			-h | -v (compound sprite mode; horizontal or vertical... horizontal is default)
+			-f <filename> (default romname.nes.#.TYPE)
+			-t <type> (raw, native, gif?, png, html; the type of file to save; default is raw)
+		
+		-chr
+			<chr index> (required; can be a number, starting at 1 or a range: 1-4)
+			-f <filename> (default romname.nes.#.chr)
+			-s (extract as single file, only available if a range is specified; default is multiple)
+			
+		-prg
+			<prg index> (required; can be a number or a range)
+			-f <filename> (default romname.nes.#.prg)
+			-s (extract as single file, only available if range is specified; default is multiple)
+
+	inject (replace sprite(s) or bank(s))
+		-sprite
+			(-chr | -prg) <bank index> <sprite index> <filename>
+		
+		-chr
+			<chr start index> (required)
+			<filename> (required; one or more CHR banks)
+			
+		-prg
+			<prg start index> (required)
+			<filename> (required; one or more PRG banks)
+	
+	view (preview a sprite in terminal)
+		[same options as sprite extraction, minus the file and type stuff]
+		
+	
+	dump (outputs, in hex, what's been input)
+		-chr
+			<index> (can be single number or range)
+		
+		-prg
+			<index> (can be single or range)
+			
+		-header
+		
+		-all (dumps header, all CHR and all PRG)
+
+examples:
+
+nesromtool info smb1.nes
+
+nesromtool title -set "Super Mario Brothers" smb1.nes
+nesromtool title smb1.nes # prints the title
+nesromtool title -remove smb1.nes
+nesromtool title -print smb1.nes
+
+nesromtool extract -sprite -chr 1 1 smb1.nes
+nesromtool extract -sprite -chr 1 1-4 smb1.nes
+nesromtool extract -sprite -chr 1 1-4 -h smb1.nes
