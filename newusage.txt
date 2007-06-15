@@ -1,9 +1,10 @@
 nesromtool [options] <method> [command options] <file> [<file> <file>...]
 
 options:
-	verbose
-	help
-	version
+	help (-?, --help)
+	version (--version)
+	verbose (-v, --verbose)
+	colorpalette (-c <####>, --color <####>)
 	
 commands:
 	info (prg/chr count, title)

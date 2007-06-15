@@ -25,6 +25,7 @@
 
 // version info
 #define OPT_VERSION			"--version"
+#define OPT_VERSION_ALT "" /* no alternate for version */
 
 // set color palette
 #define OPT_COLOR				"-c"
@@ -50,25 +51,34 @@ int main (int argc, char *argv[]) {
 	for (current_arg = GET_NEXT_ARG ; (current_arg[0] == '-') ; current_arg = GET_NEXT_ARG) {
 
 		// HELP
-		if (strcmp(current_arg, OPT_HELP) == 0 || strcmp(current_arg, OPT_HELP_ALT) == 0) {
+		if ( CHECK_ARG( OPT_HELP ) ) {
 			print_usage(program_name, true);
 			exit(EXIT_SUCCESS);
 		}
 		
-		if (strcmp(current_arg, OPT_VERSION) == 0) {
+		if ( CHECK_ARG( OPT_VERSION ) ) {
 			printf("%s-%s\n\n", PACKAGE, VERSION);
 			exit(EXIT_SUCCESS);
 		}
 		
-		if (strcmp(current_arg, OPT_COLOR) == 0 || strcmp(current_arg, OPT_COLOR_ALT) == 0) {
+		if ( CHECK_ARG( OPT_COLOR ) ) {
 			printf("COLOR PALETTE NOT YET IMPLEMENTED!!\n");
+			SKIP_NARG(1);
 			continue;
 		}
 		
+		printf("UNKNOWN OPTION: %s\n", *argv);
+		exit(EXIT_FAILURE);
 	}
 	
-	printf("command: %s\n", *argv);
-
+	printf("ok...\n");
+	
+	if (*argv == NULL) {
+		printf("no command!\n");
+	} else {
+		printf("command: %s\n", *argv);
+	}
+	
 	return 0;
 }
 
