@@ -53,7 +53,7 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_nesromtool_OBJECTS = main.$(OBJEXT) NESutils.$(OBJEXT) \
-	pathfunc.$(OBJEXT)
+	pathfunc.$(OBJEXT) functions.$(OBJEXT)
 nesromtool_OBJECTS = $(am_nesromtool_OBJECTS)
 nesromtool_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
@@ -160,7 +160,9 @@ nesromtool_SOURCES = \
 	src/types.h \
 	src/commandline.h \
 	src/pathfunc.h \
-	src/pathfunc.c 
+	src/pathfunc.c \
+	src/functions.h \
+	src/functions.c
 
 EXTRA_DIST = reconf
 all: config.h
@@ -252,6 +254,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NESutils.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/functions.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pathfunc.Po@am__quote@
 
@@ -310,6 +313,20 @@ pathfunc.obj: src/pathfunc.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/pathfunc.c' object='pathfunc.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pathfunc.obj `if test -f 'src/pathfunc.c'; then $(CYGPATH_W) 'src/pathfunc.c'; else $(CYGPATH_W) '$(srcdir)/src/pathfunc.c'; fi`
+
+functions.o: src/functions.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT functions.o -MD -MP -MF "$(DEPDIR)/functions.Tpo" -c -o functions.o `test -f 'src/functions.c' || echo '$(srcdir)/'`src/functions.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/functions.Tpo" "$(DEPDIR)/functions.Po"; else rm -f "$(DEPDIR)/functions.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/functions.c' object='functions.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o functions.o `test -f 'src/functions.c' || echo '$(srcdir)/'`src/functions.c
+
+functions.obj: src/functions.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT functions.obj -MD -MP -MF "$(DEPDIR)/functions.Tpo" -c -o functions.obj `if test -f 'src/functions.c'; then $(CYGPATH_W) 'src/functions.c'; else $(CYGPATH_W) '$(srcdir)/src/functions.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/functions.Tpo" "$(DEPDIR)/functions.Po"; else rm -f "$(DEPDIR)/functions.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/functions.c' object='functions.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o functions.obj `if test -f 'src/functions.c'; then $(CYGPATH_W) 'src/functions.c'; else $(CYGPATH_W) '$(srcdir)/src/functions.c'; fi`
 uninstall-info-am:
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)

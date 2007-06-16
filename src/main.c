@@ -162,11 +162,15 @@ void parse_cmd_info(char **argv) {
 			exit(EXIT_FAILURE);
 		}
 		
-		//print info about the file
-		printf("Filename: %s\n", lastPathComponent(current_arg));
-		printf("Filesize: %d\n", (int)NESGetFilesize(ifile));
+		u32 filesize = NESGetFilesize(ifile); //get the filesize
+		char human_filesize[32];
+		hr_filesize(human_filesize, (double)filesize);
 		
-		printf("Verify: ");
+		//print info about the file
+		printf("Filename:    %s\n", lastPathComponent(current_arg));
+		printf("Filesize:    %ld bytes (%s)\n", filesize, human_filesize);
+		
+		printf("Verify:      ");
 		if (NESVerifyROM(ifile)) {
 			printf("OK\n");
 		} else {
@@ -177,14 +181,14 @@ void parse_cmd_info(char **argv) {
 		}
 		
 		//print bank info
-		printf("PRG Banks: %d\n", NESGetPrgBankCount(ifile));
-		printf("CHR Banks: %d\n", NESGetChrBankCount(ifile));
+		printf("PRG Banks:   %d\n", NESGetPrgBankCount(ifile));
+		printf("CHR Banks:   %d\n", NESGetChrBankCount(ifile));
 		
 		//print title info
 		//outputs '[n/a]' if no title is found...
 		char *title = (char*)malloc(NES_TITLE_BLOCK_LENGTH);
 		NESGetTitle(title, ifile, 1);
-		printf("Title: %s\n", (title[0] != 0) ? title : "[n/a]");
+		printf("Title:       %s\n", (title[0] != 0) ? title : "[n/a]");
 		
 		printf("\n");
 		
