@@ -181,10 +181,10 @@ void parse_cmd_info(char **argv) {
 		printf("CHR Banks: %d\n", NESGetChrBankCount(ifile));
 		
 		//print title info
-		//outputs '(n/a)' if no title is found...
+		//outputs '[n/a]' if no title is found...
 		char *title = (char*)malloc(NES_TITLE_BLOCK_LENGTH);
 		NESGetTitle(title, ifile, 1);
-		printf("Title: %s\n", (title[0] != 0) ? title : "(n/a)");
+		printf("Title: %s\n", (title[0] != 0) ? title : "[n/a]");
 		
 		printf("\n");
 		
