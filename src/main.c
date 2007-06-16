@@ -148,7 +148,7 @@ void parse_cmd_info(char **argv) {
 	char *current_arg = *argv;
 	
 	if (current_arg == NULL) {
-		perror("no filenames specified!\n");
+		printf("no filenames specified!\n");
 		exit(EXIT_FAILURE);
 	}
 	
