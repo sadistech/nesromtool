@@ -52,7 +52,8 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_nesromtool_OBJECTS = main.$(OBJEXT) NESutils.$(OBJEXT)
+am_nesromtool_OBJECTS = main.$(OBJEXT) NESutils.$(OBJEXT) \
+	pathfunc.$(OBJEXT)
 nesromtool_OBJECTS = $(am_nesromtool_OBJECTS)
 nesromtool_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
@@ -152,7 +153,15 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-nesromtool_SOURCES = src/main.c src/NESutils.c src/NESutils.h
+nesromtool_SOURCES = \
+	src/main.c \
+	src/NESutils.c \
+	src/NESutils.h \
+	src/types.h \
+	src/commandline.h \
+	src/pathfunc.h \
+	src/pathfunc.c 
+
 EXTRA_DIST = reconf
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -244,6 +253,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NESutils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pathfunc.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -286,6 +296,20 @@ NESutils.obj: src/NESutils.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/NESutils.c' object='NESutils.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o NESutils.obj `if test -f 'src/NESutils.c'; then $(CYGPATH_W) 'src/NESutils.c'; else $(CYGPATH_W) '$(srcdir)/src/NESutils.c'; fi`
+
+pathfunc.o: src/pathfunc.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pathfunc.o -MD -MP -MF "$(DEPDIR)/pathfunc.Tpo" -c -o pathfunc.o `test -f 'src/pathfunc.c' || echo '$(srcdir)/'`src/pathfunc.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/pathfunc.Tpo" "$(DEPDIR)/pathfunc.Po"; else rm -f "$(DEPDIR)/pathfunc.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/pathfunc.c' object='pathfunc.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pathfunc.o `test -f 'src/pathfunc.c' || echo '$(srcdir)/'`src/pathfunc.c
+
+pathfunc.obj: src/pathfunc.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pathfunc.obj -MD -MP -MF "$(DEPDIR)/pathfunc.Tpo" -c -o pathfunc.obj `if test -f 'src/pathfunc.c'; then $(CYGPATH_W) 'src/pathfunc.c'; else $(CYGPATH_W) '$(srcdir)/src/pathfunc.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/pathfunc.Tpo" "$(DEPDIR)/pathfunc.Po"; else rm -f "$(DEPDIR)/pathfunc.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/pathfunc.c' object='pathfunc.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pathfunc.obj `if test -f 'src/pathfunc.c'; then $(CYGPATH_W) 'src/pathfunc.c'; else $(CYGPATH_W) '$(srcdir)/src/pathfunc.c'; fi`
 uninstall-info-am:
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)

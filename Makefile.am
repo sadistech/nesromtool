@@ -6,7 +6,7 @@ nesromtool_SOURCES = \
 	src/types.h \
 	src/commandline.h \
 	src/pathfunc.h \
-	src/pathfunc.c \
+	src/pathfunc.c 
 	
 
 EXTRA_DIST = reconf

@@ -9,8 +9,8 @@ main.o main.o: src/main.c /usr/include/stdio.h /usr/include/_types.h \
   /usr/lib/gcc/i686-apple-darwin8/4.0.1/include/stdint.h \
   /usr/include/libkern/OSByteOrder.h \
   /usr/include/libkern/i386/OSByteOrder.h /usr/include/alloca.h \
-  /usr/include/machine/types.h /usr/include/i386/types.h \
-  /usr/include/string.h src/NESutils.h
+  /usr/include/machine/types.h /usr/include/i386/types.h src/types.h \
+  src/commandline.h src/NESutils.h
 
 /usr/include/stdio.h:
 
@@ -56,6 +56,8 @@ main.o main.o: src/main.c /usr/include/stdio.h /usr/include/_types.h \
 
 /usr/include/i386/types.h:
 
-/usr/include/string.h:
+src/types.h:
+
+src/commandline.h:
 
 src/NESutils.h:

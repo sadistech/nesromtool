@@ -11,6 +11,7 @@
 #define _NES_UTIL_H_
 
 #include <stdio.h>
+#include "types.h"
 //#include "NESSprite.h"
 
 #ifdef __cplusplus
@@ -41,7 +42,7 @@ extern "C" {
 #define NES_PRG_BANK_LENGTH 					16384					/* length (in bytes) of a PRG Bank: 16KB */
 #define NES_CHR_BANK_LENGTH 					8192					/* length (in bytes) of a CHR Bank: 8KB */
 
-#define NES_ROM_TITLE_BLOCK_SIZE 			128						/* the block size (including padding) of the title data that gets appended to the end of the file */
+#define NES_TITLE_BLOCK_LENGTH 				128						/* the block size (including padding) of the title data that gets appended to the end of the file */
 
 //return values for functions
 typedef enum {

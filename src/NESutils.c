@@ -561,7 +561,7 @@ bool NESHasTitle(FILE *ifile) {
 	//if the header_size + PRG_Banks + CHR_banks == filesize, then no titledata block...
 	// if there's additional data beyond that, it's safe to assume that titledata exists...
 	// TODO: check contents of titledata to see if it's empty and return false if so... (currently, we're just assuming there is title if there's allocated space)
-	if (filesize >= (NES_HEADER_SIZE + PRG_count * NES_PRG_BANK_LENGTH + CHR_count * NES_CHR_BANK_LENGTH + NES_ROM_TITLE_BLOCK_SIZE)) {
+	if (filesize >= (NES_HEADER_SIZE + PRG_count * NES_PRG_BANK_LENGTH + CHR_count * NES_CHR_BANK_LENGTH + NES_TITLE_BLOCK_LENGTH)) {
 		return true;
 	}
 	
@@ -584,15 +584,15 @@ void NESGetTitle(char *buf, FILE *ifile, bool strip) {
 	}
 	
 	//allocate the titleData
-	char *title_data = (char *)malloc(NES_ROM_TITLE_BLOCK_SIZE + 1);
+	char *title_data = (char *)malloc(NES_TITLE_BLOCK_LENGTH + 1);
 	
 	fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ifile)) + (NES_CHR_BANK_LENGTH * NESGetChrBankCount(ifile)), SEEK_SET);
 	
 	//read the title_data... set count to the number of bytes read.
-	int count = fread(title_data, 1, NES_ROM_TITLE_BLOCK_SIZE, ifile);
+	int count = fread(title_data, 1, NES_TITLE_BLOCK_LENGTH, ifile);
 	
 	//yeah, I'm a little strict... this should probably be fixed so we're not quite as strict...
-	if (count != NES_ROM_TITLE_BLOCK_SIZE) {
+	if (count != NES_TITLE_BLOCK_LENGTH) {
 		free(title_data);
 		return;
 	}
@@ -610,7 +610,7 @@ void NESGetTitle(char *buf, FILE *ifile, bool strip) {
 	}
 	
 	//copy title_data into buf and free it
-	memcpy(buf, title_data, NES_ROM_TITLE_BLOCK_SIZE);
+	memcpy(buf, title_data, NES_TITLE_BLOCK_LENGTH);
 	free(title_data);
 }
 
@@ -628,18 +628,18 @@ bool NESSetTitle(FILE *ofile, char *title) {
 	fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ofile)) + (NES_CHR_BANK_LENGTH * NESGetChrBankCount(ofile)), SEEK_SET);
 	
 	//create a new titleblock
-	char *newTitle = (char*)malloc(NES_ROM_TITLE_BLOCK_SIZE);
+	char *newTitle = (char*)malloc(NES_TITLE_BLOCK_LENGTH);
 	
 	int i = 0;
 	
 	//fill title with 0s
-	for (i = 0; i < NES_ROM_TITLE_BLOCK_SIZE; i++) {
+	for (i = 0; i < NES_TITLE_BLOCK_LENGTH; i++) {
 		newTitle[i] = 0;
 	}
 	strcpy(newTitle, title);
 	
 	//write the titledata... bail if an error occurs
-	if (fwrite(newTitle, 1, NES_ROM_TITLE_BLOCK_SIZE, ofile) != NES_ROM_TITLE_BLOCK_SIZE) {
+	if (fwrite(newTitle, 1, NES_TITLE_BLOCK_LENGTH, ofile) != NES_TITLE_BLOCK_LENGTH) {
 		free(newTitle);
 		return false;
 	}

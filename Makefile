@@ -52,7 +52,8 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_nesromtool_OBJECTS = main.$(OBJEXT) NESutils.$(OBJEXT)
+am_nesromtool_OBJECTS = main.$(OBJEXT) NESutils.$(OBJEXT) \
+	pathfunc.$(OBJEXT)
 nesromtool_OBJECTS = $(am_nesromtool_OBJECTS)
 nesromtool_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
@@ -152,7 +153,15 @@ sbindir = ${exec_prefix}/sbin
 sharedstatedir = ${prefix}/com
 sysconfdir = ${prefix}/etc
 target_alias = 
-nesromtool_SOURCES = src/main.c src/NESutils.c src/NESutils.h
+nesromtool_SOURCES = \
+	src/main.c \
+	src/NESutils.c \
+	src/NESutils.h \
+	src/types.h \
+	src/commandline.h \
+	src/pathfunc.h \
+	src/pathfunc.c 
+
 EXTRA_DIST = reconf
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -244,6 +253,7 @@ distclean-compile:
 
 include ./$(DEPDIR)/NESutils.Po
 include ./$(DEPDIR)/main.Po
+include ./$(DEPDIR)/pathfunc.Po
 
 .c.o:
 	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -286,6 +296,20 @@ NESutils.obj: src/NESutils.c
 #	source='src/NESutils.c' object='NESutils.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o NESutils.obj `if test -f 'src/NESutils.c'; then $(CYGPATH_W) 'src/NESutils.c'; else $(CYGPATH_W) '$(srcdir)/src/NESutils.c'; fi`
+
+pathfunc.o: src/pathfunc.c
+	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pathfunc.o -MD -MP -MF "$(DEPDIR)/pathfunc.Tpo" -c -o pathfunc.o `test -f 'src/pathfunc.c' || echo '$(srcdir)/'`src/pathfunc.c; \
+	then mv -f "$(DEPDIR)/pathfunc.Tpo" "$(DEPDIR)/pathfunc.Po"; else rm -f "$(DEPDIR)/pathfunc.Tpo"; exit 1; fi
+#	source='src/pathfunc.c' object='pathfunc.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pathfunc.o `test -f 'src/pathfunc.c' || echo '$(srcdir)/'`src/pathfunc.c
+
+pathfunc.obj: src/pathfunc.c
+	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pathfunc.obj -MD -MP -MF "$(DEPDIR)/pathfunc.Tpo" -c -o pathfunc.obj `if test -f 'src/pathfunc.c'; then $(CYGPATH_W) 'src/pathfunc.c'; else $(CYGPATH_W) '$(srcdir)/src/pathfunc.c'; fi`; \
+	then mv -f "$(DEPDIR)/pathfunc.Tpo" "$(DEPDIR)/pathfunc.Po"; else rm -f "$(DEPDIR)/pathfunc.Tpo"; exit 1; fi
+#	source='src/pathfunc.c' object='pathfunc.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pathfunc.obj `if test -f 'src/pathfunc.c'; then $(CYGPATH_W) 'src/pathfunc.c'; else $(CYGPATH_W) '$(srcdir)/src/pathfunc.c'; fi`
 uninstall-info-am:
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
