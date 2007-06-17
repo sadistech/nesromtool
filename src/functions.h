@@ -9,6 +9,8 @@ extern "C" {
 
 void hr_filesize(char *buf, double filesize);
 
+void debug_print_argv(char **argv);
+
 #ifdef __cplusplus
 };
 #endif

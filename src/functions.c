@@ -21,3 +21,17 @@ void hr_filesize(char *buf, double filesize) {
 	
 	sprintf(buf, "%.02f %s", filesize, sizes[i]);
 }
+
+void debug_print_argv(char **argv) {
+	/*
+	**	debug output...
+	**	prints the argv values
+	*/
+	
+	printf("ARGV:\n");
+	
+	for(; *argv != NULL; *argv++) {
+		printf("  %s\n", *argv);
+	}
+	printf("--\n\n");
+}

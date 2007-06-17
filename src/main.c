@@ -10,6 +10,7 @@
 
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h> /* for strcpy */
 
 #include "types.h"
 #include "commandline.h" /* for commandline parsing */
@@ -25,15 +26,16 @@
 // verbose
 #define OPT_VERBOSE 		"-v"
 #define OPT_VERBOSE_ALT	"--verbose"
+bool verbose = 0;
 
 // version info
 #define OPT_VERSION			"--version"
 #define OPT_VERSION_ALT "" /* no alternate for version */
 
-// set color palette
+// set color palette (for drawing sprites to the terminal)
 #define OPT_COLOR				"-c"
 #define OPT_COLOR_ALT		"--color"
-char color_palette[4] = "0136"; //default color palette for drawing sprites
+char color_palette[4] = "0136"; //default color palette (uses ANSI terminal color codes)
 
 // program commands
 //*******************
@@ -42,7 +44,10 @@ char color_palette[4] = "0136"; //default color palette for drawing sprites
 #define CMD_INFO				"info"
 
 //title
-#define CMD_TITLE				"title"
+#define CMD_TITLE							"title"
+#define CMD_TITLE_OPT_SET			"-set"			/* set title */
+#define CMD_TITLE_OPT_REMOVE	"-remove"		/* remove title */
+#define CMD_TITLE_OPT_PRINT		"-print"		/* print title (default) */
 
 //prototypes
 //*******************
@@ -101,13 +106,15 @@ int main (int argc, char *argv[]) {
 	
 	//read command
 	char *command = current_arg;
-	printf("Command: %s\n", current_arg);
+	//printf("Command: %s\n", current_arg); //debug line...
 	
-	SKIP_NARG(1);
+	SKIP_NARG(1); //increment argv, it's now pointing to the first option after the command
 	
 	if (strcmp(command, CMD_INFO) == 0) {
+		//info command
 		parse_cmd_info(argv);
 	} else if (strcmp(command, CMD_TITLE) == 0) {
+		//title command
 		parse_cmd_title(argv);
 	}
 	
@@ -199,9 +206,96 @@ void parse_cmd_info(char **argv) {
 }
 
 void parse_cmd_title(char **argv) {
-	//continue parsing
-	//loop over program arguments until we reach one that doesn't start with a '-', then those will be the file(s) to work on  
-//	for (current_arg = GET_NEXT_ARG ; (current_arg[0] == '-') ; current_arg = GET_NEXT_ARG) {
+	/*
+	**	title functions...
+	**	the first element of argv should be the first element after the 'title' command
+	*/
+	
+	char *current_arg = *argv;
 		
-//	}
+	//title takes 1 of 3 possible modifiers:
+	//	-set <new title>
+	//	-remove
+	//	-print (default)
+	
+	char title_command[10] = CMD_TITLE_OPT_PRINT; //default
+	
+	//if the next arg starts with a -, it's a command
+	if (current_arg[0] == '-') {
+		strcpy(title_command, current_arg);
+		current_arg = GET_NEXT_ARG;
+	}
+	
+//	debug_print_argv(argv);
+		
+	if (strcmp(title_command, CMD_TITLE_OPT_PRINT) == 0) {
+		//print the title:
+		for ( ; (current_arg != NULL) ; current_arg = GET_NEXT_ARG) {
+			FILE *ifile = NULL;
+			
+			//if an error happens while trying to open the file,
+			//print an error and move on to next iteration
+			if (!(ifile = fopen(current_arg, "r"))) {
+				perror(current_arg);
+				continue;
+			}
+			
+			//fetch the title...
+			char *title = (char*)malloc(NES_TITLE_BLOCK_LENGTH);
+			NESGetTitle(title, ifile, true);
+			
+			//if the title is blank...
+			if (title[0] == 0) {
+				strcpy(title, "[n/a]");
+			}
+			
+			//print "filename: title"
+			printf("%s: %s\n", lastPathComponent(current_arg), title);
+			
+			fclose(ifile);
+		}
+	} else if (strcmp(title_command, CMD_TITLE_OPT_SET) == 0) {
+		//set a new title
+		char *new_title = current_arg;
+		current_arg = GET_NEXT_ARG;
+				
+		for ( ; (current_arg != NULL) ; current_arg = GET_NEXT_ARG) {
+			FILE *ifile = NULL;
+			
+			//if an error happens while trying to open the file,
+			//print an error and move on to next iteration
+			if (!(ifile = fopen(current_arg, "r+"))) {
+				perror(current_arg);
+				continue;
+			}
+						
+			//set the new title
+			if (!NESSetTitle(ifile, new_title)) {
+				printf("An error occurred while setting the title\n");
+			}
+			
+			fclose(ifile);
+		}
+	} else if (strcmp(title_command, CMD_TITLE_OPT_REMOVE) == 0) {
+		//remove the title
+		for (; (current_arg != NULL) ; current_arg = GET_NEXT_ARG) {
+			FILE *ifile = NULL;
+			
+			//if an error occurs while opening the file,
+			//print an error and move on to next iteration
+			if (!(ifile = fopen(current_arg, "r+"))) {
+				perror(current_arg);
+				continue;
+			}
+			
+			//remove the titledata
+			NESRemoveTitle(ifile);
+			
+			fclose(ifile);
+		}
+	} else {
+		//unknown command
+		printf("Unknown command %s\n", title_command);
+		exit(EXIT_FAILURE);
+	}
 }
