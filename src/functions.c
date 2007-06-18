@@ -127,7 +127,7 @@ bool append_data_to_file(char *data, u32 length, char *path) {
 	}
 	
 	//write data...
-	if (fwrite(data, length, 1, ofile) != length) {
+	if (fwrite(data, length, 1, ofile) != 1) {
 		perror(path);
 		fclose(ofile);
 		return false;

@@ -50,11 +50,13 @@ char color_palette[4] = "0136"; //default color palette (uses ANSI terminal colo
 #define CMD_TITLE_PRINT				"-print"		/* print title (default) */
 
 //extract
-#define CMD_EXTRACT						"extract"
-#define CMD_EXTRACT_SPRITE		"-sprite"		/* extract sprite(s) */
-#define CMD_EXTRACT_PRG				"-prg"			/* extract PRG bank */
-#define CMD_EXTRACT_CHR				"-chr"			/* extract CHR bank */
-#define CMD_EXTRACT_ALL_BANKS	"-a"				/* extract all banks (use in place of index or range) */
+#define CMD_EXTRACT								"extract"
+#define CMD_EXTRACT_SPRITE				"-sprite"		/* extract sprite(s) */
+#define CMD_EXTRACT_PRG						"-prg"			/* extract PRG bank */
+#define CMD_EXTRACT_CHR						"-chr"			/* extract CHR bank */
+#define CMD_EXTRACT_ALL_BANKS			"-a"				/* extract all banks (use in place of index or range) */
+#define CMD_EXTRACT_SINGLE_FILE		"-s"				/* extract banks as a single file */
+#define CMD_EXTRACT_SET_FILENAME	"-f"				/* specify filename */
 
 //prototypes
 //*******************
@@ -96,6 +98,13 @@ int main (int argc, char *argv[]) {
 		if ( CHECK_ARG( OPT_VERSION ) ) {
 			printf("%s-%s\n\n", PACKAGE, VERSION);
 			exit(EXIT_SUCCESS);
+		}
+		
+		//turn on verbosity
+		if ( CHECK_ARG( OPT_VERBOSE ) ) {
+			printf("Verbosity: ON\n");
+			verbose = 1;
+			continue;
 		}
 		
 		//set the color palette
@@ -338,7 +347,14 @@ void parse_cmd_extract(char **argv) {
 		printf("not implemented...\n");
 		exit(EXIT_FAILURE);
 	} else if (strcmp(extract_command, CMD_EXTRACT_PRG) == 0 || strcmp(extract_command, CMD_EXTRACT_CHR) == 0) {
-		//extract PRG bank
+		//extract PRG or CHR bank
+		// format is:
+		// -prg <bank index> [options]
+		//  <bank index> can be a single number (ie: 3), a range (ie: 2-5), or '-a' for "all"
+		// options are:
+		//  -s : extract as a single file (useful for when extracting ranges)
+		//	-f <filename> : extract to <filename>
+		
 		char *bank_info = GET_NEXT_ARG; //read the bank index
 		Range *r = (Range*)malloc(sizeof(Range));; //for extracting a range of banks
 		
@@ -356,8 +372,43 @@ void parse_cmd_extract(char **argv) {
 				r->end = bank_index;
 			}
 		}
+		
+		//options:
+		int extract_single_file = false;
+		char target_filepath[255] = "";
+		
+		//check additional options:
+		
+		current_arg = PEEK_ARG;
+		if (current_arg[0] == '-') {
+			for (current_arg = GET_NEXT_ARG; current_arg[0] == '-' ; current_arg = GET_NEXT_ARG) {
+				//single file
+				if (strcmp(current_arg, CMD_EXTRACT_SINGLE_FILE) == 0) {
+					extract_single_file = true;
+					continue;
+				}
+				
+				//set filename
+				if (strcmp(current_arg, CMD_EXTRACT_SET_FILENAME) == 0) {
+					printf("set filepath: %s\n", PEEK_ARG);
+					strcpy(target_filepath, GET_NEXT_ARG);
+					continue;
+				}
+				
+				printf("Unknown option: %s\n", current_arg);
+				exit(EXIT_FAILURE);
+			}
+		}
+		
+		//due to the way the above loop works, if additional options were specified,
+		//then current_arg will contain the first filename...
+		//so, if current_arg doesn't contain an option (start with a dash),
+		//then we don't want to GET_NEXT_ARG it
+		if (current_arg[0] == '-') {
+			current_arg = GET_NEXT_ARG;
+		}
 	
-		for (current_arg = GET_NEXT_ARG; (current_arg != NULL) ; current_arg = GET_NEXT_ARG) {
+		for (; (current_arg != NULL) ; current_arg = GET_NEXT_ARG) {
 			FILE *ifile = NULL;
 			
 			//if an error occurs while opening the file,
@@ -372,7 +423,9 @@ void parse_cmd_extract(char **argv) {
 				
 				char *data = (char*)malloc(NES_PRG_BANK_LENGTH);
 				
-				//check to see if the range's end == -1... if so, we need to set it to the last PRG bank index
+				//check to see if the range's end == -1...
+				//that serves as a hint that we want to extract every bank...
+				//if so, we need to set it to the last PRG bank index
 				if (r->end == -1) {
 					r->end = NESGetPrgBankCount(ifile);
 				}
@@ -388,20 +441,42 @@ void parse_cmd_extract(char **argv) {
 					//default is to write to files in current working directory
 					// default filename is NESROMNAME.NES.#.prg
 					char filepath[255];
-					sprintf(filepath, "%s.%d.prg", lastPathComponent(current_arg), i);
+					
+					//if a filepath wasn't specified, use the default
+					if (target_filepath[0] == '\0') {
+						if (extract_single_file) {
+							//if single-file, then FILENAME.prg
+							sprintf(filepath, "%s.prg", lastPathComponent(current_arg));
+						} else {
+							//if multi-file, then FILENAME.#.prg
+							sprintf(filepath, "%s.%d.prg", lastPathComponent(current_arg), i);
+						}
+					} else { //otherwise, use the specified one		
+						strcpy(filepath, target_filepath);
+					}
 					
 					//write the data to the files
-					if (!write_data_to_file(data, NES_PRG_BANK_LENGTH, filepath)) {
-						printf("An error occurred while writing a PRG bank (%s)\n", filepath);
-						continue;
+					if (extract_single_file) {
+						if (!append_data_to_file(data, NES_PRG_BANK_LENGTH, filepath)) {
+							printf("An error occurred while writing a PRG bank (%s)\n", filepath);
+							continue;
+						}
+					} else {
+						if (!write_data_to_file(data, NES_PRG_BANK_LENGTH, filepath)) {
+							printf("An error occurred while writing a PRG bank (%s)\n", filepath);
+							continue;
+						}
 					}
 				}
 				
 			} else if (strcmp(extract_command, CMD_EXTRACT_CHR) == 0) {
 				//extract the CHR bank
+				
 				char *data = (char*)malloc(NES_CHR_BANK_LENGTH);
 				
-				//check to see if the range's end == -1... if so, we need to set it to the last PRG bank index
+				//check to see if the range's end == -1...
+				//that serves as a hint that we want to extract every bank...
+				//if so, we need to set it to the last PRG bank index
 				if (r->end == -1) {
 					r->end = NESGetChrBankCount(ifile);
 				}
@@ -415,14 +490,35 @@ void parse_cmd_extract(char **argv) {
 					}
 					
 					//default is to write to files in current working directory
-					// default filename is NESROMNAME.NES.#.prg
+					// default filename is NESROMNAME.NES.#.chr
 					char filepath[255];
-					sprintf(filepath, "%s.%d.chr", lastPathComponent(current_arg), i);
+					
+					//if a filepath wasn't specified, use the default
+					if (target_filepath[0] == '\0') {
+						if (extract_single_file) {
+							//if single-file, then FILENAME.chr
+							sprintf(filepath, "%s.chr", lastPathComponent(current_arg));
+						} else {
+							//if multi-file, then FILENAME.#.chr
+							sprintf(filepath, "%s.%d.chr", lastPathComponent(current_arg), i);
+						}
+					} else { //otherwise, use the specified one		
+						strcpy(filepath, target_filepath);
+					}
+					
+					printf("filename: %s\n", filepath);
 					
 					//write the data to the files
-					if (!write_data_to_file(data, NES_CHR_BANK_LENGTH, filepath)) {
-						printf("An error occurred while writing a CHR bank (%s)\n", filepath);
-						continue;
+					if (extract_single_file) {
+						if (!append_data_to_file(data, NES_CHR_BANK_LENGTH, filepath)) {
+							printf("An error occurred while writing a CHR bank (%s)\n", filepath);
+							continue;
+						}
+					} else {
+						if (!write_data_to_file(data, NES_CHR_BANK_LENGTH, filepath)) {
+							printf("An error occurred while writing a CHR bank (%s)\n", filepath);
+							continue;
+						}
 					}
 				}
 			}

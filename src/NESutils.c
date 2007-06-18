@@ -69,7 +69,7 @@ bool NESGetChrBank(char *buf, FILE *ifile, int n) {
 	//read data into placeholder
 	if (fread(chrData, 1, NES_CHR_BANK_LENGTH, ifile) != NES_CHR_BANK_LENGTH) {
 		free(chrData);
-		return;
+		return false;
 	}
 	
 	//copy data into buf
