@@ -1,6 +1,7 @@
 /*
  *  types.h
  *  nesromtool
+ *	various type definitions and related functions
  *
  *  Created by spike on Fri May 21 2004.
  *  Copyright (c) 2004 Sadistech. All rights reserved.
@@ -27,7 +28,16 @@ typedef unsigned char uchar;
 #define false 0
 #endif
 
-#endif
+#endif /* bool */
+
+//Range and related functions
+
+typedef struct numericRange{
+	int start;
+	int end;
+} Range;
+
+int range_count(Range *r);
 
 #endif /* _TYPES_H_ */
 

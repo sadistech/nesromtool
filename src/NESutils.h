@@ -65,8 +65,8 @@ char NESGetPrgBankCount(FILE *ifile);
 char NESGetChrBankCount(FILE *ifile);
 
 //returns the PRG and CHR banks from a file
-void NESGetPrgBank(uchar *buf, FILE *ifile, int n);
-void NESGetChrBank(uchar *buf, FILE *ifile, int n);
+bool NESGetPrgBank(char *buf, FILE *ifile, int n);
+bool NESGetChrBank(char *buf, FILE *ifile, int n);
 
 //takes a PRG or CHR bank (full file) from ifile and puts it into the nth bank in ofile
 NESErrorCode NESInjectPrgBankData(FILE *ofile, char *prgData, int n);

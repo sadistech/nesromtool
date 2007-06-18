@@ -51,7 +51,7 @@
 #define PRINT_HELP(ARG)		printf("\t\033[1m" ARG "%s" ARG ## _ALT " " ARG ## _OPT "\033[m\n\t\t" ARG ## _HELP "\n\n", strcmp("", ARG ## _ALT) == 0 ? "" : ", ");
 
 // these are for the argument parsing engine...
-#define GET_NEXT_ARG		*(++argv)				/* returns the next argument and increments argv by one ( used in main() ) */
+#define GET_NEXT_ARG		*(argv++)				/* returns the next argument and increments argv by one ( used in main() ) */
 #define SKIP_NARG(n)		*(argv += n)		/* skips the next n arguments */
 //#define CHECK_ARG(ARG)	strcmp(ARG, currentArg) == 0 || strcmp(ARG ## _ALT, currentArg) == 0  /* returns true if teh current argument matches ARG */
 #define CHECK_ARG(ARG) 	strcmp(ARG, current_arg) == 0 || (strcmp(ARG ## _ALT, "") != 0 && strcmp(ARG ## _ALT, current_arg) == 0)

@@ -16,7 +16,7 @@
 
 #pragma mark *** LOW LEVEL ***
 
-void NESGetPrgBank(uchar *buf, FILE *ifile, int n) {
+bool NESGetPrgBank(char *buf, FILE *ifile, int n) {
 	/*
 	**	retreive the nth PRG bank and put the data into buf
 	**	buf needs to be allocated: malloc(NES_PRG_BANK_LENGTH + 1)
@@ -24,13 +24,13 @@ void NESGetPrgBank(uchar *buf, FILE *ifile, int n) {
 	
 	//check to make sure that ifile and buf aren't NULL
 	if (!ifile || !buf) {
-		return;
+		return false;
 	}
 	
 	//bail if we try to get a nonexistent PRG bank
-	if (n < 1 || n > NESGetPrgBankCount(ifile)) return;
+	if (n < 1 || n > NESGetPrgBankCount(ifile)) return false;
 	
-	uchar *PRG_data = (uchar *)malloc(NES_PRG_BANK_LENGTH + 1); //temporary placeholder for data
+	char *PRG_data = (char *)malloc(NES_PRG_BANK_LENGTH + 1); //temporary placeholder for data
 	
 	//seek to proper offset
 	fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * (n - 1)), SEEK_SET);
@@ -38,28 +38,30 @@ void NESGetPrgBank(uchar *buf, FILE *ifile, int n) {
 	//read to placeholder
 	if (fread(PRG_data, 1, NES_PRG_BANK_LENGTH, ifile) != NES_PRG_BANK_LENGTH) {
 		free(PRG_data);
-		return;
+		return false;
 	}
 	
 	//copy data into buf
 	memcpy(buf, PRG_data, NES_PRG_BANK_LENGTH);
 	free(PRG_data);
+	
+	return true;
 }
 
-void NESGetChrBank(uchar *buf, FILE *ifile, int n) {
+bool NESGetChrBank(char *buf, FILE *ifile, int n) {
 	/*
 	**	retreive the nth CHR bank and put the data into buf
 	**	buf needs to be allocated: malloc(NES_CHR_BANK_LENGTH + 1)
 	*/
 	
 	//check to make sure that ifile and buf aren't NULL
-	if (!ifile || !buf) return;
+	if (!ifile || !buf) return false;
 	
 	//bail if we try to get a nonexistent 
-	if (n < 1 || n > NESGetChrBankCount(ifile)) return;
+	if (n < 1 || n > NESGetChrBankCount(ifile)) return false;
 	
 	//temporary placeholder for data
-	uchar *chrData = (uchar *)malloc(NES_CHR_BANK_LENGTH);
+	char *chrData = (char *)malloc(NES_CHR_BANK_LENGTH);
 	
 	//move to necessary point in file
 	fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ifile)) + (NES_CHR_BANK_LENGTH * (n - 1)), SEEK_SET);
@@ -73,6 +75,8 @@ void NESGetChrBank(uchar *buf, FILE *ifile, int n) {
 	//copy data into buf
 	memcpy(buf, chrData, NES_CHR_BANK_LENGTH);
 	free(chrData);
+	
+	return true;
 }
 
 
@@ -179,7 +183,7 @@ char *NESGetCompoundSpriteDataFromChrBank(char *chrData, NESSpriteMode mode, int
 
 
 NESErrorCode NESExtractCompoundSprite(FILE *ifile, FILE *ofile, int chrIndex, int fromIndex, int toIndex, int columns, NESSpriteMode mode) {
-	uchar *chrData = (uchar *)malloc(NES_CHR_BANK_LENGTH);
+	char *chrData = (char *)malloc(NES_CHR_BANK_LENGTH);
 	
 	NESGetChrBank(chrData, ofile, chrIndex);
 	
@@ -441,7 +445,7 @@ NESErrorCode NESExtractPrgBank(FILE *fromFile, FILE *toFile, int n) {
 	
 	//no need to do any error checking since it happens in NESGetPrgBank()
 
-	uchar *PRG_data = (uchar*)malloc(NES_PRG_BANK_LENGTH);
+	char *PRG_data = (char*)malloc(NES_PRG_BANK_LENGTH);
 	
 	NESGetPrgBank(PRG_data, fromFile, n);
 	
@@ -460,7 +464,7 @@ NESErrorCode NESExtractChrBank(FILE *fromFile, FILE *toFile, int n) {
 	//extracts a CHRbank from a ROM into its own file
 	//all errorchecking occurs in NESGetChrBank()
 	
-	uchar *chrData = (uchar*)malloc(NES_CHR_BANK_LENGTH);
+	char *chrData = (char*)malloc(NES_CHR_BANK_LENGTH);
 	NESGetChrBank(chrData, fromFile, n);
 	
 	if (!chrData) return nesErr;

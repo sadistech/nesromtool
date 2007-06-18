@@ -4,6 +4,7 @@ nesromtool_SOURCES = \
 	src/NESutils.c \
 	src/NESutils.h \
 	src/types.h \
+	src/types.c \
 	src/commandline.h \
 	src/pathfunc.h \
 	src/pathfunc.c \

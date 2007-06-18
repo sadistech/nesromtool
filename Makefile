@@ -53,7 +53,7 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_nesromtool_OBJECTS = main.$(OBJEXT) NESutils.$(OBJEXT) \
-	pathfunc.$(OBJEXT) functions.$(OBJEXT)
+	types.$(OBJEXT) pathfunc.$(OBJEXT) functions.$(OBJEXT)
 nesromtool_OBJECTS = $(am_nesromtool_OBJECTS)
 nesromtool_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
@@ -158,6 +158,7 @@ nesromtool_SOURCES = \
 	src/NESutils.c \
 	src/NESutils.h \
 	src/types.h \
+	src/types.c \
 	src/commandline.h \
 	src/pathfunc.h \
 	src/pathfunc.c \
@@ -257,6 +258,7 @@ include ./$(DEPDIR)/NESutils.Po
 include ./$(DEPDIR)/functions.Po
 include ./$(DEPDIR)/main.Po
 include ./$(DEPDIR)/pathfunc.Po
+include ./$(DEPDIR)/types.Po
 
 .c.o:
 	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -299,6 +301,20 @@ NESutils.obj: src/NESutils.c
 #	source='src/NESutils.c' object='NESutils.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o NESutils.obj `if test -f 'src/NESutils.c'; then $(CYGPATH_W) 'src/NESutils.c'; else $(CYGPATH_W) '$(srcdir)/src/NESutils.c'; fi`
+
+types.o: src/types.c
+	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT types.o -MD -MP -MF "$(DEPDIR)/types.Tpo" -c -o types.o `test -f 'src/types.c' || echo '$(srcdir)/'`src/types.c; \
+	then mv -f "$(DEPDIR)/types.Tpo" "$(DEPDIR)/types.Po"; else rm -f "$(DEPDIR)/types.Tpo"; exit 1; fi
+#	source='src/types.c' object='types.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o types.o `test -f 'src/types.c' || echo '$(srcdir)/'`src/types.c
+
+types.obj: src/types.c
+	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT types.obj -MD -MP -MF "$(DEPDIR)/types.Tpo" -c -o types.obj `if test -f 'src/types.c'; then $(CYGPATH_W) 'src/types.c'; else $(CYGPATH_W) '$(srcdir)/src/types.c'; fi`; \
+	then mv -f "$(DEPDIR)/types.Tpo" "$(DEPDIR)/types.Po"; else rm -f "$(DEPDIR)/types.Tpo"; exit 1; fi
+#	source='src/types.c' object='types.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o types.obj `if test -f 'src/types.c'; then $(CYGPATH_W) 'src/types.c'; else $(CYGPATH_W) '$(srcdir)/src/types.c'; fi`
 
 pathfunc.o: src/pathfunc.c
 	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pathfunc.o -MD -MP -MF "$(DEPDIR)/pathfunc.Tpo" -c -o pathfunc.o `test -f 'src/pathfunc.c' || echo '$(srcdir)/'`src/pathfunc.c; \

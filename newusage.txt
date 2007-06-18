@@ -15,13 +15,13 @@ commands:
 	dump (chr, prg, header)
 	
 command notes:
-	info
-		prints info... no options
+√	info
+√		prints info... no options
 	
-	title
-		-set <new_title>
-		-remove
-		-print (default)
+√	title
+√		-set <new_title>
+√		-remove
+√		-print (default)
 		
 	extract
 		-sprite
@@ -33,13 +33,13 @@ command notes:
 			-f <filename> (default romname.nes.#.TYPE)
 			-t <type> (raw, native, gif?, png, html; the type of file to save; default is raw)
 		
-		-chr
-			<chr index> (required; can be a number, starting at 1 or a range: 1-4)
+√		-chr
+√			<chr index> (required; can be a number, starting at 1 or a range: 1-4 or -a for all)
 			-f <filename> (default romname.nes.#.chr)
 			-s (extract as single file, only available if a range is specified; default is multiple)
 			
-		-prg
-			<prg index> (required; can be a number or a range)
+√		-prg
+√			<prg index> (required; can be a number or a range or -a for all)
 			-f <filename> (default romname.nes.#.prg)
 			-s (extract as single file, only available if range is specified; default is multiple)
 
