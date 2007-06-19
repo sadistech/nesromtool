@@ -15,6 +15,7 @@
 #include "types.h"
 #include "commandline.h" /* for commandline parsing */
 #include "NESutils.h"
+#include "functions.h"
 
 // program options
 //******************
@@ -52,11 +53,57 @@ char color_palette[4] = "0136"; //default color palette (uses ANSI terminal colo
 //extract
 #define CMD_EXTRACT								"extract"
 #define CMD_EXTRACT_SPRITE				"-sprite"		/* extract sprite(s) */
+
 #define CMD_EXTRACT_PRG						"-prg"			/* extract PRG bank */
 #define CMD_EXTRACT_CHR						"-chr"			/* extract CHR bank */
-#define CMD_EXTRACT_ALL_BANKS			"-a"				/* extract all banks (use in place of index or range) */
-#define CMD_EXTRACT_SINGLE_FILE		"-s"				/* extract banks as a single file */
-#define CMD_EXTRACT_SET_FILENAME	"-f"				/* specify filename */
+	
+
+//program options (global ones)
+//*******************
+
+/* specify filename */
+#define OPT_FILENAME					"-f"
+#define OPT_FILENAME_ALT			"--file"
+
+/* extract banks as a single file */
+#define OPT_SINGLE_FILE				"-s"
+#define OPT_SINGLE_FILE_ALT		"--single-file"
+
+/* extract all banks (use in place of index or range) */
+#define OPT_ALL								"-a"
+#define OPT_ALL_ALT						"--all"
+
+/* use horizontal ordering for sprite extraction */
+#define OPT_H_MODE						"-h"
+#define OPT_H_MODE_ALT				"--horizontal"
+
+/* use vertical ordering for sprite extraction */
+#define OPT_V_MODE						"-v"
+#define OPT_V_MODE_ALT				"--vertical"
+
+/* extract sprite from PRG bank */
+#define OPT_PRG_BANK					"-prg"
+#define OPT_PRG_BANK_ALT			""
+
+/* extract sprite from CHR bank (default) */
+#define OPT_CHR_BANK					"-chr"
+#define OPT_CHR_BANK_ALT			""
+
+/* types for graphic formats */
+#define RAW_TYPE					"raw"			/* bitmap with 0, 1, 2, 3 for colors... easily imported into photoshop and brought back in */
+#define RAW_TYPE_EXT			"raw"			/* file extension */
+
+#define GIF_TYPE					"gif"			/* GIF */
+#define GIF_TYPE_EXT			"gif"
+
+#define PNG_TYPE					"png"			/* Portable Network Graphics */
+#define PNG_TYPE_EXT			"png"
+
+#define NATIVE_TYPE				"native"	/* same format as they are stored in ROM */ 
+#define NATIVE_TYPE_EXT		"sprite"
+
+#define HTML_TYPE					"html"		/* create html output */
+#define HTML_TYPE_EXT			"html"
 
 //prototypes
 //*******************
@@ -164,6 +211,8 @@ void print_usage(bool extended) {
 		}
 }
 
+#pragma mark -
+
 void parse_cmd_info(char **argv) {
 	/*
 	**	parses program arguments for the info command
@@ -251,6 +300,7 @@ void parse_cmd_title(char **argv) {
 		current_arg = GET_NEXT_ARG;
 	}
 			
+	#pragma mark **Print Title
 	if (strcmp(title_command, CMD_TITLE_PRINT) == 0) {
 		//print the title:
 		for ( ; (current_arg != NULL) ; current_arg = GET_NEXT_ARG) {
@@ -277,6 +327,8 @@ void parse_cmd_title(char **argv) {
 			
 			fclose(ifile);
 		}
+		
+	#pragma mark **Set Title
 	} else if (strcmp(title_command, CMD_TITLE_SET) == 0) {
 		//set a new title
 		char *new_title = current_arg;
@@ -299,6 +351,7 @@ void parse_cmd_title(char **argv) {
 			
 			fclose(ifile);
 		}
+	#pragma mark **Remove Title
 	} else if (strcmp(title_command, CMD_TITLE_REMOVE) == 0) {
 		//remove the title
 		for (; (current_arg != NULL) ; current_arg = GET_NEXT_ARG) {
@@ -342,10 +395,110 @@ void parse_cmd_extract(char **argv) {
 		exit(EXIT_FAILURE);
 	}
 	
+	#pragma mark **Extract Sprite
 	if (strcmp(extract_command, CMD_EXTRACT_SPRITE) == 0) {
 		//extract sprite
-		printf("not implemented...\n");
-		exit(EXIT_FAILURE);
+		//ussage: -sprite [-prg | -chr] <bank index> <range> [-h | -v] [-f <filename] [-t <type>]
+		
+		char *current_arg = GET_NEXT_ARG;
+		char *target_bank_type = OPT_CHR_BANK; //default
+		int bank_index = 0;
+		Range *sprite_range = (Range*)malloc(sizeof(Range));
+		char *mode = OPT_H_MODE; //default
+		char *type = RAW_TYPE; //default
+		char *filename = ""; //default
+		
+		//check to make sure that we actually grabbed an argument
+		CHECK_ARG_ERROR("Expected bank index or type!");
+		
+		//read the bank type
+		if (current_arg[0] == '-') {
+			if ( CHECK_ARG(OPT_CHR_BANK) ) {
+				target_bank_type = OPT_CHR_BANK;
+			} else if ( CHECK_ARG(OPT_PRG_BANK) ) {
+				target_bank_type = OPT_PRG_BANK;
+			} else {
+				printf("Unknown bank type: %s\n", current_arg);
+				exit(EXIT_FAILURE);
+			}
+		}
+		
+		//read the bank index
+		//for now, this has to be a single number. no ranges allowed. no all allowed, either
+		
+		//if the previous argument wasn't an option, use it as the next, otherwise read a new one
+		if ( IS_OPT(current_arg) ) {
+			current_arg = GET_NEXT_ARG;
+		}
+		
+		CHECK_ARG_ERROR("Expected bank index.");
+		
+		bank_index = atoi(current_arg);
+		
+		//read the sprite_range
+		current_arg = GET_NEXT_ARG;
+		
+		//if it's a range, set the range...
+		//otherwise, it's 1 sprite. so start and end of range are the same!
+		//TODO: add support for a '-a' option!
+		if (is_range(current_arg)) {
+			make_range(sprite_range, current_arg);
+		} else {
+			sprite_range->start = atoi(current_arg);
+			sprite_range->end = sprite_range->start;
+		}
+		
+		//now for options (which are optional... duh);
+		current_arg = PEEK_ARG;
+		if ( IS_OPT(current_arg) ) {
+			for (current_arg = GET_NEXT_ARG; IS_OPT(current_arg) ; current_arg = GET_NEXT_ARG) {
+				//horizontal mode
+				if (CHECK_ARG(OPT_H_MODE)) {
+					mode = OPT_H_MODE;
+					continue;
+				}
+				
+				//vertical mode
+				if (CHECK_ARG(OPT_V_MODE)) {
+					mode = OPT_V_MODE;
+					continue;
+				}
+				
+				//filename
+				if (CHECK_ARG(OPT_FILENAME)) {
+					strcpy(filename, GET_NEXT_ARG);
+					continue;
+				}
+				
+				//filetype:
+				if (CHECK_ARG(OPT_FILETYPE)) {
+					strcpy(type, GET_NEXT_ARG);
+					continue;
+				}
+				
+				printf("Unknown option: %s\n", current_arg);
+				exit(EXIT_FAILURE);
+			}
+		}
+		
+		//ok, now we're finally onto looping over input files!
+		for (current_arg = GET_NEXT_ARG; (current_arg != NULL) ; current_arg = GET_NEXT_ARG) {
+			FILE *ifile = NULL;
+			
+			//if an error occurs while opening the file,
+			//print an error and move on to next iteration
+			if (!(ifile = fopen(current_arg, "r"))) {
+				perror(current_arg);
+				continue;
+			}
+			
+			
+			
+			fclose(ifile);
+		}
+		
+				
+	#pragma mark **Extract PRG/CHR
 	} else if (strcmp(extract_command, CMD_EXTRACT_PRG) == 0 || strcmp(extract_command, CMD_EXTRACT_CHR) == 0) {
 		//extract PRG or CHR bank
 		// format is:
@@ -359,7 +512,7 @@ void parse_cmd_extract(char **argv) {
 		Range *r = (Range*)malloc(sizeof(Range));; //for extracting a range of banks
 		
 		//use '-a' for the range for all banks... or specify a number or a range
-		if (strcmp(bank_info, CMD_EXTRACT_ALL_BANKS) == 0) {
+		if (strcmp(bank_info, OPT_ALL) == 0) {
 			r->start = 1;
 			r->end = -1; //set to -1 to mark it to mean the last bank...
 		} else {
@@ -383,13 +536,13 @@ void parse_cmd_extract(char **argv) {
 		if (current_arg[0] == '-') {
 			for (current_arg = GET_NEXT_ARG; current_arg[0] == '-' ; current_arg = GET_NEXT_ARG) {
 				//single file
-				if (strcmp(current_arg, CMD_EXTRACT_SINGLE_FILE) == 0) {
+				if (strcmp(current_arg, OPT_SINGLE_FILE) == 0) {
 					extract_single_file = true;
 					continue;
 				}
 				
 				//set filename
-				if (strcmp(current_arg, CMD_EXTRACT_SET_FILENAME) == 0) {
+				if (strcmp(current_arg, OPT_FILENAME) == 0) {
 					printf("set filepath: %s\n", PEEK_ARG);
 					strcpy(target_filepath, GET_NEXT_ARG);
 					continue;

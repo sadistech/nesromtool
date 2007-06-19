@@ -58,5 +58,8 @@
 #define PEEK_ARG				*(argv)			/* returns the next argument without advancing the pointer */
 #define PEEK_NARG(n)		*(argv + n - 1)			/* returns the next nth argument without advancing the pointer */
 
+//some helpful macros for error detection
+#define IS_OPT(arg) arg[0] == '-' ? true : false /* return true if arg is an option (starts with a '-') */
+#define CHECK_ARG_ERROR(error_string) if (!current_arg) { printf("Argument error: %s\n\n", error_string); exit(EXIT_FAILURE); }
 
 #endif /* _COMMANDLINE_H_ */

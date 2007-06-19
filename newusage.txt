@@ -35,13 +35,13 @@ command notes:
 		
 √		-chr
 √			<chr index> (required; can be a number, starting at 1 or a range: 1-4 or -a for all)
-			-f <filename> (default romname.nes.#.chr)
-			-s (extract as single file, only available if a range is specified; default is multiple)
+√			-f <filename> (default romname.nes.#.chr)
+√			-s (extract as single file, only available if a range is specified; default is multiple)
 			
 √		-prg
 √			<prg index> (required; can be a number or a range or -a for all)
-			-f <filename> (default romname.nes.#.prg)
-			-s (extract as single file, only available if range is specified; default is multiple)
+√			-f <filename> (default romname.nes.#.prg)
+√			-s (extract as single file, only available if range is specified; default is multiple)
 
 	inject (replace sprite(s) or bank(s))
 		-sprite

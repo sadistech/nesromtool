@@ -10,7 +10,8 @@ main.o main.o: src/main.c /usr/include/stdio.h /usr/include/_types.h \
   /usr/include/libkern/OSByteOrder.h \
   /usr/include/libkern/i386/OSByteOrder.h /usr/include/alloca.h \
   /usr/include/machine/types.h /usr/include/i386/types.h \
-  /usr/include/string.h src/types.h src/commandline.h src/NESutils.h
+  /usr/include/string.h src/types.h src/commandline.h src/NESutils.h \
+  src/functions.h
 
 /usr/include/stdio.h:
 
@@ -63,3 +64,5 @@ src/types.h:
 src/commandline.h:
 
 src/NESutils.h:
+
+src/functions.h:
