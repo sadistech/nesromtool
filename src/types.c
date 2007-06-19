@@ -1,9 +1,9 @@
 #include "types.h"
 
-int range_length(Range *r) {
+int range_count(Range *r) {
 	/*
-	**	returns the length (end - start)
+	**	returns the number of elements in the range (end - start + 1)
 	*/
 	
-	return (r->end - r->start);
+	return (r->end - r->start + 1);
 }

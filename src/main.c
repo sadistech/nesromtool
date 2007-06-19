@@ -81,6 +81,10 @@ char color_palette[4] = "0136"; //default color palette (uses ANSI terminal colo
 #define OPT_V_MODE						"-v"
 #define OPT_V_MODE_ALT				"--vertical"
 
+/* specify filetype for extraction */
+#define OPT_FILETYPE					"-t"
+#define OPT_FILETYPE_ALT			"--type"
+
 /* extract sprite from PRG bank */
 #define OPT_PRG_BANK					"-prg"
 #define OPT_PRG_BANK_ALT			""
@@ -400,13 +404,14 @@ void parse_cmd_extract(char **argv) {
 		//extract sprite
 		//ussage: -sprite [-prg | -chr] <bank index> <range> [-h | -v] [-f <filename] [-t <type>]
 		
+		//where we store our arguments...
 		char *current_arg = GET_NEXT_ARG;
 		char *target_bank_type = OPT_CHR_BANK; //default
 		int bank_index = 0;
 		Range *sprite_range = (Range*)malloc(sizeof(Range));
 		char *mode = OPT_H_MODE; //default
 		char *type = RAW_TYPE; //default
-		char *filename = ""; //default
+		char filename[255] = ""; //default
 		
 		//check to make sure that we actually grabbed an argument
 		CHECK_ARG_ERROR("Expected bank index or type!");
@@ -441,8 +446,8 @@ void parse_cmd_extract(char **argv) {
 		//if it's a range, set the range...
 		//otherwise, it's 1 sprite. so start and end of range are the same!
 		//TODO: add support for a '-a' option!
-		if (is_range(current_arg)) {
-			make_range(sprite_range, current_arg);
+		if (check_is_range(current_arg)) {
+			str_to_range(sprite_range, current_arg);
 		} else {
 			sprite_range->start = atoi(current_arg);
 			sprite_range->end = sprite_range->start;
@@ -492,8 +497,85 @@ void parse_cmd_extract(char **argv) {
 				continue;
 			}
 			
+			char *bank_data = NULL; //where we store the bank we are going to pull from
 			
+			//read the appropriate bank into bank_data
+			if (target_bank_type == OPT_CHR_BANK) {
+				//read CHR bank
+				bank_data = (char*)malloc(NES_CHR_BANK_LENGTH);
+				
+				if ( !NESGetChrBank(bank_data, ifile, bank_index) ) {
+					// error reading bank... non-fatal... clean up and move on...
+					printf("%s: Error reading CHR bank. Either it does not exist or something went terribly wrong.\n\n", current_arg);
+					free(bank_data);
+					fclose(ifile);
+					continue;
+				}
+				
+			} else if (target_bank_type == OPT_PRG_BANK) {
+				//read PRG bank
+				bank_data = (char*)malloc(NES_PRG_BANK_LENGTH);
+				
+				if ( !NESGetPrgBank(bank_data, ifile, bank_index) ) {
+					// error reading bank... non-fatal... clean up and move on...
+					printf("%s: Error reading PRG bank. Either it does not exist or something went terribly wrong.\n\n", current_arg);
+					free(bank_data);
+					fclose(ifile);
+					continue;
+				}
+				
+			} else {
+				//this shouldn't happen
+				printf("FATAL ERROR: Unknown bank type!\n\n");
+				exit(EXIT_FAILURE);
+			}
 			
+			//pull the sprite data out...
+			char *sprite_data = (char*)malloc(NES_ROM_SPRITE_LENGTH * range_count(sprite_range));
+			
+			//error detection
+			if ( !NESGetSpriteDataFromData(sprite_data, bank_data, sprite_range, 0) ) {
+				//if this happens, it's BAD... we're reading something from internal memory
+				//and if the memory failed to populate, we should have caught this much earlier
+				printf("FATAL ERROR: An error occurred while reading sprite data.\n\n");
+				exit(EXIT_FAILURE);
+			}
+			
+			//holder for sprite converted data:
+			char *sprite_converted = NULL;
+			u16 sprite_converted_length = 0;
+			
+			//now, we convert the sprite data, if needed, and write it out to a file...
+			if (strcmp(type, RAW_TYPE) == 0) {
+				//extract as raw
+				
+			} else if (strcmp(type, PNG_TYPE) == 0) {
+				//extract as png
+				//not implemented
+				printf("PNG extraction is not yet implemented!\n\n");
+				exit(EXIT_FAILURE);
+			} else if (strcmp(type, GIF_TYPE) == 0) {
+				//extract as gif
+				//not implemented
+				printf("GIF extraction is not yet implemented!\n\n");
+				exit(EXIT_FAILURE);
+			} else if (strcmp(type, NATIVE_TYPE) == 0) {
+				//extract as native sprite data
+				
+			} else if (strcmp(type, HTML_TYPE) == 0) {
+				//extract as HTML
+				
+			}
+			
+			//write converted data to file... if it fails, show an error
+			if (!write_data_to_file(sprite_converted, sprite_converted_length, filename)) {
+				printf("%s: Error writing sprite data to file!\n\n", filename);
+			}
+			
+			//clean up
+			free(sprite_converted);
+			free(sprite_range);
+			free(bank_data);
 			fclose(ifile);
 		}
 		

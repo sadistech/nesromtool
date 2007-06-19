@@ -44,21 +44,12 @@ extern "C" {
 
 #define NES_TITLE_BLOCK_LENGTH 				128						/* the block size (including padding) of the title data that gets appended to the end of the file */
 
-//return values for functions
-typedef enum {
-	nesErr = -1,
-	nesNoErr = 0,
-} NESErrorCode;
-
 // sprite assembly modes
 typedef enum {
 	nesHMode = 0, // horizontal
 	nesVMode = 1, // vertical
 } NESSpriteMode;
 
-//for converting between ROM sprite data and RAW sprite data
-char NESCombineBits(int a, int b, int n);
-char *NESBreakBits(char c);
 
 //returns the number of PRG and CHR banks respectively
 char NESGetPrgBankCount(FILE *ifile);
@@ -68,20 +59,23 @@ char NESGetChrBankCount(FILE *ifile);
 bool NESGetPrgBank(char *buf, FILE *ifile, int n);
 bool NESGetChrBank(char *buf, FILE *ifile, int n);
 
+//retreiving spritedata from chr or prg banks
+bool NESGetSpriteDataFromData(char *buf, char *data, Range *r, unsigned int adjust);
+
 //takes a PRG or CHR bank (full file) from ifile and puts it into the nth bank in ofile
-NESErrorCode NESInjectPrgBankData(FILE *ofile, char *prgData, int n);
-NESErrorCode NESInjectChrBankData(FILE *ofile, char *chrData, int n);
+bool NESInjectPrgBankData(FILE *ofile, char *prgData, int n);
+bool NESInjectChrBankData(FILE *ofile, char *chrData, int n);
 
 char *NESGetSpriteDataRangeFromChrBank(char *chrData, int startIndex, int endIndex);
 
 //sprite injection stuff
-NESErrorCode NESInjectSpriteData(FILE *ofile, char *spriteData, int chrIndex, int spriteIndex);
+bool NESInjectSpriteData(FILE *ofile, char *spriteData, int chrIndex, int spriteIndex);
 
-NESErrorCode NESInjectSpriteStripFile(FILE *ofile, FILE *ifile, int chrIndex, int startIndex);
-NESErrorCode NESInjectSpriteStrip(FILE *ofile, char *spriteData, int size, int chrIndex, int startIndex);
+bool NESInjectSpriteStripFile(FILE *ofile, FILE *ifile, int chrIndex, int startIndex);
+bool NESInjectSpriteStrip(FILE *ofile, char *spriteData, int size, int chrIndex, int startIndex);
 
-NESErrorCode NESInjectCompoundSpriteFile(FILE *ofile, FILE *ifile, int columns, NESSpriteMode mode, int chrIndex, int startIndex);
-NESErrorCode NESInjectCompoundSprite(FILE *ofile, char *spriteData, int size, int columns, NESSpriteMode mode, int chrIndex, int startIndex);
+bool NESInjectCompoundSpriteFile(FILE *ofile, FILE *ifile, int columns, NESSpriteMode mode, int chrIndex, int startIndex);
+bool NESInjectCompoundSprite(FILE *ofile, char *spriteData, int size, int columns, NESSpriteMode mode, int chrIndex, int startIndex);
 
 //sprite assembling stuff
 char *NESMakeCompoundSprite(char *spriteData, int size, int columns, NESSpriteMode mode);
@@ -93,8 +87,12 @@ bool NESSetTitle(FILE *ofile, char *title);
 bool NESRemoveTitle(FILE *ofile);
 
 //some utility functions
-long NESGetFilesize(FILE *ifile);
+u32 NESGetFilesize(FILE *ifile);
 bool NESVerifyROM(FILE *ifile);
+
+//for converting between ROM sprite data and RAW sprite data
+char NESCombineBits(int a, int b, int n);
+char *NESBreakBits(char c);
 
 int NESGetOffset(int x, int y, int width);
 
