@@ -789,13 +789,15 @@ char *NESBreakBits(char c) {
 
 #pragma mark-
 
-char *NESConvertSpriteDataToComposite(char *spriteData, int size) {
-	if (!spriteData || !size) return NULL;
-	if (size % NES_ROM_SPRITE_LENGTH) return NULL;
+bool NESConvertSpriteDataToComposite(char *buf, char *spriteData, int size) {
+	if (!spriteData || !size) return false;
+	if (size % NES_ROM_SPRITE_LENGTH) return false;
 	
 	int spriteCount = size / NES_ROM_SPRITE_LENGTH;
 	
-	char channel_a[NES_ROM_SPRITE_CHANNEL_LENGTH], channel_b[NES_ROM_SPRITE_CHANNEL_LENGTH];
+	printf("spritecount: %d\n", spriteCount);
+	
+	unsigned char channel_a[NES_ROM_SPRITE_CHANNEL_LENGTH], channel_b[NES_ROM_SPRITE_CHANNEL_LENGTH];
 	int i = 0;
 	int j = 0;
 	int curSprite = 0;
@@ -803,22 +805,27 @@ char *NESConvertSpriteDataToComposite(char *spriteData, int size) {
 	char *composite = (char *)malloc(NES_RAW_SPRITE_LENGTH * spriteCount);
 	
 	for (curSprite = 0; curSprite < spriteCount; curSprite++) {
-		int k = 0;
 		
+		//initialize channel_a and channel_b
 		for (i = 0; i < NES_ROM_SPRITE_CHANNEL_LENGTH; i++) {
 			channel_a[i] = spriteData[NES_ROM_SPRITE_LENGTH * (curSprite - 1) + i];
 			channel_b[i] = spriteData[NES_ROM_SPRITE_LENGTH * (curSprite - 1) + i + NES_ROM_SPRITE_CHANNEL_LENGTH];
+			printf("%02x/%02x\n", (unsigned char)channel_a[i], (unsigned char)channel_b[i]);
 		}
 		
+		//create composite data
 		for (i = 0; i < NES_ROM_SPRITE_CHANNEL_LENGTH; i++) {
 			for (j = 7; j >= 0; j--) {
-				composite[k + curSprite * NES_RAW_SPRITE_LENGTH] = NESCombineBits(channel_a[i], channel_b[i], j);
-				k++;
+				int pixel_offset = (i * 8) + (8 - j); //where in the composite we are
+				printf("(%02d) %02x ", pixel_offset, NESCombineBits(channel_a[i], channel_b[i], j));
+				composite[pixel_offset + curSprite * NES_RAW_SPRITE_LENGTH] = NESCombineBits(channel_a[i], channel_b[i], j);
 			}
 		}
 	}
 	
-	return composite;
+	memcpy(buf, composite, NES_RAW_SPRITE_LENGTH * spriteCount);
+	
+	return true;
 }
 
 char *NESConvertSpriteDataToRom(char *compositeData, int size) {

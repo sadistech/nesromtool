@@ -417,7 +417,7 @@ void parse_cmd_extract(char **argv) {
 		CHECK_ARG_ERROR("Expected bank index or type!");
 		
 		//read the bank type
-		if (current_arg[0] == '-') {
+		if (IS_OPT(current_arg)) {
 			if ( CHECK_ARG(OPT_CHR_BANK) ) {
 				target_bank_type = OPT_CHR_BANK;
 			} else if ( CHECK_ARG(OPT_PRG_BANK) ) {
@@ -443,6 +443,8 @@ void parse_cmd_extract(char **argv) {
 		//read the sprite_range
 		current_arg = GET_NEXT_ARG;
 		
+		CHECK_ARG_ERROR("Expected sprite range.");
+		
 		//if it's a range, set the range...
 		//otherwise, it's 1 sprite. so start and end of range are the same!
 		//TODO: add support for a '-a' option!
@@ -455,7 +457,7 @@ void parse_cmd_extract(char **argv) {
 		
 		//now for options (which are optional... duh);
 		current_arg = PEEK_ARG;
-		if ( IS_OPT(current_arg) ) {
+		if ( current_arg != NULL && IS_OPT(current_arg) ) {
 			for (current_arg = GET_NEXT_ARG; IS_OPT(current_arg) ; current_arg = GET_NEXT_ARG) {
 				//horizontal mode
 				if (CHECK_ARG(OPT_H_MODE)) {
@@ -485,6 +487,9 @@ void parse_cmd_extract(char **argv) {
 				exit(EXIT_FAILURE);
 			}
 		}
+				
+		current_arg = PEEK_ARG;
+		CHECK_ARG_ERROR("No filenames specified.");
 		
 		//ok, now we're finally onto looping over input files!
 		for (current_arg = GET_NEXT_ARG; (current_arg != NULL) ; current_arg = GET_NEXT_ARG) {
@@ -512,6 +517,12 @@ void parse_cmd_extract(char **argv) {
 					continue;
 				}
 				
+				int i = 0;
+				for (i = 0; i < NES_CHR_BANK_LENGTH; i++) {
+					printf("%02x ", (unsigned char)bank_data[i]);
+					if ((i + 1) % 16 == 0) printf("\n");
+				}
+				
 			} else if (target_bank_type == OPT_PRG_BANK) {
 				//read PRG bank
 				bank_data = (char*)malloc(NES_PRG_BANK_LENGTH);
@@ -531,7 +542,10 @@ void parse_cmd_extract(char **argv) {
 			}
 			
 			//pull the sprite data out...
-			char *sprite_data = (char*)malloc(NES_ROM_SPRITE_LENGTH * range_count(sprite_range));
+			u16 sprite_data_length = NES_ROM_SPRITE_LENGTH * range_count(sprite_range);
+			char *sprite_data = (char*)malloc(sprite_data_length);
+			
+			printf("loading sprite data from data...\n");
 			
 			//error detection
 			if ( !NESGetSpriteDataFromData(sprite_data, bank_data, sprite_range, 0) ) {
@@ -549,6 +563,28 @@ void parse_cmd_extract(char **argv) {
 			if (strcmp(type, RAW_TYPE) == 0) {
 				//extract as raw
 				
+				printf("extracting raw\n");
+				
+				sprite_converted_length = NES_RAW_SPRITE_LENGTH * range_count(sprite_range);
+				sprite_converted = (char*)malloc(sprite_converted_length);
+				
+				
+				//convert the sprite_data into composite data
+				if (!NESConvertSpriteDataToComposite(sprite_converted, sprite_data, sprite_data_length)) {
+					printf("An error occurred while converting sprite data to composite data in RAW_TYPE\n\n");
+					exit(EXIT_FAILURE);
+				}
+				
+				printf("done.\n");
+				
+				//if the filename isn't specified, use the same name as our ROM, but put the file extension at the end
+				if (strcmp(filename, "") == 0) {
+					strcpy(filename, current_arg);
+					strcat(filename, ".");
+					strcat(filename, RAW_TYPE_EXT);
+					printf("filename: %s\n\n", filename);
+				}
+				
 			} else if (strcmp(type, PNG_TYPE) == 0) {
 				//extract as png
 				//not implemented
@@ -562,12 +598,39 @@ void parse_cmd_extract(char **argv) {
 			} else if (strcmp(type, NATIVE_TYPE) == 0) {
 				//extract as native sprite data
 				
+				//convert the sprite
+				sprite_converted_length = sprite_data_length;
+				sprite_converted = (char*)malloc(sprite_converted_length);
+				memcpy(sprite_converted, sprite_data, sprite_data_length);
+				
+				//if the filename isn't specified, use the same name as our ROM, but put the file extension at the end
+				if (strcmp(filename, "") == 0) {
+					strcpy(filename, current_arg);
+					strcat(filename, ".");
+					strcat(filename, NATIVE_TYPE_EXT);
+				}
+				
 			} else if (strcmp(type, HTML_TYPE) == 0) {
 				//extract as HTML
 				
+				//convert the sprite data into composite data
+				if (!NESConvertSpriteDataToComposite(sprite_converted, sprite_data, sprite_data_length)) {
+					printf("An error occurred while converting sprite data to composite data in RAW_TYPE\n\n");
+					exit(EXIT_FAILURE);
+				}
+				
+				//now, let's generate some HTML...
+				
+				//if the filename isn't specified, use the same name as our ROM, but put the file extension at the end
+				if (strcmp(filename, "") == 0) {
+					strcpy(filename, current_arg);
+					strcat(filename, ".");
+					strcat(filename, HTML_TYPE_EXT);
+				}
 			}
 			
 			//write converted data to file... if it fails, show an error
+			printf("writing %d bytes to %s\n", sprite_converted_length, filename);
 			if (!write_data_to_file(sprite_converted, sprite_converted_length, filename)) {
 				printf("%s: Error writing sprite data to file!\n\n", filename);
 			}

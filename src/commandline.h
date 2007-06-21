@@ -55,8 +55,8 @@
 #define SKIP_NARG(n)		*(argv += n)		/* skips the next n arguments */
 //#define CHECK_ARG(ARG)	strcmp(ARG, currentArg) == 0 || strcmp(ARG ## _ALT, currentArg) == 0  /* returns true if teh current argument matches ARG */
 #define CHECK_ARG(ARG) 	strcmp(ARG, current_arg) == 0 || (strcmp(ARG ## _ALT, "") != 0 && strcmp(ARG ## _ALT, current_arg) == 0)
-#define PEEK_ARG				*(argv)			/* returns the next argument without advancing the pointer */
-#define PEEK_NARG(n)		*(argv + n - 1)			/* returns the next nth argument without advancing the pointer */
+#define PEEK_ARG				*argv					/* returns the next argument without advancing the pointer */
+#define PEEK_NARG(n)		argv[n - 1]			/* returns the next nth argument without advancing the pointer */
 
 //some helpful macros for error detection
 #define IS_OPT(arg) arg[0] == '-' ? true : false /* return true if arg is an option (starts with a '-') */

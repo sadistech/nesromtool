@@ -126,6 +126,8 @@ bool NESVerifyROM(FILE *ifile);
 char NESCombineBits(int a, int b, int n);
 char *NESBreakBits(char c);
 
+bool NESConvertSpriteDataToComposite(char *buf, char *spriteData, int size);
+
 int NESGetOffset(int x, int y, int width);
 
 #ifdef __cplusplus
