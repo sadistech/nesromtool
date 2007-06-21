@@ -27,6 +27,38 @@ extern "C" {
 #define NES_PRG_COUNT_OFFSET 					4							/* the offset in the file where the PRG_COUNT is located */
 #define NES_CHR_COUNT_OFFSET 					5							/* the offset in the file where the CHR_COUNT is located */
 
+#define NES_ROM_CONTROL_OFFSET				6							/* contains bits indicating:
+ 																												byte 1:
+																													0: Mirror Type (0: horizontal/ 1: Vertical)
+																													1: Presence of battery backed RAM
+																													2: presence of 512-byte trainer
+																													3: 4-screen mirroring (overrides bit 0)
+																													4-7: Four (4) lower bits of mapper number
+																												
+																												byte 2:
+																													0-3: Reserved (should be zero)
+																													4-7: Four (4) upper bits of mapper number*/
+																													
+// Masks for NES_ROM_CONTROL bytes: (apply to byte 1 or 2 only, not the whole thing)
+//first byte:
+#define NES_ROM_CONTROL_MIRROR_TYPE_MASK	1					/* 00000001 : 0 = Horizontal | 1 = Vertical */
+#define NES_ROM_CONTROL_BATT_RAM_MASK			2					/* 00000010 */
+#define NES_ROM_CONTROL_TRAINER_MASK			4					/* 00000100 */
+#define NES_ROM_CONTROL_4_SCREEN_MASK			8					/* 00001000 : overrides MIRROR_TYPE */
+#define NES_ROM_CONTROL_MAPPER_LOW_MASK		240				/* 11110000 */
+
+//second byte:
+#define NES_ROM_CONTROL_RESERVED_MASK			15				/* 00001111 */
+#define NES_ROM_CONTROL_MAPPER_HIGH_MASK	240				/* 11110000 */
+
+#define NES_ROM_CONTROL_LENGTH				2							/* ROM Control Byte: should be read in as an (unsigned char *) */
+#define	NES_8KB_RAM_BANK_COUNT_OFFSET	8							/* the number of 8KB RAM Banks (for compatibility purposes) */
+#define NES_8KB_RAM_BANK_COUNT_LENGTH	1							/* only 1 byte */
+
+#define NES_RESERVED_BYTES_OFFSET			9							/* reserved; should all be 0 */
+#define NES_RESERVED_BYTES_LENGTH			7							/* length of reserved bytes */
+
+// ROM
 #define NES_ROM_SPRITE_LENGTH 				16						/* datalength of a sprite from ROM file (.nes) - 16 bytes */
 
 #define NES_ROM_SPRITE_CHANNEL_LENGTH 8							/* length of a single sprite channel, in bytes: (NES_ROM_SPRITE_LENGTH / 2) = 8 bytes */
