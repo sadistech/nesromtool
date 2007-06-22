@@ -85,7 +85,7 @@ AMTAR = ${SHELL} /Users/spike/svn/nesromtool/trunk/config/missing --run tar
 AUTOCONF = ${SHELL} /Users/spike/svn/nesromtool/trunk/config/missing --run autoconf
 AUTOHEADER = ${SHELL} /Users/spike/svn/nesromtool/trunk/config/missing --run autoheader
 AUTOMAKE = ${SHELL} /Users/spike/svn/nesromtool/trunk/config/missing --run automake-1.9
-AWK = gawk
+AWK = awk
 CC = gcc
 CCDEPMODE = depmode=gcc3
 CFLAGS = -g -O2

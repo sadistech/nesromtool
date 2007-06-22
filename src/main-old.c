@@ -26,23 +26,23 @@
 
 //command types
 //extract cmd
-#define kCmdExtractSprites 			"-xs"
+#define kCmdExtractTiles 			"-xs"
 #define kCmdExtractPRG				"-xp"
 #define kCmdExtractCHR				"-xc"
-#define kCmdExtractSpritesPRG		"-xsp"
+#define kCmdExtractTilesPRG		"-xsp"
 
 //injection cmd
 #define kCmdInjectPRG				"-ip"
 #define kCmdInjectCHR				"-ic"
-#define kCmdInjectSprites			"-is"
+#define kCmdInjectTiles			"-is"
 
 //titles
 #define kCmdSetTitle				"-st"
 #define kCmdRemoveTitle				"-rt"
 #define kCmdPrintTitle				"-pt"
 
-//drawing sprites
-#define kCmdDrawSprites				"-ds"
+//drawing tiles
+#define kCmdDrawTiles				"-ds"
 
 //misc cmd
 #define kCmdSetSourceFile			"-f"
@@ -79,8 +79,8 @@ void printUsage();
 void cleanUp(char *msg, int errCode);
 void bail_srcFileError();
 
-void printSpriteData(char *spriteData, int dataSize, int columns, int mono);
-void spriteToHtml(char *spriteData);
+void printTileData(char *tileData, int dataSize, int columns, int mono);
+void tileToHtml(char *tileData);
 int printROM_info(FILE *ifile);
 
 #pragma mark -
@@ -88,8 +88,8 @@ int printROM_info(FILE *ifile);
 void ExtractPrg(int startIndex, int endIndex, char *filepath, int isMulti);
 void ExtractChr(int startIndex, int endIndex, char *filepath, int isMulti);
 
-void ExtractSprites(int chrIndex, int startIndex, int endIndex, char *filepath);
-void ExtractCompoundSprite(NESSpriteMode mode, int columnCount, int chrIndex, int startIndex, int endIndex, char *filepath);
+void ExtractTiles(int chrIndex, int startIndex, int endIndex, char *filepath);
+void ExtractCompoundTile(NESTileMode mode, int columnCount, int chrIndex, int startIndex, int endIndex, char *filepath);
 
 #pragma mark -
 #pragma mark *** Globals
@@ -309,17 +309,17 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 		
 		ExtractChr(startIndex, endIndex, filepath, isMulti);
 		
-	} else if (strcmp(cmd, kCmdExtractSprites) == 0) {				//extract sprite(s)
+	} else if (strcmp(cmd, kCmdExtractTiles) == 0) {				//extract tile(s)
 		#pragma mark -
-		#pragma mark EXTRACT SPRITES
+		#pragma mark EXTRACT TILES
 		// *********************************************************************************************************************************************
 		// usage:
-		// -xs +a <chrIndex> <directory>												Extract all sprites from <chrIndex> into <directory>
-		// -xs +a +a <directory>														Extract all sprites from all CHR banks into <directory>
-		// -xs +r <chrIndex> <fromIndex> <toIndex> <directory>							Extract a range of sprites from <chrIndex>
-		// -xs <chrIndex> <index> <filename>											Extract a sprite from <chrIndex> to <filename>
-		// -xs +r +s <chrIndex> <fromIndex> <toIndex> <filename>						Extract a sprite strip from <chrIndex> from <fromIndex> to <toIndex> to <filename>
-		// -xs +r +c <mode> <columnCount> <chrIndex> <fromIndex> <toIndex> <filename>	Extract a compound sprite that is <columnCount> columns from <chrIndex> from <fromIndex> to <toIndex> to <filename>
+		// -xs +a <chrIndex> <directory>												Extract all tiles from <chrIndex> into <directory>
+		// -xs +a +a <directory>														Extract all tiles from all CHR banks into <directory>
+		// -xs +r <chrIndex> <fromIndex> <toIndex> <directory>							Extract a range of tiles from <chrIndex>
+		// -xs <chrIndex> <index> <filename>											Extract a tile from <chrIndex> to <filename>
+		// -xs +r +s <chrIndex> <fromIndex> <toIndex> <filename>						Extract a tile strip from <chrIndex> from <fromIndex> to <toIndex> to <filename>
+		// -xs +r +c <mode> <columnCount> <chrIndex> <fromIndex> <toIndex> <filename>	Extract a compound tile that is <columnCount> columns from <chrIndex> from <fromIndex> to <toIndex> to <filename>
 		// *********************************************************************************************************************************************
 		
 		//this command requires a sourcefile
@@ -328,7 +328,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 		}
 		
 		if (argc < 3) {
-			cleanUp("Extracting sprites requires at least 3 arguments.", 1);
+			cleanUp("Extracting tiles requires at least 3 arguments.", 1);
 		}
 		
 		int chrIndex;
@@ -340,56 +340,56 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 		if (strcmp(argv[0], kOptAll) == 0) {
 			int all = 0;
 			
-			//all chr, all sprites
+			//all chr, all tiles
 			if (strcmp(argv[1], kOptAll) == 0) {
 				filepath = argv[2];
 				all = 1;
 				
-			//all sprites, specific CHR
+			//all tiles, specific CHR
 			} else {
 				chrIndex = atoi(argv[1]);
 			}
 			
 			filepath = argv[2];
 			startIndex = 1;
-			endIndex = NES_MAX_SPRITES_CHR;
+			endIndex = NES_MAX_TILES_CHR;
 			isMulti = 1;
 			
 			if (all) {
 				int i = 0;
 				
 				for (i = 1; i <= NESGetChrBankCount(srcFile); i++) {
-					ExtractSprites(i, startIndex, endIndex, filepath);
+					ExtractTiles(i, startIndex, endIndex, filepath);
 				}
 				
 				return;
 			}
 			
-			ExtractSprites(chrIndex, startIndex, endIndex, filepath);
+			ExtractTiles(chrIndex, startIndex, endIndex, filepath);
 			
-		//range of sprites
+		//range of tiles
 		} else if (strcmp(argv[0], kOptRange) == 0) {
 			
-			//compound sprite
+			//compound tile
 			if (strcmp(argv[1], kOptCompound) == 0) {
 				chrIndex = atoi(argv[2]);
 				startIndex = atoi(argv[3]);
 				endIndex = atoi(argv[4]);
 				filepath = argv[5];
 				
-				ExtractCompoundSprite(nesHMode, 1, chrIndex, startIndex, endIndex, filepath);
+				ExtractCompoundTile(nesHMode, 1, chrIndex, startIndex, endIndex, filepath);
 				
 				return;
-			//strip sprite
+			//strip tile
 			} else if (strcmp(argv[1], kOptStrip) == 0) {
-				NESSpriteMode mode;
+				NESTileMode mode;
 				
 				if (strcmp(argv[2], kOptHMode) == 0) {
 					mode = nesHMode;
 				} else if (strcmp(argv[2], kOptVMode) == 0) {
 					mode = nesVMode;
 				} else {
-					cleanUp("Bad sprite mode.", 1);
+					cleanUp("Bad tile mode.", 1);
 				}
 				
 				int columnCount = atoi(argv[3]);
@@ -398,7 +398,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				endIndex = atoi(argv[6]);
 				filepath = argv[7];
 				
-				ExtractCompoundSprite(mode, columnCount, chrIndex, startIndex, endIndex, filepath);
+				ExtractCompoundTile(mode, columnCount, chrIndex, startIndex, endIndex, filepath);
 				
 			//just a range...
 			} else {
@@ -409,20 +409,20 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				
 			}
 		
-		//single sprite
+		//single tile
 		} else {
 			chrIndex = atoi(argv[0]);
 			startIndex = endIndex = atoi(argv[1]);
 			filepath = argv[2];
 		}
 		
-		ExtractSprites(chrIndex, startIndex, endIndex, filepath);
+		ExtractTiles(chrIndex, startIndex, endIndex, filepath);
 		
 		/*if (strcmp(argv[0], kOptAll) == 0) {	//all
 			if (strcmp(argv[1], kOptAll) == 0) { //all
-				#pragma mark -all chr, all sprites
+				#pragma mark -all chr, all tiles
 				if (argc < 3) {
-					cleanUp("Must have at least 3 arguments to extract all sprites", 1);
+					cleanUp("Must have at least 3 arguments to extract all tiles", 1);
 				}
 				int i = 0;
 				int j = 0;
@@ -431,12 +431,12 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				char *directory = argv[2];
 				
 				if (verbose) {
-					printf("Extracting ALL sprites from ALL CHR banks...\n");
+					printf("Extracting ALL tiles from ALL CHR banks...\n");
 					printf("\tDirectory:\t%s\n", directory);
 				}
 				
 				for (i = 1; i <= (int)NESGetChrBankCount(srcFile); i++) { //the chr loop
-					for (j = 1; j <= NES_MAX_SPRITES_CHR; j++) { //the sprite loop
+					for (j = 1; j <= NES_MAX_TILES_CHR; j++) { //the tile loop
 						char filename[256];
 						
 						sprintf(filename, "%s.%d-%d.raw", srcFilename, i, j);
@@ -453,9 +453,9 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 							cleanUp("Cannot open file for writing!", 1);
 						}
 						
-						if (NESExtractSprite(srcFile, ofile, i, j) == nesErr) {
+						if (NESExtractTile(srcFile, ofile, i, j) == nesErr) {
 							fclose(ofile);
-							cleanUp("Could not extract sprite.", 1);
+							cleanUp("Could not extract tile.", 1);
 						}
 						
 						fclose(ofile);
@@ -465,22 +465,22 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 						}
 					}
 				}
-			} else {	//specific CHR, all sprites
-			#pragma mark -specific chr, all sprites
+			} else {	//specific CHR, all tiles
+			#pragma mark -specific chr, all tiles
 				if (argc < 3) {
-					cleanUp("Extracting all sprites from a CHR requires at least 3 arguments.", 1);
+					cleanUp("Extracting all tiles from a CHR requires at least 3 arguments.", 1);
 				}
 				
 				int chrIndex = atoi(argv[1]);
 				char destPath[512];
 				
 				if (verbose) {
-					printf("Extracting ALL sprites from CHR bank %d to %s.\n", chrIndex, destPath);
+					printf("Extracting ALL tiles from CHR bank %d to %s.\n", chrIndex, destPath);
 				}
 				
 				int i = 0;
 				
-				for (i = 1; i <= NES_MAX_SPRITES_CHR; i++) {
+				for (i = 1; i <= NES_MAX_TILES_CHR; i++) {
 					char filename[256];
 					
 					sprintf(filename, "%s.%d-%d.raw", srcFilename, chrIndex, i);
@@ -497,9 +497,9 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 						cleanUp("Could not open destination file.", 1);
 					}
 					
-					if (NESExtractSprite(srcFile, ofile, chrIndex, i) == nesErr) {
+					if (NESExtractTile(srcFile, ofile, chrIndex, i) == nesErr) {
 						fclose(ofile);
-						cleanUp("Could not extract sprite.", 1);
+						cleanUp("Could not extract tile.", 1);
 					}
 					
 					fclose(ofile);
@@ -509,14 +509,14 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 					}
 				}
 			}
-		} else if (strcmp(argv[0], kOptRange) == 0) { //range of sprites
+		} else if (strcmp(argv[0], kOptRange) == 0) { //range of tiles
 			#pragma mark - RANGE
 			
 			if (strcmp(argv[1], kOptStrip) == 0) {
 				#pragma mark --strip
 				
 				if (argc < 6) {
-					cleanUp("Need at least 6 arguments to extract a sprite strip!", 1);
+					cleanUp("Need at least 6 arguments to extract a tile strip!", 1);
 				}
 				
 				int chrIndex = atoi(argv[2]);
@@ -526,7 +526,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				char *filename = argv[5];
 				
 				if (verbose) {
-					printf("Extracting a strip of sprites.\n");
+					printf("Extracting a strip of tiles.\n");
 					printf("\tchrIndex:\t%d\n", chrIndex);
 					printf("\tfromIndex:\t%d\n", fromIndex);
 					printf("\ttoIndex:\t%d\n", toIndex);
@@ -536,11 +536,11 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				FILE *ofile;
 				
 				if (!(ofile = fopen(filename, "w"))) {
-					cleanUp("Can't open file for writing sprite strip!", 1);
+					cleanUp("Can't open file for writing tile strip!", 1);
 				}
 				
-				if (NESExtractSpriteRange(srcFile, ofile, chrIndex, fromIndex, toIndex) == nesErr) {
-					cleanUp("Could not extract a sprite strip!", 1);
+				if (NESExtractTileRange(srcFile, ofile, chrIndex, fromIndex, toIndex) == nesErr) {
+					cleanUp("Could not extract a tile strip!", 1);
 				}
 				
 				fclose(ofile);
@@ -550,13 +550,13 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				}
 				
 			} else if (strcmp(argv[1], kOptCompound) == 0) {
-				#pragma mark --compound sprite
+				#pragma mark --compound tile
 				
 				if (argc < 8) {
-					cleanUp("Need at least 8 arguments to extract a compound sprite!", 1);
+					cleanUp("Need at least 8 arguments to extract a compound tile!", 1);
 				}
 				
-				NESSpriteMode mode;
+				NESTileMode mode;
 				
 				if (strcmp(argv[2], kOptVMode) == 0) {
 					mode = nesVMode;
@@ -574,7 +574,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				char *filename = argv[7];
 				
 				if (verbose) {
-					printf("Extracting compound sprite.\n");
+					printf("Extracting compound tile.\n");
 					printf("\tcolumnCount:\t%d\n", columnCount);
 					printf("\tchrIndex:\t%d\n", chrIndex);
 					printf("\tfromIndex:\t%d\n", fromIndex);
@@ -582,12 +582,12 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 					printf("\tfile:\t%s\t", filename);
 				}
 				
-				int dataSize = (toIndex - fromIndex + 1) * NES_RAW_SPRITE_LENGTH;
+				int dataSize = (toIndex - fromIndex + 1) * NES_RAW_TILE_LENGTH;
 				
 				FILE *ofile;
 				
 				if (!(ofile = fopen(filename, "w"))) {
-					cleanUp("Can't open file for writing compound sprite!", 1);
+					cleanUp("Can't open file for writing compound tile!", 1);
 				}
 				
 				char *chrBank = NESGetChrBank(srcFile, chrIndex);
@@ -596,27 +596,27 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 					cleanUp("Can't retrieve CHR bank from ROM!", 1);
 				}
 				
-				char *spriteData = NESGetSpriteDataRangeFromChrBank(chrBank, fromIndex, toIndex);
+				char *tileData = NESGetTileDataRangeFromChrBank(chrBank, fromIndex, toIndex);
 				free(chrBank);
 				
-				if (!spriteData) {
-					cleanUp("Can't retrieve sprite data from CHR!", 1);
+				if (!tileData) {
+					cleanUp("Can't retrieve tile data from CHR!", 1);
 				}
 				
-				char *cSprite = NESMakeCompoundSprite(spriteData, dataSize, columnCount, mode);
-				free(spriteData);
+				char *cTile = NESMakeCompoundTile(tileData, dataSize, columnCount, mode);
+				free(tileData);
 				
-				if (!cSprite) {
-					cleanUp("Can't create compound sprite!", 1);
+				if (!cTile) {
+					cleanUp("Can't create compound tile!", 1);
 				}
 				
-				if (fwrite(cSprite, 1, dataSize, ofile) != (unsigned int)dataSize) {
-					free(cSprite);
+				if (fwrite(cTile, 1, dataSize, ofile) != (unsigned int)dataSize) {
+					free(cTile);
 					fclose(ofile);
-					cleanUp("error writing compound sprite to file!", 1);
+					cleanUp("error writing compound tile to file!", 1);
 				}
 				
-				free(cSprite);
+				free(cTile);
 				fclose(ofile);
 				
 				if (verbose) {
@@ -626,7 +626,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				#pragma mark --standard range
 				
 				if (argc < 5) {
-					cleanUp("Not enough arguments to extract a range of sprites.", 1);
+					cleanUp("Not enough arguments to extract a range of tiles.", 1);
 				}
 				
 				char destPath[512];
@@ -635,7 +635,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				int endIndex = atoi(argv[3]);
 				
 				if (verbose) {
-					printf("Extracting a range of sprites...\n");
+					printf("Extracting a range of tiles...\n");
 					printf("\tchrIndex:\t%d\n", chrIndex);
 					printf("\tstartIndex:\t%d\n", startIndex);
 					printf("\tendIndex:\t%d\n", endIndex);
@@ -647,8 +647,8 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 					cleanUp("Invalid CHR index.", 1);
 				}
 				
-				if (startIndex < 1 || endIndex > NES_MAX_SPRITES_CHR) {
-					cleanUp("Invalid index for extracting a range sprite data.", 1);
+				if (startIndex < 1 || endIndex > NES_MAX_TILES_CHR) {
+					cleanUp("Invalid index for extracting a range tile data.", 1);
 				}
 				
 				for (i = startIndex; i <= endIndex; i++) {
@@ -668,9 +668,9 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 						cleanUp("Could not open destination file.", 1);
 					}
 					
-					if (NESExtractSprite(srcFile, ofile, chrIndex, i) == nesErr) {
+					if (NESExtractTile(srcFile, ofile, chrIndex, i) == nesErr) {
 						fclose(ofile);
-						cleanUp("Could not extract sprite.", 1);
+						cleanUp("Could not extract tile.", 1);
 					}
 					
 					fclose(ofile);
@@ -681,19 +681,19 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				}
 			}
 		} else { //single
-			#pragma mark -specific chr, specific sprite
+			#pragma mark -specific chr, specific tile
 			if (argc < 3) {
-				cleanUp("Extracting a sprite requires at least 3 arguments", 1);
+				cleanUp("Extracting a tile requires at least 3 arguments", 1);
 			}
 			
 			int chrIndex = atoi(argv[0]);
-			int spriteIndex = atoi(argv[1]);
+			int tileIndex = atoi(argv[1]);
 			char *filename = argv[2];
 			
 			if (verbose) {
-				printf("Extracting single sprite...\n");
+				printf("Extracting single tile...\n");
 				printf("\tchrIndex:\t%d\n", chrIndex);
-				printf("\tspriteIndex\t%d\n", spriteIndex);
+				printf("\ttileIndex\t%d\n", tileIndex);
 				printf("\tfile:\t%s\t", filename);
 			}
 			
@@ -707,8 +707,8 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				cleanUp("Could not open file for writing...", 1);
 			}
 			
-			if (NESExtractSprite(srcFile, ofile, chrIndex, spriteIndex) == nesErr) {
-				cleanUp("Could not extract sprite.", 1);
+			if (NESExtractTile(srcFile, ofile, chrIndex, tileIndex) == nesErr) {
+				cleanUp("Could not extract tile.", 1);
 				fclose(ofile);
 			}
 			
@@ -718,9 +718,9 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				printf("done.\n");
 			}
 		}*/
-	} else if (strcmp(cmd, kCmdExtractSpritesPRG) == 0) {			//extract sprite(s) from PRG!
+	} else if (strcmp(cmd, kCmdExtractTilesPRG) == 0) {			//extract tile(s) from PRG!
 		#pragma mark -
-		#pragma mark EXTRACT SPRITES FROM PRG
+		#pragma mark EXTRACT TILES FROM PRG
 		// *********************************************************************************************************************************************
 		//USAGE:
 		// -xsp +r +c ( +h | +v ) <columnCount> <prgIndex> <fromIndex> <toIndex> <filename>
@@ -731,7 +731,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 			bail_srcFileError();
 		}
 		
-		NESSpriteMode mode;
+		NESTileMode mode;
 				
 		if (strcmp(argv[2], kOptVMode) == 0) {
 			mode = nesVMode;
@@ -749,15 +749,15 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 		char *filename = argv[7];
 		
 		if (verbose) {
-			printf("Extracting prg sprite (BEWARE!!!!! RAHHH!\n");
+			printf("Extracting prg tile (BEWARE!!!!! RAHHH!\n");
 		}
 								
-		int dataSize = (toIndex - fromIndex + 1) * NES_RAW_SPRITE_LENGTH;
+		int dataSize = (toIndex - fromIndex + 1) * NES_RAW_TILE_LENGTH;
 		
 		FILE *ofile;
 		
 		if (!(ofile = fopen(filename, "w"))) {
-			cleanUp("Can't open file for writing compound sprite!", 1);
+			cleanUp("Can't open file for writing compound tile!", 1);
 		}
 		
 		char *prgData = NESGetPrgBank(srcFile, prgIndex);
@@ -768,27 +768,27 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 			cleanUp("Can't retrieve PRG bank from ROM!", 1);
 		}
 		
-		char *spriteData = NESGetSpriteDataRangeFromChrBank(prgData, fromIndex, toIndex);
+		char *tileData = NESGetTileDataRangeFromChrBank(prgData, fromIndex, toIndex);
 		free(prgData);
 		
-		if (!spriteData) {
-			cleanUp("Can't retreive sprite data from PRG!", 1);
+		if (!tileData) {
+			cleanUp("Can't retreive tile data from PRG!", 1);
 		}
 		
-		char *cSprite = NESMakeCompoundSprite(spriteData, dataSize, columnCount, mode);
-		free(spriteData);
+		char *cTile = NESMakeCompoundTile(tileData, dataSize, columnCount, mode);
+		free(tileData);
 		
-		if (!cSprite) {
-			cleanUp("Can't create compound sprite!", 1);
+		if (!cTile) {
+			cleanUp("Can't create compound tile!", 1);
 		}
 		
-		if (fwrite(cSprite, 1, dataSize, ofile) != (unsigned int)dataSize) {
-			free(cSprite);
+		if (fwrite(cTile, 1, dataSize, ofile) != (unsigned int)dataSize) {
+			free(cTile);
 			fclose(ofile);
-			cleanUp("error writing compound sprite to file!", 1);
+			cleanUp("error writing compound tile to file!", 1);
 		}
 		
-		free(cSprite);
+		free(cTile);
 		fclose(ofile);
 	} else if (strcmp(cmd, kCmdInjectPRG) == 0) {
 		#pragma mark -
@@ -881,12 +881,12 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 			printf("done\n");
 		}
 		
-	} else if (strcmp(cmd, kCmdInjectSprites) == 0) {
+	} else if (strcmp(cmd, kCmdInjectTiles) == 0) {
 		#pragma mark -
-		#pragma mark INJECT SPRITES
+		#pragma mark INJECT TILES
 		// *********************************************************************************************************************************************
 		// usage:
-		// -is <filename> <chrIndex> <spriteIndex>
+		// -is <filename> <chrIndex> <tileIndex>
 		// -is +r <chrIndex> <fromIndex> <toIndex> [Files...]?
 		// -is +r +s <chrIndex> <fromIndex> <filename>
 		// -is +r +c [+h | +v] <columns> <chrIndex> <fromIndex> <filename>
@@ -896,14 +896,14 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 			#pragma mark -RANGE
 			
 			if (strcmp(argv[1], kOptStrip) == 0) {
-				#pragma mark --strip of sprites
+				#pragma mark --strip of tiles
 				
 				int chrIndex = atoi(argv[2]);
 				int fromIndex = atoi(argv[3]);
 				char *filename = argv[4];
 				
 				if (verbose) {
-					printf("Injecting a sprite strip\n");
+					printf("Injecting a tile strip\n");
 					printf("\tchrIndex:\t%d\n", chrIndex);
 					printf("\tfromIndex:\t%d\n", fromIndex);
 					printf("\tfile:\t%s\t", filename);
@@ -912,11 +912,11 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				FILE *ifile;
 				
 				if (!(ifile = fopen(filename, "r"))) {
-					cleanUp("Can't open sprite strip file!", 1);
+					cleanUp("Can't open tile strip file!", 1);
 				}
 				
-				if (NESInjectSpriteStripFile(srcFile, ifile, chrIndex, fromIndex) == nesErr) {
-					cleanUp("Can't inject sprite!", 1);
+				if (NESInjectTileStripFile(srcFile, ifile, chrIndex, fromIndex) == nesErr) {
+					cleanUp("Can't inject tile!", 1);
 				}
 				
 				fclose(ifile);
@@ -925,16 +925,16 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 					printf("done.\n");
 				}
 			} else if (strcmp(argv[1], kOptCompound) == 0) {
-				#pragma mark --compound sprite
+				#pragma mark --compound tile
 				
-				NESSpriteMode mode;
+				NESTileMode mode;
 				
 				if (strcmp(argv[2], kOptHMode) == 0) {
 					mode = nesHMode;
 				} else if (strcmp(argv[2], kOptVMode) == 0) {
 					mode = nesVMode;
 				} else {
-					cleanUp("Invalid sprite mode!", 1);
+					cleanUp("Invalid tile mode!", 1);
 				}
 				
 				int columns = atoi(argv[3]);
@@ -943,7 +943,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				char *filename = argv[6];
 
 				if (verbose) {
-					printf("Injecting compound sprite.\n");
+					printf("Injecting compound tile.\n");
 					printf("\tcolumns:\t%d\n", columns);
 					printf("\tchrIndex:\t%d\n", chrIndex);
 					printf("\tfromIndex:\t%d\n", fromIndex);
@@ -954,11 +954,11 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				FILE *ifile;
 				
 				if (!(ifile = fopen(filename, "r"))) {
-					cleanUp("Can't open sprite file!", 1);
+					cleanUp("Can't open tile file!", 1);
 				}
 				
-				if (NESInjectCompoundSpriteFile(srcFile, ifile, columns, mode, chrIndex, fromIndex) == nesErr) {
-					cleanUp("Can't inject sprite! ahhhh!", 1);
+				if (NESInjectCompoundTileFile(srcFile, ifile, columns, mode, chrIndex, fromIndex) == nesErr) {
+					cleanUp("Can't inject tile! ahhhh!", 1);
 				}
 				
 				fclose(ifile);
@@ -970,42 +970,42 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 			} else {
 				#pragma mark --just a range...
 				
-				cleanUp("Injecting a range of sprites is not yet supported", 1);
+				cleanUp("Injecting a range of tiles is not yet supported", 1);
 			}
-		} else {																		//specific sprite
-			#pragma mark -specific sprite
+		} else {																		//specific tile
+			#pragma mark -specific tile
 			if (argc < 3) {
-				cleanUp("Injecting sprites requires at least 3 arguments!", 1);
+				cleanUp("Injecting tiles requires at least 3 arguments!", 1);
 			}
 			
 			char *filename = argv[0];
 			int chrIndex = atoi(argv[1]);
-			int spriteIndex = atoi(argv[2]);
+			int tileIndex = atoi(argv[2]);
 			
 			if (verbose) {
-				printf("Injecting sprite...\n");
+				printf("Injecting tile...\n");
 				printf("\tchIndex:\t%d\n", chrIndex);
-				printf("\tspriteIndex:\t%d\n", spriteIndex);
+				printf("\ttileIndex:\t%d\n", tileIndex);
 				printf("\tfromFile:\t%s\t", filename);
 			}
 			
 			if (chrIndex < 1 || chrIndex > (int)NESGetChrBankCount(srcFile)) {
-				cleanUp("Invalid chrIndex for injection of sprites!", 1);
+				cleanUp("Invalid chrIndex for injection of tiles!", 1);
 			}
 			
-			if (spriteIndex < 1 || spriteIndex > NES_MAX_SPRITES_CHR) {
-				cleanUp("Invalid spriteIndex!", 1);
+			if (tileIndex < 1 || tileIndex > NES_MAX_TILES_CHR) {
+				cleanUp("Invalid tileIndex!", 1);
 			}
 			
 			FILE *ifile;
 			
 			if (!(ifile = fopen(filename, "r"))) {
-				cleanUp("Can't open sprite file!", 1);
+				cleanUp("Can't open tile file!", 1);
 			}
 			
-			if (NESInjectSpriteFile(srcFile, ifile, chrIndex, spriteIndex) == nesErr) {
+			if (NESInjectTileFile(srcFile, ifile, chrIndex, tileIndex) == nesErr) {
 				fclose(ifile);
-				cleanUp("Can't inject sprite!", 1);
+				cleanUp("Can't inject tile!", 1);
 			}
 			
 			fclose(ifile);
@@ -1014,16 +1014,16 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				printf("done.\n");
 			}
 		}
-	} else if (strcmp(cmd, kCmdDrawSprites) == 0) {
+	} else if (strcmp(cmd, kCmdDrawTiles) == 0) {
 		#pragma mark -
-		#pragma mark DRAW SPRITES
+		#pragma mark DRAW TILES
 		// *********************************************************************************************************************************************
 		// usage:
-		// -ds [+m] +a													display ALL sprites from ALL CHR banks
-		// -ds [+m] <chrindex> +a										display ALL sprites from CHR bank <chrindex>
-		// -ds [+m] <chrindex> <spriteindex>							display sprite <spriteindex> from CHR bank <chrindex>
-		// -ds [+m] +r <chrIndex> <fromIndex> <toIndex> 				display a range of sprites from <chrIndex>
-		// -ds [+m] +r +c [mode] <columns> <chrIndex> <fromIndex> <toIndex>	display compound sprite with <columns> 
+		// -ds [+m] +a													display ALL tiles from ALL CHR banks
+		// -ds [+m] <chrindex> +a										display ALL tiles from CHR bank <chrindex>
+		// -ds [+m] <chrindex> <tileindex>							display tile <tileindex> from CHR bank <chrindex>
+		// -ds [+m] +r <chrIndex> <fromIndex> <toIndex> 				display a range of tiles from <chrIndex>
+		// -ds [+m] +r +c [mode] <columns> <chrIndex> <fromIndex> <toIndex>	display compound tile with <columns> 
 		// -ds [+m] +r +s <chrIndex> <fromIndex> <toIndex>
 		// *********************************************************************************************************************************************
 		
@@ -1038,15 +1038,15 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 			mono = 1;
 		}
 		
-		if (strcmp(argv[0 + mono], kOptAll) == 0) { 	//all CHR, all sprites
-			#pragma mark -all chr, all sprites
+		if (strcmp(argv[0 + mono], kOptAll) == 0) { 	//all CHR, all tiles
+			#pragma mark -all chr, all tiles
 			
 			if ((argc - mono) < 1) {
-				cleanUp("Displaying all sprites requires at least one argument.", 1);
+				cleanUp("Displaying all tiles requires at least one argument.", 1);
 			}
 			
 			if (verbose) {
-				printf("Displaying ALL sprites in ALL CHR banks...\n");
+				printf("Displaying ALL tiles in ALL CHR banks...\n");
 			}
 			
 			int chrCount = NESGetChrBankCount(srcFile);
@@ -1060,24 +1060,24 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 					cleanUp("Can't get chrData!!!", 1);
 				}
 				
-				for (j = 1; j < NES_MAX_SPRITES_CHR; j++) {
-					char *spriteData = NESGetSpriteDataFromChrBank(chrData, j);
+				for (j = 1; j < NES_MAX_TILES_CHR; j++) {
+					char *tileData = NESGetTileDataFromChrBank(chrData, j);
 					
-					if (!spriteData) {
+					if (!tileData) {
 						free(chrData);
-						cleanUp("Can't get spriteData!", 1);
+						cleanUp("Can't get tileData!", 1);
 					}
 					
 					if (verbose) {
 						printf("CHR:\t%d\n", i);
-						printf("Sprite:\t%d\n", j);
+						printf("Tile:\t%d\n", j);
 					}
 					
-					printSpriteData(spriteData, 1, NES_RAW_SPRITE_LENGTH, mono);
+					printTileData(tileData, 1, NES_RAW_TILE_LENGTH, mono);
 					
 					printf("\n");
 					
-					free(spriteData);
+					free(tileData);
 				}
 				
 				free(chrData);
@@ -1087,17 +1087,17 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				}
 			}
 			
-		} else if (strcmp(argv[0 + mono], kOptRange) == 0) {	//specific chr, range of sprites
+		} else if (strcmp(argv[0 + mono], kOptRange) == 0) {	//specific chr, range of tiles
 				#pragma mark -RANGE
 				
 			if (strcmp(argv[1 + mono], kOptCompound) == 0) {
-				#pragma mark --compound sprite
+				#pragma mark --compound tile
 				
 				if ((argc - mono) < 7) {
-					cleanUp("Displaying a compound sprite requires at least 7 arguments.", 1);
+					cleanUp("Displaying a compound tile requires at least 7 arguments.", 1);
 				}
 				
-				NESSpriteMode mode;
+				NESTileMode mode;
 				
 				if (strcmp(argv[2 + mono], kOptVMode) == 0) {
 					mode = nesVMode;
@@ -1113,7 +1113,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				int toIndex = atoi(argv[6 + mono]);
 				
 				if (verbose) {
-					printf("Displaying compound sprite...\n");
+					printf("Displaying compound tile...\n");
 					printf("\tmode:\t%s\n", (mode == nesVMode) ? "Vertical" : "Horizontal");
 					printf("\tcolumns:\t%d\n", columns);
 					printf("\tchrIndex:\t%d\n", chrIndex);
@@ -1127,27 +1127,27 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 					cleanUp("Can't get CHR bank!", 1);
 				}
 				
-				char *spriteData = NESGetSpriteDataRangeFromChrBank(chrData, fromIndex, toIndex);
+				char *tileData = NESGetTileDataRangeFromChrBank(chrData, fromIndex, toIndex);
 				free(chrData);
 				
-				if (!spriteData) {
-					cleanUp("Can't get sprite data!", 1);
+				if (!tileData) {
+					cleanUp("Can't get tile data!", 1);
 				}
 				
-				char *compSprite = NESMakeCompoundSprite(spriteData, (toIndex - fromIndex + 1) * NES_RAW_SPRITE_LENGTH, columns, mode);
-				free(spriteData);
+				char *compTile = NESMakeCompoundTile(tileData, (toIndex - fromIndex + 1) * NES_RAW_TILE_LENGTH, columns, mode);
+				free(tileData);
 				
-				if (!compSprite) {
-					cleanUp("Can't make compound sprite!", 1);
+				if (!compTile) {
+					cleanUp("Can't make compound tile!", 1);
 				}
 				
-				printSpriteData(compSprite, (toIndex - fromIndex + 1) * NES_RAW_SPRITE_LENGTH, columns, mono);
+				printTileData(compTile, (toIndex - fromIndex + 1) * NES_RAW_TILE_LENGTH, columns, mono);
 				
 			} else if (strcmp(argv[1 + mono], kOptStrip) == 0) {
-				#pragma mark --strip of sprites
+				#pragma mark --strip of tiles
 				
 				if ((argc - mono) < 5) {
-					cleanUp("Displaying a strip of sprites requires at least 5 arguments!", 1);
+					cleanUp("Displaying a strip of tiles requires at least 5 arguments!", 1);
 				}
 				
 				int chrIndex = atoi(argv[2 + mono]);
@@ -1155,7 +1155,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				int toIndex = atoi(argv[4 + mono]);
 				
 				if (verbose) {
-					printf("Displaying sprite strip...\n");
+					printf("Displaying tile strip...\n");
 					printf("\tchrIndex:\t%d\n", chrIndex);
 					printf("\tfromIndex:\t%d\n", fromIndex);
 					printf("\ttoIndex:\t%d\n", toIndex);
@@ -1167,27 +1167,27 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 					cleanUp("Can't get CHR bank!", 1);
 				}
 				
-				char *spriteData = NESGetSpriteDataRangeFromChrBank(chrData, fromIndex, toIndex);
+				char *tileData = NESGetTileDataRangeFromChrBank(chrData, fromIndex, toIndex);
 				free(chrData);
 				
-				if (!spriteData) {
-					cleanUp("Can't get sprite data!", 1);
+				if (!tileData) {
+					cleanUp("Can't get tile data!", 1);
 				}
 				
-				char *compSprite = NESMakeCompoundSprite(spriteData, (toIndex - fromIndex + 1) * NES_RAW_SPRITE_LENGTH, 1, nesHMode);
-				free(spriteData);
+				char *compTile = NESMakeCompoundTile(tileData, (toIndex - fromIndex + 1) * NES_RAW_TILE_LENGTH, 1, nesHMode);
+				free(tileData);
 				
-				if (!compSprite) {
-					cleanUp("Can't make compound sprite!", 1);
+				if (!compTile) {
+					cleanUp("Can't make compound tile!", 1);
 				}
 				
-				printSpriteData(compSprite, (toIndex - fromIndex + 1) * NES_RAW_SPRITE_LENGTH, 1, mono);
+				printTileData(compTile, (toIndex - fromIndex + 1) * NES_RAW_TILE_LENGTH, 1, mono);
 				
 			} else {
-				#pragma mark -specific chr, range of sprites
+				#pragma mark -specific chr, range of tiles
 				
 				if ((argc - mono) < 4) {
-					cleanUp("Displaying a range of sprites requires at least four arguments.", 1);
+					cleanUp("Displaying a range of tiles requires at least four arguments.", 1);
 				}
 				
 				int chrIndex = atoi(argv[1 + mono]);
@@ -1195,7 +1195,7 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				int toIndex = atoi(argv[3 + mono]);
 				
 				if (verbose) {
-					printf("Displaying range of sprites...\n");
+					printf("Displaying range of tiles...\n");
 					printf("\tchrIndex:\t%d\n", chrIndex);
 					printf("\tfromIndex:\t%d\n", fromIndex);
 					printf("\ttoIndex:\t%d\n", toIndex);
@@ -1210,77 +1210,77 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				}
 				
 				for (i = fromIndex; i <= toIndex; i++) {
-					char *spriteData = NESGetSpriteDataFromChrBank(chrData, i);
+					char *tileData = NESGetTileDataFromChrBank(chrData, i);
 					
-					if (!spriteData) {
+					if (!tileData) {
 						free(chrData);
-						cleanUp("Can't get sprite data!", 1);
+						cleanUp("Can't get tile data!", 1);
 					}
 					
 					if (verbose) {
 						printf("CHR:\t%d\n", chrIndex);
-						printf("Sprite:\t%d\n", i);
+						printf("Tile:\t%d\n", i);
 					}
 					
-					printSpriteData(spriteData, NES_RAW_SPRITE_LENGTH, 1, mono);
+					printTileData(tileData, NES_RAW_TILE_LENGTH, 1, mono);
 					
 					printf("\n");
 					
-					free(spriteData);
+					free(tileData);
 				}
 				
 				free(chrData);
 			}
-		} else if (strcmp(argv[1 + mono], kOptAll) == 0) {		//specific chr, all sprites
-			#pragma mark -specific chr, all sprites
+		} else if (strcmp(argv[1 + mono], kOptAll) == 0) {		//specific chr, all tiles
+			#pragma mark -specific chr, all tiles
 			
 			if ((argc - mono) < 2) {
-				cleanUp("Displaying all sprites from a CHR bank requires at least two arguments.", 1);
+				cleanUp("Displaying all tiles from a CHR bank requires at least two arguments.", 1);
 			}
 			
 			int chrIndex = atoi(argv[0 + mono]);
 			
 			if (verbose) {
-				printf("Displaying ALL sprites from CHR bank %d...", chrIndex);
+				printf("Displaying ALL tiles from CHR bank %d...", chrIndex);
 			}
 			
 			int i = 0;
 			
 			char *chrData = NESGetChrBank(srcFile, chrIndex);
 			
-			for (i = 1; i <= NES_MAX_SPRITES_CHR; i++) {
-				char *spriteData = NESGetSpriteDataFromChrBank(chrData, i);
+			for (i = 1; i <= NES_MAX_TILES_CHR; i++) {
+				char *tileData = NESGetTileDataFromChrBank(chrData, i);
 				
-				if (!spriteData) {
+				if (!tileData) {
 					free(chrData);
-					cleanUp("Can't get sprite data!", 1);
+					cleanUp("Can't get tile data!", 1);
 				}
 				
 				//printf("CHR:\t%d\n", chrIndex);
 				if (verbose) {
-					printf("Sprite:\t%d\n", i);
+					printf("Tile:\t%d\n", i);
 				}
 				
-				printSpriteData(spriteData, NES_RAW_SPRITE_LENGTH, 1, mono);
+				printTileData(tileData, NES_RAW_TILE_LENGTH, 1, mono);
 				
 				printf("\n");
 				
-				free(spriteData);
+				free(tileData);
 			}
 			
 			free(chrData);
 		} else {
-			#pragma mark -specific chr, specific sprite
+			#pragma mark -specific chr, specific tile
 			
 			if ((argc - mono) < 2) {
-				cleanUp("Displaying a sprite requires at least two arguments.", 1);
+				cleanUp("Displaying a tile requires at least two arguments.", 1);
 			}
 			
 			int chrIndex = atoi(argv[0 + mono]);
-			int spriteIndex = atoi(argv[1 + mono]);
+			int tileIndex = atoi(argv[1 + mono]);
 			
 			if (verbose) {
-				printf("Displaying sprite...\n");
+				printf("Displaying tile...\n");
 			}
 			
 			char *chrData = NESGetChrBank(srcFile, chrIndex);
@@ -1289,23 +1289,23 @@ void doCommand(char *cmd, int argc, char *argv[]) {
 				cleanUp("Can't get CHR bank!!!", 1);
 			}
 			
-			char *spriteData = NESGetSpriteDataFromChrBank(chrData, spriteIndex);
+			char *tileData = NESGetTileDataFromChrBank(chrData, tileIndex);
 			
-			if (!spriteData) {
+			if (!tileData) {
 				free(chrData);
-				cleanUp("Can't get spriteData!", 1);
+				cleanUp("Can't get tileData!", 1);
 			}
 			
 			if (verbose) {
 				printf("CHR:\t%d\n", chrIndex);
-				printf("Sprite:\t%d\n", spriteIndex);
+				printf("Tile:\t%d\n", tileIndex);
 			}
 			
-			printSpriteData(spriteData, NES_RAW_SPRITE_LENGTH, 1, mono);
+			printTileData(tileData, NES_RAW_TILE_LENGTH, 1, mono);
 				
 			printf("\n");
 				
-			free(spriteData);
+			free(tileData);
 			free(chrData);
 		}
 		#pragma mark -
@@ -1458,20 +1458,20 @@ void ExtractChr(int startIndex, int endIndex, char *filepath, int isMulti) {
 
 #pragma mark -
 
-void ExtractSprites(int chrIndex, int startIndex, int endIndex, char *filepath) {
+void ExtractTiles(int chrIndex, int startIndex, int endIndex, char *filepath) {
 	int i = 0;
 	char destPath[512];
 	FILE *ofile;
 	
 	if (verbose) {
-		printf("Extracting sprite from CHR bank %d...\n", chrIndex);
+		printf("Extracting tile from CHR bank %d...\n", chrIndex);
 	}
 	
 	for (i = startIndex; i <= endIndex; i++) {
 		char filename[256];
 		strcpy(destPath, filepath);
 		
-		//if it's truly a range of sprites
+		//if it's truly a range of tiles
 		if (startIndex != endIndex) {
 			sprintf(filename, "%s.%d.%d.raw", srcFilename, chrIndex, i);
 			appendPathComponent(destPath, filename);
@@ -1485,9 +1485,9 @@ void ExtractSprites(int chrIndex, int startIndex, int endIndex, char *filepath) 
 			cleanUp("Cannot open file for writing!", 1);
 		}
 		
-		if (NESExtractSprite(srcFile, ofile, chrIndex, i) == nesErr) {
+		if (NESExtractTile(srcFile, ofile, chrIndex, i) == nesErr) {
 			fclose(ofile);
-			cleanUp("Could not extract sprite.", 1);
+			cleanUp("Could not extract tile.", 1);
 		}
 		
 		fclose(ofile);
@@ -1499,19 +1499,19 @@ void ExtractSprites(int chrIndex, int startIndex, int endIndex, char *filepath) 
 	}
 }
 
-void ExtractCompoundSprite(NESSpriteMode mode, int columnCount, int chrIndex, int startIndex, int endIndex, char *filepath) {
+void ExtractCompoundTile(NESTileMode mode, int columnCount, int chrIndex, int startIndex, int endIndex, char *filepath) {
 	FILE *ofile;
 	
 	if (!(ofile = fopen(filepath, "w"))) {
 		cleanUp("Cannot open file!", 1);
 	}
 	
-	NESErrorCode err = NESExtractCompoundSprite(srcFile, ofile, chrIndex, startIndex, endIndex, columnCount, mode);
+	NESErrorCode err = NESExtractCompoundTile(srcFile, ofile, chrIndex, startIndex, endIndex, columnCount, mode);
 	
 	fclose(ofile);
 	
 	if (err == nesErr) {
-		cleanUp("Can't extract compound sprite!", 1);
+		cleanUp("Can't extract compound tile!", 1);
 	}
 }
 
@@ -1540,18 +1540,18 @@ void printUsage() {
 	printf("\t%s %s <directory>\n\t\tExtract all CHR banks from file to <directory>\n", kCmdExtractCHR, kOptAll);
 	printf("\t%s %s <fromIndex> <toIndex> <directory>\n\t\tExtract CHR <fromIndex> to CHR <toIndex> into <directory>\n", kCmdExtractCHR, kOptRange);
 	printf("\t%s <prgIndex> <filename>\n\t\tExtract CHR <prgIndex> to file <filename>\n", kCmdExtractCHR);
-	printf("\t%s %s <chrIndex> <directory>\n\t\tExtract all sprites from CHR <chrIndex> into <directory>\n", kCmdExtractSprites, kOptAll);
-	printf("\t%s %s %s <directory>\n\t\tExtract all sprites from all CHR banks into <directory>\n", kCmdExtractSprites, kOptAll, kOptAll);
-	printf("\t%s %s <chrIndex> <fromIndex> <toIndex> <directory>\n\t\tExtract sprites <fromIndex> to <toIndex> from CHR bank <chrIndex> into <directory>\n", kCmdExtractSprites, kOptRange);
-	printf("\t%s <chrIndex> <spriteIndex> <filename>\n\t\tExtract sprite <spriteIndex> from CHR bank <chrIndex> to <filename>\n", kCmdExtractSprites);
-	printf("\t%s %s %s <chrIndex> <fromIndex> <toIndex> <filename>\n\t\tExtract a range of sprites into a single file, 1 sprite wide.\n", kCmdExtractSprites, kOptRange, kOptStrip);
-	printf("\t%s %s %s ( %s | %s ) <columnCount> <chrIndex> <fromIndex> <toIndex> <filename>\n\t\tExtract a range of sprites into a single file that is <columnCount> columns wide. %s or %s determines the order that the sprites are drawn into the file.\n", kCmdExtractSprites, kOptRange, kOptCompound, kOptVMode, kOptHMode, kOptVMode, kOptHMode);
+	printf("\t%s %s <chrIndex> <directory>\n\t\tExtract all tiles from CHR <chrIndex> into <directory>\n", kCmdExtractTiles, kOptAll);
+	printf("\t%s %s %s <directory>\n\t\tExtract all tiles from all CHR banks into <directory>\n", kCmdExtractTiles, kOptAll, kOptAll);
+	printf("\t%s %s <chrIndex> <fromIndex> <toIndex> <directory>\n\t\tExtract tiles <fromIndex> to <toIndex> from CHR bank <chrIndex> into <directory>\n", kCmdExtractTiles, kOptRange);
+	printf("\t%s <chrIndex> <tileIndex> <filename>\n\t\tExtract tile <tileIndex> from CHR bank <chrIndex> to <filename>\n", kCmdExtractTiles);
+	printf("\t%s %s %s <chrIndex> <fromIndex> <toIndex> <filename>\n\t\tExtract a range of tiles into a single file, 1 tile wide.\n", kCmdExtractTiles, kOptRange, kOptStrip);
+	printf("\t%s %s %s ( %s | %s ) <columnCount> <chrIndex> <fromIndex> <toIndex> <filename>\n\t\tExtract a range of tiles into a single file that is <columnCount> columns wide. %s or %s determines the order that the tiles are drawn into the file.\n", kCmdExtractTiles, kOptRange, kOptCompound, kOptVMode, kOptHMode, kOptVMode, kOptHMode);
 	
 	printf("\n");
 	printf("INJECTION:\n");
 	printf("\t%s <filename> <prgIndex>\n\t\tInject <filename> into PRG bank <prgIndex>\n", kCmdInjectPRG);
 	printf("\t%s <filename> <chrIndex>\n\t\tInject <filename> into CHR bank <chrIndex>\n", kCmdInjectCHR);
-	printf("\t%s <filename> <chrIndex> <spriteIndex>\n\t\tInject sprite <filename> into CHR bank <chrIndex> at <spriteIndex>\n", kCmdInjectSprites);
+	printf("\t%s <filename> <chrIndex> <tileIndex>\n\t\tInject tile <filename> into CHR bank <chrIndex> at <tileIndex>\n", kCmdInjectTiles);
 	
 	printf("\n");
 	printf("TITLES:\n");
@@ -1561,13 +1561,13 @@ void printUsage() {
 	
 	printf("\n");
 	printf("PREVIEWING:\n");
-	printf("By specifying the %s option, nesromtool will output the indexed color values of the sprite as text (for monochrome terminals (non colour))\n", kOptMono);
-	printf("\t%s [%s] %s\n\t\tDisplay All sprites in the terminal window.\n", kCmdDrawSprites, kOptMono, kOptAll);
-	printf("\t%s [%s] <chrIndex> %s\n\t\tDisplay all sprites from CHR bank <chrIndex>\n", kCmdDrawSprites, kOptMono, kOptAll);
-	printf("\t%s [%s] <chrIndex> <spriteIndex>\n\t\tDisplay sprite <spriteIndex> from CHR bank <chrIndex>\n", kCmdDrawSprites, kOptMono);
-	printf("\t%s [%s] %s <chrIndex> <fromIndex> <toIndex>\n\t\tDisplay sprites <fromIndex> to <toIndex> from CHR bank <chrIndex>\n", kCmdDrawSprites, kOptMono, kOptRange);
-	printf("\t%s [%s] %s %s ( %s | %s ) <columnCount> <chrIndex> <fromIndex> <toIndex>\n\t\tDisplay a compound sprite.\n", kCmdDrawSprites, kOptMono, kOptRange, kOptCompound, kOptHMode, kOptVMode);
-	printf("\t%s [%s] %s %s <chrIndex> <fromIndex> <toIndex>\n\t\tDisplay a sprite strip.\n", kCmdDrawSprites, kOptMono, kOptRange, kOptStrip);
+	printf("By specifying the %s option, nesromtool will output the indexed color values of the tile as text (for monochrome terminals (non colour))\n", kOptMono);
+	printf("\t%s [%s] %s\n\t\tDisplay All tiles in the terminal window.\n", kCmdDrawTiles, kOptMono, kOptAll);
+	printf("\t%s [%s] <chrIndex> %s\n\t\tDisplay all tiles from CHR bank <chrIndex>\n", kCmdDrawTiles, kOptMono, kOptAll);
+	printf("\t%s [%s] <chrIndex> <tileIndex>\n\t\tDisplay tile <tileIndex> from CHR bank <chrIndex>\n", kCmdDrawTiles, kOptMono);
+	printf("\t%s [%s] %s <chrIndex> <fromIndex> <toIndex>\n\t\tDisplay tiles <fromIndex> to <toIndex> from CHR bank <chrIndex>\n", kCmdDrawTiles, kOptMono, kOptRange);
+	printf("\t%s [%s] %s %s ( %s | %s ) <columnCount> <chrIndex> <fromIndex> <toIndex>\n\t\tDisplay a compound tile.\n", kCmdDrawTiles, kOptMono, kOptRange, kOptCompound, kOptHMode, kOptVMode);
+	printf("\t%s [%s] %s %s <chrIndex> <fromIndex> <toIndex>\n\t\tDisplay a tile strip.\n", kCmdDrawTiles, kOptMono, kOptRange, kOptStrip);
 }
 
 void cleanUp(char *msg, int errCode) {
@@ -1594,15 +1594,15 @@ void argumentError(const char *arg) {
 	exit(1);
 }
 
-void printSpriteData(char *spriteData, int dataSize, int columns, int mono) {
+void printTileData(char *tileData, int dataSize, int columns, int mono) {
 	//mono specifies that the terminal is monochrome, so print characters
 	//to differentiate between the colors; 1 = print color numbers
 	
 	int i = 0;
 
 	for (i = 0; i < dataSize; i++) {
-		//printf("%d (%d) ", spriteData[i], i);
-		switch (spriteData[i]) {
+		//printf("%d (%d) ", tileData[i], i);
+		switch (tileData[i]) {
 			case 0:
 				printf("\033[40m");
 				break;
@@ -1619,13 +1619,13 @@ void printSpriteData(char *spriteData, int dataSize, int columns, int mono) {
 				printf("\033[40m");
 		}
 		if (mono)
-			printf("%d ", spriteData[i]);
+			printf("%d ", tileData[i]);
 		else
 			printf("  ");
 		
 		printf("\033[m");
 		
-		if ((i + 1) % (columns * NES_SPRITE_WIDTH) == 0) {
+		if ((i + 1) % (columns * NES_TILE_WIDTH) == 0) {
 			printf("\n");
 		}
 	}	
@@ -1633,15 +1633,15 @@ void printSpriteData(char *spriteData, int dataSize, int columns, int mono) {
 	//printf("\n");
 }
 
-void spriteToHtml(char *spriteData) {
+void tileToHtml(char *tileData) {
 	int i = 0;
 	
-	//printf("<html><head><title>sprite!!!</title></head><body><center>");
+	//printf("<html><head><title>tile!!!</title></head><body><center>");
 	printf("<td><table width=32 height=32 cellspacing=0 cellpadding=0><tr>");
 	
 	for (i = 0; i < 64; i++) {
-		//printf("%d (%d) ", spriteData[i], i);
-		switch (spriteData[i]) {
+		//printf("%d (%d) ", tileData[i], i);
+		switch (tileData[i]) {
 			case 0:
 				printf("<td bgcolor=black>&nbsp;</td>");
 				break;

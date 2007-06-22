@@ -1,5 +1,5 @@
 /*
- *  NESSprite.c
+ *  NESTile.c
  *  NESRomTool
  *
  *  Created by spike on Sat Jun 07 2003.
@@ -7,18 +7,18 @@
  *
  */
 
-#include "NESSprite.h"
+#include "NESTile.h"
 
-NESSprite *NESNewSprite(void) {
-	NESSprite *s = (NESSprite*)malloc(sizeof(NESSprite));
+NESTile *NESNewTile(void) {
+	NESTile *s = (NESTile*)malloc(sizeof(NESTile));
 	
 	if (!s) return NULL;
 	
-	s->width = NES_SPRITE_WIDTH;
-	s->height = NES_SPRITE_HEIGHT;
+	s->width = NES_TILE_WIDTH;
+	s->height = NES_TILE_HEIGHT;
 
-	s->spriteData = (char*)malloc(NES_RAW_SPRITE_LENGTH);
-	if (!s->spriteData) {
+	s->tileData = (char*)malloc(NES_RAW_TILE_LENGTH);
+	if (!s->tileData) {
 		free(s);
 		return NULL;
 	}
@@ -26,42 +26,42 @@ NESSprite *NESNewSprite(void) {
 	return s;
 }
 
-NESSprite *NESNewSpriteFromFile(FILE *ifile) {
+NESTile *NESNewTileFromFile(FILE *ifile) {
 	if (!ifile) return NULL;
 	
 	rewind(ifile);
 	
-	char *data = (char *)malloc(NES_RAW_SPRITE_LENGTH);
+	char *data = (char *)malloc(NES_RAW_TILE_LENGTH);
 	
-	if (fread(data, 1, NES_RAW_SPRITE_LENGTH, ifile) != NES_RAW_SPRITE_LENGTH) {
+	if (fread(data, 1, NES_RAW_TILE_LENGTH, ifile) != NES_RAW_TILE_LENGTH) {
 		return NULL;
 	}
 	
-	return NESNewSpriteFromData(data);
+	return NESNewTileFromData(data);
 }
 
-NESSprite *NESNewSpriteFromData(char *spriteData) {
-	if (!spriteData) return NULL;
+NESTile *NESNewTileFromData(char *tileData) {
+	if (!tileData) return NULL;
 	
-	NESSprite *s = NESNewSprite();
-	s->spriteData = spriteData;
+	NESTile *s = NESNewTile();
+	s->tileData = tileData;
 	return s;
 }
 
-bool NESSpriteIsValid(NESSprite *sprite) {
-	if (sprite && sprite->spriteData)
+bool NESTileIsValid(NESTile *tile) {
+	if (tile && tile->tileData)
 		return true;
 	
 	return false;
 }
 
-void NESFreeSprite(NESSprite *sprite) {
-	if (!sprite) return;
-	if (!sprite->spriteData) {
-		free(sprite);
+void NESFreeTile(NESTile *tile) {
+	if (!tile) return;
+	if (!tile->tileData) {
+		free(tile);
 		return;
 	}
 	
-	free(sprite->spriteData);
-	free(sprite);
+	free(tile->tileData);
+	free(tile);
 }

@@ -533,7 +533,7 @@ s,@install_sh@,|#_!!_#|/Users/spike/svn/nesromtool/trunk/config/install-sh,g
 s,@STRIP@,|#_!!_#|,g
 s,@INSTALL_STRIP_PROGRAM@,|#_!!_#|${SHELL} $(install_sh) -c -s,g
 s,@mkdir_p@,|#_!!_#|$(install_sh) -d,g
-s,@AWK@,|#_!!_#|gawk,g
+s,@AWK@,|#_!!_#|awk,g
 s,@SET_MAKE@,|#_!!_#|,g
 s,@am__leading_dot@,|#_!!_#|.,g
 s,@AMTAR@,|#_!!_#|${SHELL} /Users/spike/svn/nesromtool/trunk/config/missing --run tar,g

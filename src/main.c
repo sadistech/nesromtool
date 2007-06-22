@@ -21,92 +21,92 @@
 //******************
 
 // help
-#define OPT_HELP 				"-?"
+#define OPT_HELP 			"-?"
 #define OPT_HELP_ALT 		"--help"
 
 // verbose
 #define OPT_VERBOSE 		"-v"
-#define OPT_VERBOSE_ALT	"--verbose"
+#define OPT_VERBOSE_ALT		"--verbose"
 bool verbose = 0;
 
 // version info
 #define OPT_VERSION			"--version"
-#define OPT_VERSION_ALT "" /* no alternate for version */
+#define OPT_VERSION_ALT		"" /* no alternate for version */
 
-// set color palette (for drawing sprites to the terminal)
-#define OPT_COLOR				"-c"
+// set color palette (for drawing tiles to the terminal)
+#define OPT_COLOR			"-c"
 #define OPT_COLOR_ALT		"--color"
-char color_palette[4] = "0136"; //default color palette (uses ANSI terminal color codes)
+char color_palette[4] =		"0136"; //default color palette (uses ANSI terminal color codes)
 
 // program commands
 //*******************
 
 //info
-#define CMD_INFO				"info"
+#define CMD_INFO			"info"
 
 //title
-#define CMD_TITLE							"title"
-#define CMD_TITLE_SET					"-set"			/* set title */
-#define CMD_TITLE_REMOVE			"-remove"		/* remove title */
-#define CMD_TITLE_PRINT				"-print"		/* print title (default) */
+#define CMD_TITLE			"title"
+#define CMD_TITLE_SET		"-set"		/* set title */
+#define CMD_TITLE_REMOVE	"-remove"	/* remove title */
+#define CMD_TITLE_PRINT		"-print"	/* print title (default) */
 
 //extract
-#define CMD_EXTRACT								"extract"
-#define CMD_EXTRACT_SPRITE				"-sprite"		/* extract sprite(s) */
-
-#define CMD_EXTRACT_PRG						"-prg"			/* extract PRG bank */
-#define CMD_EXTRACT_CHR						"-chr"			/* extract CHR bank */
+#define CMD_EXTRACT			"extract"
+#define CMD_EXTRACT_TILE	"-tile"		/* extract tile(s) */
+                             
+#define CMD_EXTRACT_PRG		"-prg"		/* extract PRG bank */
+#define CMD_EXTRACT_CHR		"-chr"		/* extract CHR bank */
 	
 
 //program options (global ones)
 //*******************
 
 /* specify filename */
-#define OPT_FILENAME					"-f"
-#define OPT_FILENAME_ALT			"--file"
+#define OPT_FILENAME			"-f"
+#define OPT_FILENAME_ALT		"--file"
 
 /* extract banks as a single file */
-#define OPT_SINGLE_FILE				"-s"
+#define OPT_SINGLE_FILE			"-s"
 #define OPT_SINGLE_FILE_ALT		"--single-file"
 
 /* extract all banks (use in place of index or range) */
-#define OPT_ALL								"-a"
-#define OPT_ALL_ALT						"--all"
+#define OPT_ALL					"-a"
+#define OPT_ALL_ALT				"--all"
 
-/* use horizontal ordering for sprite extraction */
-#define OPT_H_MODE						"-h"
-#define OPT_H_MODE_ALT				"--horizontal"
+/* use horizontal ordering for tile extraction */
+#define OPT_H_MODE				"-h"
+#define OPT_H_MODE_ALT			"--horizontal"
 
-/* use vertical ordering for sprite extraction */
-#define OPT_V_MODE						"-v"
-#define OPT_V_MODE_ALT				"--vertical"
+/* use vertical ordering for tile extraction */
+#define OPT_V_MODE				"-v"
+#define OPT_V_MODE_ALT			"--vertical"
 
 /* specify filetype for extraction */
-#define OPT_FILETYPE					"-t"
-#define OPT_FILETYPE_ALT			"--type"
+#define OPT_FILETYPE			"-t"
+#define OPT_FILETYPE_ALT		"--type"
 
-/* extract sprite from PRG bank */
-#define OPT_PRG_BANK					"-prg"
-#define OPT_PRG_BANK_ALT			""
+/* extract tile from PRG bank */
+#define OPT_PRG_BANK			"-prg"
+#define OPT_PRG_BANK_ALT		""
 
-/* extract sprite from CHR bank (default) */
-#define OPT_CHR_BANK					"-chr"
-#define OPT_CHR_BANK_ALT			""
+/* extract tile from CHR bank (default) */
+#define OPT_CHR_BANK			"-chr"
+#define OPT_CHR_BANK_ALT		""
 
 /* types for graphic formats */
-#define RAW_TYPE					"raw"			/* bitmap with 0, 1, 2, 3 for colors... easily imported into photoshop and brought back in */
-#define RAW_TYPE_EXT			"raw"			/* file extension */
+#define RAW_TYPE				"raw"		/* bitmap with 0, 1, 2, 3 for colors... easily imported into photoshop and brought back in */
+#define RAW_TYPE_EXT			"raw"		/* file extension */
 
-#define GIF_TYPE					"gif"			/* GIF */
+#define GIF_TYPE				"gif"		/* GIF */
 #define GIF_TYPE_EXT			"gif"
 
-#define PNG_TYPE					"png"			/* Portable Network Graphics */
+#define PNG_TYPE				"png"		/* Portable Network Graphics */
 #define PNG_TYPE_EXT			"png"
 
 #define NATIVE_TYPE				"native"	/* same format as they are stored in ROM */ 
-#define NATIVE_TYPE_EXT		"sprite"
+#define NATIVE_TYPE_EXT			"tile"
 
-#define HTML_TYPE					"html"		/* create html output */
+#define HTML_TYPE				"html"		/* create html output */
 #define HTML_TYPE_EXT			"html"
 
 //prototypes
@@ -203,16 +203,16 @@ void print_usage(bool extended) {
 	**	program usage
 	*/
 	
-		printf("\n");
-		printf("%s-%s (http://nesromtool.sourceforge.net)\n", PACKAGE, VERSION);
-		printf("Written by spike grobstein <spike@sadistech.com>\n\n");
-		printf("USAGE: %s [options] <command> [command options] <file> [<file> ...]\n\n", program_name);
-		
-		if (extended) {
-			printf("INSERT EXTENDED HELP HERE...\n\n");
-		} else {
-			printf("  Run '%s -?' for additional usage help\n\n", program_name);
-		}
+	printf("\n");
+	printf("%s-%s (http://nesromtool.sourceforge.net)\n", PACKAGE, VERSION);
+	printf("Written by spike grobstein <spike@sadistech.com>\n\n");
+	printf("USAGE: %s [options] <command> [command options] <file> [<file> ...]\n\n", program_name);
+
+	if (extended) {
+		printf("INSERT EXTENDED HELP HERE...\n\n");
+	} else {
+		printf("  Run '%s -?' for additional usage help\n\n", program_name);
+	}
 }
 
 #pragma mark -
@@ -252,10 +252,10 @@ void parse_cmd_info(char **argv) {
 		hr_filesize(human_filesize, (double)filesize);
 		
 		//print info about the file
-		printf("Filename:    %s\n", lastPathComponent(current_arg));
-		printf("Filesize:    %ld bytes (%s)\n", filesize, human_filesize);
+		printf("Filename:           %s\n", lastPathComponent(current_arg));
+		printf("Filesize:           %ld bytes (%s)\n", filesize, human_filesize);
 		
-		printf("Verify:      ");
+		printf("Verify:             ");
 		if (NESVerifyROM(ifile)) {
 			printf("OK\n");
 		} else {
@@ -266,14 +266,46 @@ void parse_cmd_info(char **argv) {
 		}
 		
 		//print bank info
-		printf("PRG Banks:   %d\n", NESGetPrgBankCount(ifile));
-		printf("CHR Banks:   %d\n", NESGetChrBankCount(ifile));
+		printf("PRG Banks:          %d\n", NESGetPrgBankCount(ifile));
+		printf("CHR Banks:          %d\n", NESGetChrBankCount(ifile));
+		
+		char rom_control_bytes[2];
+		
+		if (!NESGetRomControlBytes(rom_control_bytes, ifile)) {
+			printf("%s: Error reading ROM control bytes\n", current_arg);
+			continue;
+		}
+		
+		//get the mirror info
+		char mirror_type[] = "Horizontal";
+		if (rom_control_bytes[0] && NES_ROM_CONTROL_MIRROR_TYPE_MASK) {
+			strcpy(mirror_type, "Vertical");
+		}
+		
+		//get the presense of battery-backed RAM
+		bool battery = (rom_control_bytes[0] && NES_ROM_CONTROL_BATT_RAM_MASK);
+		
+		//get the presense of a trainer
+		bool trainer = (rom_control_bytes[0] && NES_ROM_CONTROL_TRAINER_MASK);
+		
+		//get the 4-screen mask info
+		bool four_screen = (rom_control_bytes[0] && NES_ROM_CONTROL_4_SCREEN_MASK);
+		
+		//get the mapper info (gotta read the HI and the LO separately, and shift them together)
+		char mapper = (rom_control_bytes[0] && NES_ROM_CONTROL_MAPPER_HIGH_MASK);
+		mapper <<= 4;
+		mapper += (rom_control_bytes[1] && NES_ROM_CONTROL_MAPPER_LOW_MASK);
+		
+		printf("Mirror Mode:        %s\n", four_screen ? "4-Screen" : mirror_type);
+		printf("Battery-backed RAM: %s\n", battery ? "YES" : "NO");
+		printf("Trainer Present:    %s\n", trainer ? "YES" : "NO");
+		printf("Mapper:             %02X\n", mapper);
 		
 		//print title info
 		//outputs '[n/a]' if no title is found...
 		char *title = (char*)malloc(NES_TITLE_BLOCK_LENGTH);
 		NESGetTitle(title, ifile, 1);
-		printf("Title:       %s\n", (title[0] != 0) ? title : "[n/a]");
+		printf("Title:              %s\n", (title[0] != 0) ? title : "[n/a]");
 		
 		printf("\n");
 		
@@ -384,7 +416,7 @@ void parse_cmd_extract(char **argv) {
 	/*
 	**	extraction stuff
 	**	takes one required argument:
-	**	-sprite (for sprite extraction)
+	**	-tile (for tile extraction)
 	**	-chr (for chr extraction)
 	**	-prg (for prg extraction, duh)
 	*/
@@ -399,16 +431,16 @@ void parse_cmd_extract(char **argv) {
 		exit(EXIT_FAILURE);
 	}
 	
-	#pragma mark **Extract Sprite
-	if (strcmp(extract_command, CMD_EXTRACT_SPRITE) == 0) {
-		//extract sprite
-		//ussage: -sprite [-prg | -chr] <bank index> <range> [-h | -v] [-f <filename] [-t <type>]
+	#pragma mark **Extract Tile
+	if (strcmp(extract_command, CMD_EXTRACT_TILE) == 0) {
+		//extract tile
+		//ussage: -tile [-prg | -chr] <bank index> <range> [-h | -v] [-f <filename] [-t <type>]
 		
 		//where we store our arguments...
 		char *current_arg = GET_NEXT_ARG;
 		char *target_bank_type = OPT_CHR_BANK; //default
 		int bank_index = 0;
-		Range *sprite_range = (Range*)malloc(sizeof(Range));
+		Range *tile_range = (Range*)malloc(sizeof(Range));
 		char *mode = OPT_H_MODE; //default
 		char *type = RAW_TYPE; //default
 		char filename[255] = ""; //default
@@ -440,19 +472,19 @@ void parse_cmd_extract(char **argv) {
 		
 		bank_index = atoi(current_arg);
 		
-		//read the sprite_range
+		//read the tile_range
 		current_arg = GET_NEXT_ARG;
 		
-		CHECK_ARG_ERROR("Expected sprite range.");
+		CHECK_ARG_ERROR("Expected tile range.");
 		
 		//if it's a range, set the range...
-		//otherwise, it's 1 sprite. so start and end of range are the same!
+		//otherwise, it's 1 tile. so start and end of range are the same!
 		//TODO: add support for a '-a' option!
 		if (check_is_range(current_arg)) {
-			str_to_range(sprite_range, current_arg);
+			str_to_range(tile_range, current_arg);
 		} else {
-			sprite_range->start = atoi(current_arg);
-			sprite_range->end = sprite_range->start;
+			tile_range->start = atoi(current_arg);
+			tile_range->end = tile_range->start;
 		}
 		
 		//now for options (which are optional... duh);
@@ -541,37 +573,37 @@ void parse_cmd_extract(char **argv) {
 				exit(EXIT_FAILURE);
 			}
 			
-			//pull the sprite data out...
-			u16 sprite_data_length = NES_ROM_SPRITE_LENGTH * range_count(sprite_range);
-			char *sprite_data = (char*)malloc(sprite_data_length);
+			//pull the tile data out...
+			u16 tile_data_length = NES_ROM_TILE_LENGTH * range_count(tile_range);
+			char *tile_data = (char*)malloc(tile_data_length);
 			
-			printf("loading sprite data from data...\n");
+			printf("loading tile data from data...\n");
 			
 			//error detection
-			if ( !NESGetSpriteDataFromData(sprite_data, bank_data, sprite_range, 0) ) {
+			if ( !NESGetTileDataFromData(tile_data, bank_data, tile_range, 0) ) {
 				//if this happens, it's BAD... we're reading something from internal memory
 				//and if the memory failed to populate, we should have caught this much earlier
-				printf("FATAL ERROR: An error occurred while reading sprite data.\n\n");
+				printf("FATAL ERROR: An error occurred while reading tile data.\n\n");
 				exit(EXIT_FAILURE);
 			}
 			
-			//holder for sprite converted data:
-			char *sprite_converted = NULL;
-			u16 sprite_converted_length = 0;
+			//holder for tile converted data:
+			char *tile_converted = NULL;
+			u16 tile_converted_length = 0;
 			
-			//now, we convert the sprite data, if needed, and write it out to a file...
+			//now, we convert the tile data, if needed, and write it out to a file...
 			if (strcmp(type, RAW_TYPE) == 0) {
 				//extract as raw
 				
 				printf("extracting raw\n");
 				
-				sprite_converted_length = NES_RAW_SPRITE_LENGTH * range_count(sprite_range);
-				sprite_converted = (char*)malloc(sprite_converted_length);
+				tile_converted_length = NES_RAW_TILE_LENGTH * range_count(tile_range);
+				tile_converted = (char*)malloc(tile_converted_length);
 				
 				
-				//convert the sprite_data into composite data
-				if (!NESConvertSpriteDataToComposite(sprite_converted, sprite_data, sprite_data_length)) {
-					printf("An error occurred while converting sprite data to composite data in RAW_TYPE\n\n");
+				//convert the tile_data into composite data
+				if (!NESConvertTileDataToComposite(tile_converted, tile_data, tile_data_length)) {
+					printf("An error occurred while converting tile data to composite data in RAW_TYPE\n\n");
 					exit(EXIT_FAILURE);
 				}
 				
@@ -596,12 +628,12 @@ void parse_cmd_extract(char **argv) {
 				printf("GIF extraction is not yet implemented!\n\n");
 				exit(EXIT_FAILURE);
 			} else if (strcmp(type, NATIVE_TYPE) == 0) {
-				//extract as native sprite data
+				//extract as native tile data
 				
-				//convert the sprite
-				sprite_converted_length = sprite_data_length;
-				sprite_converted = (char*)malloc(sprite_converted_length);
-				memcpy(sprite_converted, sprite_data, sprite_data_length);
+				//convert the tile
+				tile_converted_length = tile_data_length;
+				tile_converted = (char*)malloc(tile_converted_length);
+				memcpy(tile_converted, tile_data, tile_data_length);
 				
 				//if the filename isn't specified, use the same name as our ROM, but put the file extension at the end
 				if (strcmp(filename, "") == 0) {
@@ -613,9 +645,9 @@ void parse_cmd_extract(char **argv) {
 			} else if (strcmp(type, HTML_TYPE) == 0) {
 				//extract as HTML
 				
-				//convert the sprite data into composite data
-				if (!NESConvertSpriteDataToComposite(sprite_converted, sprite_data, sprite_data_length)) {
-					printf("An error occurred while converting sprite data to composite data in RAW_TYPE\n\n");
+				//convert the tile data into composite data
+				if (!NESConvertTileDataToComposite(tile_converted, tile_data, tile_data_length)) {
+					printf("An error occurred while converting tile data to composite data in RAW_TYPE\n\n");
 					exit(EXIT_FAILURE);
 				}
 				
@@ -630,14 +662,14 @@ void parse_cmd_extract(char **argv) {
 			}
 			
 			//write converted data to file... if it fails, show an error
-			printf("writing %d bytes to %s\n", sprite_converted_length, filename);
-			if (!write_data_to_file(sprite_converted, sprite_converted_length, filename)) {
-				printf("%s: Error writing sprite data to file!\n\n", filename);
+			printf("writing %d bytes to %s\n", tile_converted_length, filename);
+			if (!write_data_to_file(tile_converted, tile_converted_length, filename)) {
+				printf("%s: Error writing tile data to file!\n\n", filename);
 			}
 			
 			//clean up
-			free(sprite_converted);
-			free(sprite_range);
+			free(tile_converted);
+			free(tile_range);
 			free(bank_data);
 			fclose(ifile);
 		}
