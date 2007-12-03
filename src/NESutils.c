@@ -815,8 +815,6 @@ bool NESConvertTileDataToComposite(char *buf, char *tileData, int size) {
 	
 	int tileCount = size / NES_ROM_TILE_LENGTH;
 	
-	printf("tilecount: %d\n", tileCount);
-	
 	unsigned char channel_a[NES_ROM_TILE_CHANNEL_LENGTH], channel_b[NES_ROM_TILE_CHANNEL_LENGTH];
 	int i = 0;
 	int j = 0;
@@ -828,16 +826,14 @@ bool NESConvertTileDataToComposite(char *buf, char *tileData, int size) {
 		
 		//initialize channel_a and channel_b
 		for (i = 0; i < NES_ROM_TILE_CHANNEL_LENGTH; i++) {
-			channel_a[i] = tileData[NES_ROM_TILE_LENGTH * (curTile - 1) + i];
-			channel_b[i] = tileData[NES_ROM_TILE_LENGTH * (curTile - 1) + i + NES_ROM_TILE_CHANNEL_LENGTH];
-			printf("%02x/%02x\n", (unsigned char)channel_a[i], (unsigned char)channel_b[i]);
+			channel_a[i] = tileData[NES_ROM_TILE_LENGTH * (curTile) + i];
+			channel_b[i] = tileData[NES_ROM_TILE_LENGTH * (curTile) + i + NES_ROM_TILE_CHANNEL_LENGTH];
 		}
 		
 		//create composite data
 		for (i = 0; i < NES_ROM_TILE_CHANNEL_LENGTH; i++) {
 			for (j = 7; j >= 0; j--) {
 				int pixel_offset = (i * 8) + (8 - j); //where in the composite we are
-				printf("(%02d) %02x ", pixel_offset, NESCombineBits(channel_a[i], channel_b[i], j));
 				composite[pixel_offset + curTile * NES_RAW_TILE_LENGTH] = NESCombineBits(channel_a[i], channel_b[i], j);
 			}
 		}

@@ -442,7 +442,7 @@ void parse_cmd_extract(char **argv) {
 		int bank_index = 0;
 		Range *tile_range = (Range*)malloc(sizeof(Range));
 		char *mode = OPT_H_MODE; //default
-		char *type = RAW_TYPE; //default
+		char type[10] = RAW_TYPE; //default
 		char filename[255] = ""; //default
 		
 		//check to make sure that we actually grabbed an argument
@@ -511,7 +511,9 @@ void parse_cmd_extract(char **argv) {
 				
 				//filetype:
 				if (CHECK_ARG(OPT_FILETYPE)) {
-					strcpy(type, GET_NEXT_ARG);
+					current_arg = GET_NEXT_ARG;
+					CHECK_ARG_ERROR("Expected filetype!");
+					strcpy(type, current_arg);
 					continue;
 				}
 				
@@ -519,8 +521,10 @@ void parse_cmd_extract(char **argv) {
 				exit(EXIT_FAILURE);
 			}
 		}
-				
-		current_arg = PEEK_ARG;
+			
+		if (IS_OPT(current_arg)) {
+			current_arg = PEEK_ARG;
+		}					
 		CHECK_ARG_ERROR("No filenames specified.");
 		
 		//ok, now we're finally onto looping over input files!
@@ -549,12 +553,6 @@ void parse_cmd_extract(char **argv) {
 					continue;
 				}
 				
-				int i = 0;
-				for (i = 0; i < NES_CHR_BANK_LENGTH; i++) {
-					printf("%02x ", (unsigned char)bank_data[i]);
-					if ((i + 1) % 16 == 0) printf("\n");
-				}
-				
 			} else if (target_bank_type == OPT_PRG_BANK) {
 				//read PRG bank
 				bank_data = (char*)malloc(NES_PRG_BANK_LENGTH);
@@ -576,9 +574,7 @@ void parse_cmd_extract(char **argv) {
 			//pull the tile data out...
 			u16 tile_data_length = NES_ROM_TILE_LENGTH * range_count(tile_range);
 			char *tile_data = (char*)malloc(tile_data_length);
-			
-			printf("loading tile data from data...\n");
-			
+						
 			//error detection
 			if ( !NESGetTileDataFromData(tile_data, bank_data, tile_range, 0) ) {
 				//if this happens, it's BAD... we're reading something from internal memory
@@ -594,9 +590,7 @@ void parse_cmd_extract(char **argv) {
 			//now, we convert the tile data, if needed, and write it out to a file...
 			if (strcmp(type, RAW_TYPE) == 0) {
 				//extract as raw
-				
-				printf("extracting raw\n");
-				
+								
 				tile_converted_length = NES_RAW_TILE_LENGTH * range_count(tile_range);
 				tile_converted = (char*)malloc(tile_converted_length);
 				
@@ -606,15 +600,12 @@ void parse_cmd_extract(char **argv) {
 					printf("An error occurred while converting tile data to composite data in RAW_TYPE\n\n");
 					exit(EXIT_FAILURE);
 				}
-				
-				printf("done.\n");
-				
+								
 				//if the filename isn't specified, use the same name as our ROM, but put the file extension at the end
 				if (strcmp(filename, "") == 0) {
-					strcpy(filename, current_arg);
+					strcpy(filename, (char*)lastPathComponent(current_arg));
 					strcat(filename, ".");
 					strcat(filename, RAW_TYPE_EXT);
-					printf("filename: %s\n\n", filename);
 				}
 				
 			} else if (strcmp(type, PNG_TYPE) == 0) {
@@ -637,7 +628,7 @@ void parse_cmd_extract(char **argv) {
 				
 				//if the filename isn't specified, use the same name as our ROM, but put the file extension at the end
 				if (strcmp(filename, "") == 0) {
-					strcpy(filename, current_arg);
+					strcpy(filename, (char*)(lastPathComponent(current_arg)));
 					strcat(filename, ".");
 					strcat(filename, NATIVE_TYPE_EXT);
 				}
@@ -652,17 +643,55 @@ void parse_cmd_extract(char **argv) {
 				}
 				
 				//now, let's generate some HTML...
+				//table has 15 overhead + 2 \n (17)
+				//each cell takes up 31 bytes + \n (32)
+				//each row has 9 bytes overhead + \n (10)
+				
+				int number_rows = (tile_data_length / 8);
+				tile_converted_length = number_rows * 10 + tile_data_length * 32 + 17 + tile_data_length;
+				tile_converted = (char*)malloc(tile_converted_length);
+				
+				printf("tile_converted_length: %d\n", tile_converted_length);
+				
+				strcat(tile_converted, "<table>\n");
+				
+				int i = 0;
+				for (i = 0; i < tile_data_length; i++) {
+					if ((i + 1) % 8 == 0) {
+						strcat(tile_converted, "<tr>\n");
+					}
+					
+					switch (tile_data[i]) {
+						case 0:
+							strcat(tile_converted, "<td bgcolor=\"black\">&nbsp;</td>\n");
+							break;
+						case 1:
+							strcat(tile_converted, "<td bgcolor=\"red\">&nbsp;</td>\n");
+							break;
+						case 2:
+							strcat(tile_converted, "<td bgcolor=\"green\">&nbsp;</td>\n");
+							break;
+						case 3:
+							strcat(tile_converted, "<td bgcolor=\"blue\">&nbsp;</td>\n");
+							break;
+					}
+					
+					if (i % 9 == 0) {
+						strcat(tile_converted, "</tr>\n");
+					}
+				}
+				
+				strcat(tile_converted, "</table>\n");
 				
 				//if the filename isn't specified, use the same name as our ROM, but put the file extension at the end
 				if (strcmp(filename, "") == 0) {
-					strcpy(filename, current_arg);
+					strcpy(filename, (char*)lastPathComponent(current_arg));
 					strcat(filename, ".");
 					strcat(filename, HTML_TYPE_EXT);
 				}
 			}
 			
 			//write converted data to file... if it fails, show an error
-			printf("writing %d bytes to %s\n", tile_converted_length, filename);
 			if (!write_data_to_file(tile_converted, tile_converted_length, filename)) {
 				printf("%s: Error writing tile data to file!\n\n", filename);
 			}
