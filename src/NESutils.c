@@ -132,14 +132,19 @@ bool NESGetTileDataFromData(char *buf, char *data, Range *r, unsigned int adjust
 	**
 	**	buf needs to be allocated (NES_ROM_TILE_LENGTH * (r->end - r->start))
 	*/
+
+	v_printf(2, "NESGetTileDataFromData(buf=%x, data=%x, Range=%d->%d, adjust=%d)", &buf, &data, r->start, r->end, adjust);
 	
 	//error detection
 	if (!buf || !data || !r || r->start < 0) return false;
 	
+	int shift_amount = ((r->start - 1) * NES_ROM_TILE_LENGTH) + adjust;
+	v_printf(2, "Shifting %d bytes", shift_amount);
+	
 	//move the pointer to the appropriate tile...
-	*data += ((r->start - 1) * NES_ROM_TILE_LENGTH) + adjust;
+	char *data_pointer = data + shift_amount;
 		
-	memcpy(buf, data, range_count(r) * NES_ROM_TILE_LENGTH);
+	memcpy(buf, data_pointer, range_count(r) * NES_ROM_TILE_LENGTH);
 	
 	return true;
 }
