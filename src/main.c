@@ -463,7 +463,7 @@ void parse_cmd_extract(char **argv) {
 			}
 		}
 
-		v_printf(2, "Got bank type %s", target_bank_type);
+		v_printf(2, "Extract from banktype: %s", target_bank_type);
 		
 		//read the bank index:
 		// (for now, this has to be a single number. no ranges allowed. no all allowed, either)
@@ -475,6 +475,7 @@ void parse_cmd_extract(char **argv) {
 		CHECK_ARG_ERROR("Expected bank index.");
 		
 		bank_index = atoi(current_arg);
+		v_printf(2, "Bank index: %d", bank_index);
 		
 		//read the tile_range from commandline
 		current_arg = GET_NEXT_ARG;
@@ -489,12 +490,16 @@ void parse_cmd_extract(char **argv) {
 			tile_range->start = atoi(current_arg);
 			tile_range->end = tile_range->start;
 		}
+		v_printf(2, "Tile range: %d -> %d", tile_range->start, tile_range->end);
 		
 		//now for options (which are optional... duh);
 		current_arg = PEEK_ARG;
 		CHECK_ARG_ERROR("No filenames specified.");
+		
+		// if current_arg is an option, then keep looping until we hit one that isn't.
 		if ( current_arg != NULL && IS_OPT(current_arg) ) {
-			for (current_arg = GET_NEXT_ARG; IS_OPT(current_arg) ; current_arg = GET_NEXT_ARG) {
+			for (current_arg = PEEK_ARG; IS_OPT(current_arg) ; current_arg = PEEK_ARG) {
+				current_arg = GET_NEXT_ARG;
 				//horizontal mode
 				if (CHECK_ARG(OPT_H_MODE)) {
 					mode = OPT_H_MODE;
@@ -525,15 +530,13 @@ void parse_cmd_extract(char **argv) {
 				exit(EXIT_FAILURE);
 			}
 		}
-			
-		v_printf(2, "checking next arg...");
-		if (IS_OPT(current_arg)) {
-			current_arg = PEEK_ARG;
-		}					
-		v_printf(2, "checked next arg...");
-		CHECK_ARG_ERROR("No filenames specified.");
 		
-		v_printf(2, "PEEK_ARG: %s: %x", current_arg, &current_arg);
+		v_printf(2, "Mode: %s", mode);
+		v_printf(2, "Output file: %s", filename);
+		v_printf(2, "Type: %s", type);
+		
+		v_printf(2, "PEEK: %s %s %s %s", PEEK_ARG, PEEK_ARG, PEEK_ARG, PEEK_ARG);
+		//v_printf(2, "PEEK_ARG: %s (%s): %x", current_arg, PEEK_ARG, &current_arg);
 		
 		//ok, now we're finally onto looping over input files!
 		for (current_arg = GET_NEXT_ARG; (current_arg != NULL) ; current_arg = GET_NEXT_ARG) {
