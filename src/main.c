@@ -153,7 +153,7 @@ int main (int argc, char *argv[]) {
 		//turn on verbosity
 		if ( CHECK_ARG( OPT_VERBOSE ) ) {
 			increment_verbosity();
-			v_printf(1, "Verbosity level: %d\n", get_verbosity());
+			v_printf(1, "Verbosity level: %d", get_verbosity());
 			continue;
 		}
 		
@@ -421,13 +421,13 @@ void parse_cmd_extract(char **argv) {
 	*/
 	
 	char *current_arg = NULL;
-	char *extract_command = GET_NEXT_ARG;
+	char *extract_command = GET_NEXT_ARG; //should be oe of -tile, -chr, -prg
 	
-	v_printf(2, "Starting cmd_extract");
+	v_printf(2, "Starting cmd_extract (%s)", extract_command);
 	
 	//if the first modifier doesnt' start with a '-', then something's wrong
 	// so bail.
-	if (extract_command[0] != '-') {
+	if (!IS_OPT(extract_command)) {
 		printf("No modifier specified for extract command.\nSee usage (%s --help)\n\n", program_name);
 		exit(EXIT_FAILURE);
 	}
