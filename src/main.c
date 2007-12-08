@@ -168,15 +168,15 @@ int main (int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 	
-	//if there is nothing else to do, print error and exit
-	if (*argv == NULL) {
-		printf("no command!\n");
-		exit(EXIT_FAILURE);
-	}
-	
 	//read command
 	char *command = current_arg;
 	//printf("Command: %s\n", current_arg); //debug line...
+	
+	//if there is nothing else to do, print error and exit
+	if (command == NULL) {
+		printf("no command!\n");
+		exit(EXIT_FAILURE);
+	}
 		
 	if (strcmp(command, CMD_INFO) == 0) {
 		//info command
