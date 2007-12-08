@@ -16,6 +16,7 @@
 #include "commandline.h" /* for commandline parsing */
 #include "NESutils.h"
 #include "functions.h"
+#include "verbosity.h"
 
 // program options
 //******************
@@ -27,7 +28,6 @@
 // verbose
 #define OPT_VERBOSE 		"-v"
 #define OPT_VERBOSE_ALT		"--verbose"
-bool verbose = 0;
 
 // version info
 #define OPT_VERSION			"--version"
@@ -153,8 +153,8 @@ int main (int argc, char *argv[]) {
 		
 		//turn on verbosity
 		if ( CHECK_ARG( OPT_VERBOSE ) ) {
-			printf("Verbosity: ON\n");
-			verbose = 1;
+			verbose++;
+			printf("Verbosity level: %d\n", verbose);
 			continue;
 		}
 		
@@ -424,6 +424,8 @@ void parse_cmd_extract(char **argv) {
 	char *current_arg = NULL;
 	char *extract_command = GET_NEXT_ARG;
 	
+	v_printf(2, "Starting cmd_extract");
+	
 	//if the first modifier doesnt' start with a '-', then something's wrong
 	// so bail.
 	if (extract_command[0] != '-') {
@@ -435,6 +437,8 @@ void parse_cmd_extract(char **argv) {
 	if (strcmp(extract_command, CMD_EXTRACT_TILE) == 0) {
 		//extract tile
 		//ussage: -tile [-prg | -chr] <bank index> <range> [-h | -v] [-f <filename] [-t <type>]
+		
+		v_printf(1, "Extract tile.");
 		
 		//where we store our arguments...
 		char *current_arg = GET_NEXT_ARG;
@@ -459,6 +463,8 @@ void parse_cmd_extract(char **argv) {
 				exit(EXIT_FAILURE);
 			}
 		}
+
+		v_printf(2, "Got bank type %s", target_bank_type);
 		
 		//read the bank index
 		//for now, this has to be a single number. no ranges allowed. no all allowed, either
@@ -489,6 +495,7 @@ void parse_cmd_extract(char **argv) {
 		
 		//now for options (which are optional... duh);
 		current_arg = PEEK_ARG;
+		CHECK_ARG_ERROR("No filenames specified.");
 		if ( current_arg != NULL && IS_OPT(current_arg) ) {
 			for (current_arg = GET_NEXT_ARG; IS_OPT(current_arg) ; current_arg = GET_NEXT_ARG) {
 				//horizontal mode
@@ -522,10 +529,14 @@ void parse_cmd_extract(char **argv) {
 			}
 		}
 			
+		v_printf(2, "checking next arg...");
 		if (IS_OPT(current_arg)) {
 			current_arg = PEEK_ARG;
 		}					
+		v_printf(2, "checked next arg...");
 		CHECK_ARG_ERROR("No filenames specified.");
+		
+		v_printf(2, "PEEK_ARG: %s: %x", current_arg, &current_arg);
 		
 		//ok, now we're finally onto looping over input files!
 		for (current_arg = GET_NEXT_ARG; (current_arg != NULL) ; current_arg = GET_NEXT_ARG) {

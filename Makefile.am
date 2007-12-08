@@ -9,7 +9,9 @@ nesromtool_SOURCES = \
 	src/pathfunc.h \
 	src/pathfunc.c \
 	src/functions.h \
-	src/functions.c
+	src/functions.c \
+	src/verbosity.h \
+	src/verbosity.c
 	
 
 EXTRA_DIST = reconf
