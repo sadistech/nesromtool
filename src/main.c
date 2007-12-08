@@ -436,7 +436,7 @@ void parse_cmd_extract(char **argv) {
 	#pragma mark **Extract Tile
 	if (strcmp(extract_command, CMD_EXTRACT_TILE) == 0) {
 		//extract tile
-		//ussage: -tile [-prg | -chr] <bank index> <range> [-h | -v] [-f <filename] [-t <type>]
+		//usage: -tile [-prg | -chr] <bank index> <range> [-h | -v] [-f <filename] [-t <type>]
 		
 		v_printf(1, "Extract tile.");
 		

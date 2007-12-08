@@ -794,6 +794,12 @@ char NESCombineBits(int a, int b, int n) {
 char *NESBreakBits(char c) {
 	//there's gotta be a faster (or at least better) way of doing this!
 	
+	/*
+	Working on a better way:
+	char **values = ["00", "10", "01", "11"];
+	return values[c];
+	*/
+	
 	switch (c) {
 		case 0:
 			return "00";
