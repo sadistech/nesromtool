@@ -5,9 +5,11 @@
 extern "C" {
 #endif
 
-static int verbose = 0;
+static int verbosity = 0;
 
 void v_printf(int verbose_level, char *fmt, ...);
+int get_verbosity();
+int increment_verbosity();
 
 #ifdef __cplusplus
 };

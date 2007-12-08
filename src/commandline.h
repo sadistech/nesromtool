@@ -60,6 +60,6 @@
 
 //some helpful macros for error detection
 #define IS_OPT(arg) arg[0] == '-' ? true : false /* return true if arg is an option (starts with a '-') */
-#define CHECK_ARG_ERROR(error_string) if (!current_arg || current_arg == 0) { printf("Argument error: %s\n\n", error_string); exit(EXIT_FAILURE); }
+#define CHECK_ARG_ERROR(error_string) if (!current_arg || current_arg == 0) { fprintf(stderr, "Argument error: %s\n\n", error_string); exit(EXIT_FAILURE); }
 
 #endif /* _COMMANDLINE_H_ */

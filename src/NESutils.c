@@ -817,7 +817,7 @@ char *NESBreakBits(char c) {
 #pragma mark-
 
 bool NESConvertTileDataToComposite(char *buf, char *tileData, int size) {
-	if (!tileData || !size) return false;
+	if (!tileData || !size || buf == NULL) return false;
 	if (size % NES_ROM_TILE_LENGTH) return false;
 	
 	int tileCount = size / NES_ROM_TILE_LENGTH;
@@ -830,6 +830,7 @@ bool NESConvertTileDataToComposite(char *buf, char *tileData, int size) {
 	char *composite = (char *)malloc(NES_RAW_TILE_LENGTH * tileCount);
 	
 	for (curTile = 0; curTile < tileCount; curTile++) {
+		v_printf(2, "curTile: %d/%d", curTile + 1, tileCount);
 		
 		//initialize channel_a and channel_b
 		for (i = 0; i < NES_ROM_TILE_CHANNEL_LENGTH; i++) {

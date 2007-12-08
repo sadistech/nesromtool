@@ -124,8 +124,7 @@ void parse_cmd_extract(char **argv);
 //********************
 char *program_name = NULL;
 
-int main (int argc, char *argv[]) {
-	
+int main (int argc, char *argv[]) {	
 	program_name = GET_NEXT_ARG;
 	
 	//check to see how many arguments we have... if no args, then print usage and bail
@@ -153,8 +152,8 @@ int main (int argc, char *argv[]) {
 		
 		//turn on verbosity
 		if ( CHECK_ARG( OPT_VERBOSE ) ) {
-			verbose++;
-			printf("Verbosity level: %d\n", verbose);
+			increment_verbosity();
+			v_printf(1, "Verbosity level: %d\n", get_verbosity());
 			continue;
 		}
 		
@@ -436,7 +435,7 @@ void parse_cmd_extract(char **argv) {
 	#pragma mark **Extract Tile
 	if (strcmp(extract_command, CMD_EXTRACT_TILE) == 0) {
 		//extract tile
-		//usage: -tile [-prg | -chr] <bank index> <range> [-h | -v] [-f <filename] [-t <type>]
+		//usage: -tile [-prg | -chr] <bank index> <range> [-h | -v] [-f <output_filename>] [-t <type>]
 		
 		v_printf(1, "Extract tile.");
 		
@@ -466,21 +465,19 @@ void parse_cmd_extract(char **argv) {
 
 		v_printf(2, "Got bank type %s", target_bank_type);
 		
-		//read the bank index
-		//for now, this has to be a single number. no ranges allowed. no all allowed, either
+		//read the bank index:
+		// (for now, this has to be a single number. no ranges allowed. no all allowed, either)
 		
 		//if the previous argument wasn't an option, use it as the next, otherwise read a new one
 		if ( IS_OPT(current_arg) ) {
 			current_arg = GET_NEXT_ARG;
 		}
-		
 		CHECK_ARG_ERROR("Expected bank index.");
 		
 		bank_index = atoi(current_arg);
 		
-		//read the tile_range
+		//read the tile_range from commandline
 		current_arg = GET_NEXT_ARG;
-		
 		CHECK_ARG_ERROR("Expected tile range.");
 		
 		//if it's a range, set the range...
@@ -542,6 +539,8 @@ void parse_cmd_extract(char **argv) {
 		for (current_arg = GET_NEXT_ARG; (current_arg != NULL) ; current_arg = GET_NEXT_ARG) {
 			FILE *ifile = NULL;
 			
+			v_printf(1, "Opening file: %s", current_arg);
+			
 			//if an error occurs while opening the file,
 			//print an error and move on to next iteration
 			if (!(ifile = fopen(current_arg, "r"))) {
@@ -582,10 +581,14 @@ void parse_cmd_extract(char **argv) {
 				exit(EXIT_FAILURE);
 			}
 			
+			v_printf(2, "Pulling tile data...");
+			
 			//pull the tile data out...
 			u16 tile_data_length = NES_ROM_TILE_LENGTH * range_count(tile_range);
 			char *tile_data = (char*)malloc(tile_data_length);
 						
+			v_printf(2, "Pulled tile data.");
+			
 			//error detection
 			if ( !NESGetTileDataFromData(tile_data, bank_data, tile_range, 0) ) {
 				//if this happens, it's BAD... we're reading something from internal memory
@@ -597,6 +600,8 @@ void parse_cmd_extract(char **argv) {
 			//holder for tile converted data:
 			char *tile_converted = NULL;
 			u16 tile_converted_length = 0;
+			
+			v_printf(2, "Tile data ready to write...");
 			
 			//now, we convert the tile data, if needed, and write it out to a file...
 			if (strcmp(type, RAW_TYPE) == 0) {
@@ -647,11 +652,7 @@ void parse_cmd_extract(char **argv) {
 			} else if (strcmp(type, HTML_TYPE) == 0) {
 				//extract as HTML
 				
-				//convert the tile data into composite data
-				if (!NESConvertTileDataToComposite(tile_converted, tile_data, tile_data_length)) {
-					printf("An error occurred while converting tile data to composite data in RAW_TYPE\n\n");
-					exit(EXIT_FAILURE);
-				}
+				v_printf(1, "Extracting tile as HTML");
 				
 				//now, let's generate some HTML...
 				//table has 15 overhead + 2 \n (17)
@@ -661,6 +662,14 @@ void parse_cmd_extract(char **argv) {
 				int number_rows = (tile_data_length / 8);
 				tile_converted_length = number_rows * 10 + tile_data_length * 32 + 17 + tile_data_length;
 				tile_converted = (char*)malloc(tile_converted_length);
+				
+				//convert the tile data into composite data
+				if (!NESConvertTileDataToComposite(tile_converted, tile_data, tile_data_length)) {
+					printf("An error occurred while converting tile data to composite data in RAW_TYPE\n\n");
+					exit(EXIT_FAILURE);
+				}
+				
+				v_printf(2, "Converted data to composite...");
 				
 				printf("tile_converted_length: %d\n", tile_converted_length);
 				
@@ -672,7 +681,9 @@ void parse_cmd_extract(char **argv) {
 						strcat(tile_converted, "<tr>\n");
 					}
 					
-					switch (tile_data[i]) {
+					printf("Tile: %d\n", tile_data[i]);
+					
+					switch ((int)tile_data[i]) {
 						case 0:
 							strcat(tile_converted, "<td bgcolor=\"black\">&nbsp;</td>\n");
 							break;
@@ -684,6 +695,10 @@ void parse_cmd_extract(char **argv) {
 							break;
 						case 3:
 							strcat(tile_converted, "<td bgcolor=\"blue\">&nbsp;</td>\n");
+							break;
+						default:
+							strcat(tile_converted, "ERROR");
+							printf("ERROR: %d\n", tile_data[i]);
 							break;
 					}
 					
@@ -700,7 +715,11 @@ void parse_cmd_extract(char **argv) {
 					strcat(filename, ".");
 					strcat(filename, HTML_TYPE_EXT);
 				}
+				
+				printf(tile_converted);
 			}
+			
+			v_printf(2, "Writing data to file...");
 			
 			//write converted data to file... if it fails, show an error
 			if (!write_data_to_file(tile_converted, tile_converted_length, filename)) {
@@ -712,8 +731,11 @@ void parse_cmd_extract(char **argv) {
 			free(tile_range);
 			free(bank_data);
 			fclose(ifile);
-		}
+			
+			v_printf(2, "Done.");
+		} // end for() loop over files
 		
+		v_printf(2, "Done.");
 				
 	#pragma mark **Extract PRG/CHR
 	} else if (strcmp(extract_command, CMD_EXTRACT_PRG) == 0 || strcmp(extract_command, CMD_EXTRACT_CHR) == 0) {

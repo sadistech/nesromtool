@@ -8,10 +8,10 @@
 void v_printf(int verbose_level, char *fmt, ...) {
 	/*
 	**	prints a string like printf() to stderr
-	**	only if verbose_level == verbose
+	**	only if verbose_level == verbosity
 	*/
-	
-	if (verbose_level <= verbose) {
+			
+	if (verbose_level <= verbosity) {
 		va_list arg;
 		va_start(arg, fmt);
 		
@@ -25,4 +25,16 @@ void v_printf(int verbose_level, char *fmt, ...) {
 		free(new_fmt);
 		va_end(arg);
 	}
+}
+
+int increment_verbosity() {
+	/*
+	**	increments verbosity
+	*/
+	
+	verbosity++;
+}
+
+int get_verbosity() {
+	return verbosity;
 }
