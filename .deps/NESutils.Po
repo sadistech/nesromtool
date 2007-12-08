@@ -14,7 +14,7 @@ NESutils.o NESutils.o: src/NESutils.c /usr/include/stdio.h \
   /usr/include/machine/types.h /usr/include/i386/types.h \
   /usr/include/unistd.h /usr/include/sys/unistd.h \
   /usr/include/sys/select.h /usr/include/sys/_select.h src/NESutils.h \
-  src/types.h
+  src/types.h src/verbosity.h
 
 /usr/include/stdio.h:
 
@@ -81,3 +81,5 @@ NESutils.o NESutils.o: src/NESutils.c /usr/include/stdio.h \
 src/NESutils.h:
 
 src/types.h:
+
+src/verbosity.h:

@@ -13,6 +13,7 @@
 #include <unistd.h>
 
 #include "NESutils.h"
+#include "verbosity.h"
 
 
 char NESGetPrgBankCount(FILE *ifile) {
@@ -763,14 +764,14 @@ bool NESVerifyROM(FILE *ifile) {
 	
 	fseek(ifile, NES_HEADER_PREFIX_OFFSET, SEEK_SET);
 	
-	unsigned char *four_byte_header = (unsigned char*)malloc(sizeof(NES_HEADER_PREFIX));
+	unsigned char *four_byte_header = (unsigned char*)malloc(NES_HEADER_PREFIX_SIZE);
 	
-	if (fread(four_byte_header, 1, sizeof(NES_HEADER_PREFIX) - 1, ifile) != (sizeof(NES_HEADER_PREFIX) - 1)) {
+	if (fread(four_byte_header, 1, NES_HEADER_PREFIX_SIZE, ifile) != (NES_HEADER_PREFIX_SIZE)) {
 		printf("ERROR READING\n");
 		free(four_byte_header);
 		return false;
 	}
-	if (strcmp(NES_HEADER_PREFIX, (const char*)four_byte_header) != 0) { //make sure the 
+	if (strncmp(NES_HEADER_PREFIX, (const char*)four_byte_header, NES_HEADER_PREFIX_SIZE) != 0) { //make sure the 
 		free(four_byte_header);
 		return false;
 	}

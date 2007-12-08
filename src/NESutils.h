@@ -20,6 +20,7 @@ extern "C" {
 //header stuff
 #define NES_HEADER_PREFIX 					"NES\x01a"	/* Magic Number for NES ROMs */
 #define NES_HEADER_PREFIX_OFFSET 			0			/* The offset in the file (in bytes) where the magic number is stored */
+#define NES_HEADER_PREFIX_SIZE				4			/* the size of the header prefix (4) */
 #define NES_HEADER_SIZE 					16			/* the size of the entire file header */
 
 // PRG (program code) and CHR (graphic data) bank information
