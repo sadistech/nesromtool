@@ -535,7 +535,6 @@ void parse_cmd_extract(char **argv) {
 		v_printf(2, "Output file: %s", filename);
 		v_printf(2, "Type: %s", type);
 		
-		v_printf(2, "PEEK: %s %s %s %s", PEEK_ARG, PEEK_ARG, PEEK_ARG, PEEK_ARG);
 		//v_printf(2, "PEEK_ARG: %s (%s): %x", current_arg, PEEK_ARG, &current_arg);
 		
 		//ok, now we're finally onto looping over input files!
@@ -579,7 +578,7 @@ void parse_cmd_extract(char **argv) {
 				}
 				
 			} else {
-				//this shouldn't happen
+				//this shouldn't happen, since we should have caught this earlier.
 				printf("FATAL ERROR: Unknown bank type!\n\n");
 				exit(EXIT_FAILURE);
 			}
