@@ -86,12 +86,12 @@ char color_palette[4] =		"0136"; //default color palette (uses ANSI terminal col
 #define OPT_FILETYPE_ALT		"--type"
 
 /* extract tile from PRG bank */
-#define OPT_PRG_BANK			"-prg"
-#define OPT_PRG_BANK_ALT		""
+#define OPT_PRG_BANK			"-p"
+#define OPT_PRG_BANK_ALT		"--prg"
 
 /* extract tile from CHR bank (default) */
-#define OPT_CHR_BANK			"-chr"
-#define OPT_CHR_BANK_ALT		""
+#define OPT_CHR_BANK			"-c"
+#define OPT_CHR_BANK_ALT		"--chr"
 
 /* types for graphic formats */
 #define RAW_TYPE				"raw"		/* bitmap with 0, 1, 2, 3 for colors... easily imported into photoshop and brought back in */
@@ -259,7 +259,7 @@ void parse_cmd_info(char **argv) {
 			printf("OK\n");
 		} else {
 			//the file does not appear to be an NES ROM... so stop printing info and move on to next iteration of loop
-			printf("ERROR\n");
+			printf("ERROR (does not appear to be a valid NES ROM)\n");
 			fclose(ifile);
 			continue;
 		}
