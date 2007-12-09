@@ -280,22 +280,22 @@ bool NESExtractTileRange(FILE *ifile, FILE *ofile, int chrIndex, int startIndex,
 	return true;
 }*/
 
-char *NESGetCompoundTileDataFromChrBank(char *chrData, NESTileMode mode, int columns, int startIndex, int endIndex) {
+char *NESGetCompoundTileDataFromChrBank(char *chrData, NESSpriteOrder order, int columns, int startIndex, int endIndex) {
 	return NULL;
 }
 
 
-bool NESExtractCompoundTile(FILE *ifile, FILE *ofile, int chrIndex, int fromIndex, int toIndex, int columns, NESTileMode mode) {
+bool NESExtractCompoundTile(FILE *ifile, FILE *ofile, int chrIndex, int fromIndex, int toIndex, int columns, NESSpriteOrder order) {
 	char *chrData = (char *)malloc(NES_CHR_BANK_LENGTH);
 	
 	NESGetChrBank(chrData, ofile, chrIndex);
 	
 	if (!chrData) return false;
 	
-	return NESExtractCompoundTileData(chrData, ofile, fromIndex, toIndex, columns, mode);
+	return NESExtractCompoundTileData(chrData, ofile, fromIndex, toIndex, columns, order);
 }
 
-bool NESExtractCompoundTileData(char *chrData, FILE *ofile, int fromIndex, int toIndex, int columns, NESTileMode mode) {
+bool NESExtractCompoundTileData(char *chrData, FILE *ofile, int fromIndex, int toIndex, int columns, NESSpriteOrder order) {
 	if (!chrData || !ofile) return false;
 	//if (chrIndex < 1 || chrIndex > NESGetChrBankCount(ifile)) return false;
 	if (fromIndex < 1 || fromIndex > NES_MAX_TILES_CHR) return false;
@@ -386,14 +386,14 @@ bool NESInjectTileData(FILE *ofile, char *tileData, int chrIndex, int tileIndex)
 }
 
 bool NESInjectTileStripFile(FILE *ofile, FILE *ifile, int chrIndex, int startIndex) {
-	return NESInjectCompoundTileFile(ofile, ifile, 1, nesHMode, chrIndex, startIndex);
+	return NESInjectCompoundTileFile(ofile, ifile, 1, nes_horizontal, chrIndex, startIndex);
 }
 
 bool NESInjectTileStrip(FILE *ofile, char *tileData, int size, int chrIndex, int startIndex) {
-	return NESInjectCompoundTile(ofile, tileData, size, 1, nesHMode, chrIndex, startIndex);
+	return NESInjectCompoundTile(ofile, tileData, size, 1, nes_horizontal, chrIndex, startIndex);
 }
 
-bool NESInjectCompoundTileFile(FILE *ofile, FILE *ifile, int columns, NESTileMode mode, int chrIndex, int startIndex) {
+bool NESInjectCompoundTileFile(FILE *ofile, FILE *ifile, int columns, NESSpriteOrder order, int chrIndex, int startIndex) {
 	if (!ofile || !ifile) return false;
 	if (columns < 1) return false;
 	if (chrIndex < 1 || chrIndex > NESGetChrBankCount(ofile)) return false;
@@ -410,12 +410,12 @@ bool NESInjectCompoundTileFile(FILE *ofile, FILE *ifile, int columns, NESTileMod
 		return false;
 	}
 	
-	bool err = NESInjectCompoundTile(ofile, tileData, filesize, columns, mode, chrIndex, startIndex);
+	bool err = NESInjectCompoundTile(ofile, tileData, filesize, columns, order, chrIndex, startIndex);
 	free(tileData);
 	return err;
 }
 
-bool NESInjectCompoundTile(FILE *ofile, char *tileData, int size, int columns, NESTileMode mode, int chrIndex, int startIndex) {
+bool NESInjectCompoundTile(FILE *ofile, char *tileData, int size, int columns, NESSpriteOrder order, int chrIndex, int startIndex) {
 	if (!ofile || !tileData) return false;
 	if (columns < 1) return false;
 	if (chrIndex < 1 || chrIndex > NESGetChrBankCount(ofile)) return false;
@@ -441,8 +441,8 @@ bool NESInjectCompoundTile(FILE *ofile, char *tileData, int size, int columns, N
 		for (tileRow = 0; tileRow < NES_TILE_HEIGHT; tileRow++) { 	//row of pixels
 			for (curCol = 0; curCol < columns; curCol++) { 					//column of tiles
 				
-				//depending on what the mode is, set the current tile.
-				if (mode == nesHMode) {
+				//depending on what the order is, set the current tile.
+				if (order == nes_horizontal) {
 					curTile = (curRow * columns) + curCol;
 				} else {
 					curTile = curRow + curCol * rows;
@@ -488,13 +488,13 @@ bool NESInjectCompoundTile(FILE *ofile, char *tileData, int size, int columns, N
 //*data:	the actual data that's being converted
 //size:		The size of the data
 //columns:	number of columns in final compoundTile
-//mode:		nesHMode || nesVMode, determines the mode that the tile is ceated.
+//order:	nes_horizontal || nes_vertical, determines the order that the tile is ceated.
 //
-//			nesHMode:		nesVMode:
+//			nes_horizontal:		nes_vertical:
 //			   AB			   AC
 //			   CD			   BD
 
-char *NESMakeCompoundTile(char *tileData, int size, int columns, NESTileMode mode) {
+char *NESMakeCompoundTile(char *tileData, int size, int columns, NESSpriteOrder order) {
 	if (!tileData) return NULL;
 	
 	int finalWidth = columns * NES_TILE_WIDTH;
@@ -518,8 +518,8 @@ char *NESMakeCompoundTile(char *tileData, int size, int columns, NESTileMode mod
 		for (tileRow = 0; tileRow < NES_TILE_HEIGHT; tileRow++) { 	//row of pixels
 			for (curCol = 0; curCol < columns; curCol++) { 					//column of tiles
 				
-				//depending on what the mode is, set the current tile.
-				if (mode == nesHMode) {
+				//depending on what the order is, set the current tile.
+				if (order == nes_horizontal) {
 					curTile = (curRow * columns) + curCol;
 				} else {
 					curTile = curRow + curCol * rows;

@@ -74,12 +74,12 @@ char color_palette[4] =		"0136"; //default color palette (uses ANSI terminal col
 #define OPT_ALL_ALT				"--all"
 
 /* use horizontal ordering for tile extraction */
-#define OPT_H_MODE				"-h"
-#define OPT_H_MODE_ALT			"--horizontal"
+#define OPT_H_ORDER				"-h"
+#define OPT_H_ORDER_ALT			"--horizontal"
 
 /* use vertical ordering for tile extraction */
-#define OPT_V_MODE				"-v"
-#define OPT_V_MODE_ALT			"--vertical"
+#define OPT_V_ORDER				"-v"
+#define OPT_V_ORDER_ALT			"--vertical"
 
 /* specify filetype for extraction */
 #define OPT_FILETYPE			"-t"
@@ -444,7 +444,7 @@ void parse_cmd_extract(char **argv) {
 		char *target_bank_type = OPT_CHR_BANK; //default
 		int bank_index = 0;
 		Range *tile_range = (Range*)malloc(sizeof(Range));
-		char *mode = OPT_H_MODE; //default
+		char order = nes_horizontal; //default
 		char type[10] = RAW_TYPE; //default
 		char filename[255] = ""; //default
 		
@@ -500,21 +500,24 @@ void parse_cmd_extract(char **argv) {
 		if ( current_arg != NULL && IS_OPT(current_arg) ) {
 			for (current_arg = PEEK_ARG; IS_OPT(current_arg) ; current_arg = PEEK_ARG) {
 				current_arg = GET_NEXT_ARG;
-				//horizontal mode
-				if (CHECK_ARG(OPT_H_MODE)) {
-					mode = OPT_H_MODE;
+				//horizontal order
+				if (CHECK_ARG(OPT_H_ORDER)) {
+					order = nes_horizontal;
+					v_printf(VERBOSE_DEBUG, "setting order: horizontal");
 					continue;
 				}
 				
-				//vertical mode
-				if (CHECK_ARG(OPT_V_MODE)) {
-					mode = OPT_V_MODE;
+				//vertical order
+				if (CHECK_ARG(OPT_V_ORDER)) {
+					order = nes_vertical;
+					v_printf(VERBOSE_DEBUG, "setting order: vertical");
 					continue;
 				}
 				
 				//filename
 				if (CHECK_ARG(OPT_FILENAME)) {
 					strcpy(filename, GET_NEXT_ARG);
+					v_printf(VERBOSE_DEBUG, "output filename: %s", filename);
 					continue;
 				}
 				
@@ -523,6 +526,7 @@ void parse_cmd_extract(char **argv) {
 					current_arg = GET_NEXT_ARG;
 					CHECK_ARG_ERROR("Expected filetype!");
 					strcpy(type, current_arg);
+					v_printf(VERBOSE_DEBUG, "Output filetype: %s", type);
 					continue;
 				}
 				
@@ -531,7 +535,7 @@ void parse_cmd_extract(char **argv) {
 			}
 		}
 		
-		v_printf(VERBOSE_DEBUG, "Mode: %s", mode);
+		v_printf(VERBOSE_DEBUG, "Order: %c", order);
 		v_printf(VERBOSE_DEBUG, "Output file: %s", filename);
 		v_printf(VERBOSE_DEBUG, "Type: %s", type);
 		

@@ -80,11 +80,13 @@ extern "C" {
 
 #define NES_TITLE_BLOCK_LENGTH 				128			/* the block size (including padding) of the title data that gets appended to the end of the file */
 
-// tile assembly modes
+// tile assembly order
+// horiz =>  	1 2			vertical =>		1 3
+//				3 4							2 4
 typedef enum {
-	nesHMode = 0, // horizontal
-	nesVMode = 1, // vertical
-} NESTileMode;
+	nes_horizontal = 'h', // horizontal
+	nes_vertical = 'v', // vertical
+} NESSpriteOrder;
 
 
 //header functions:
@@ -114,11 +116,11 @@ bool NESInjectTileData(FILE *ofile, char *tileData, int chrIndex, int tileIndex)
 bool NESInjectTileStripFile(FILE *ofile, FILE *ifile, int chrIndex, int startIndex);
 bool NESInjectTileStrip(FILE *ofile, char *tileData, int size, int chrIndex, int startIndex);
 
-bool NESInjectCompoundTileFile(FILE *ofile, FILE *ifile, int columns, NESTileMode mode, int chrIndex, int startIndex);
-bool NESInjectCompoundTile(FILE *ofile, char *tileData, int size, int columns, NESTileMode mode, int chrIndex, int startIndex);
+bool NESInjectCompoundTileFile(FILE *ofile, FILE *ifile, int columns, NESSpriteOrder order, int chrIndex, int startIndex);
+bool NESInjectCompoundTile(FILE *ofile, char *tileData, int size, int columns, NESSpriteOrder order, int chrIndex, int startIndex);
 
 //tile assembling stuff
-char *NESMakeCompoundTile(char *tileData, int size, int columns, NESTileMode mode);
+char *NESMakeCompoundTile(char *tileData, int size, int columns, NESSpriteOrder order);
 
 //title functions
 bool NESHasTitle(FILE *ifile);
