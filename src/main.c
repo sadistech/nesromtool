@@ -670,7 +670,7 @@ void parse_cmd_extract(char **argv) {
 				tile_composite = (char*)malloc(tile_composite_length);
 				
 				int number_rows = (tile_composite_length / 8);
-				tile_converted_length = (number_rows * 10) + ((tile_data_length + 1) * 32 * number_rows * 8) + 17;
+				tile_converted_length = (number_rows * 10) + ((tile_data_length + 1) * 32 * number_rows * 8) + 64;
 				tile_converted = (char*)malloc(tile_converted_length);
 				
 				v_printf(VERBOSE_DEBUG, "Number of Rows: %d", number_rows);
@@ -685,7 +685,7 @@ void parse_cmd_extract(char **argv) {
 				
 				printf("tile_converted_length: %d\n", tile_converted_length);
 				
-				strcat(tile_converted, "<table>\n");
+				strcat(tile_converted, "<table colspacing=0 cellspacing=0>\n");
 				
 				int i = 0;
 				for (i = 0; i < tile_composite_length; i++) {
