@@ -62,7 +62,7 @@ int NESWriteTileAsHTML(FILE *ofile, char *data, int data_size, NESSpriteOrder or
 	
 	v_printf(VERBOSE_DEBUG, "Converted data to composite...");
 	
-	fwrite("<table colspacing=0 cellspacing=0>\n", 15, 1, ofile);
+	fwrite("<table colspacing=0 cellspacing=0>\n", 35, 1, ofile);
 	
 	char *html_cell[4] = {
 		"<td bgcolor=\"black\">&nbsp;</td>\n",
