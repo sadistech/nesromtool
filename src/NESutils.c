@@ -841,13 +841,15 @@ bool NESConvertTileDataToComposite(char *buf, char *tileData, int size) {
 		for (i = 0; i < NES_ROM_TILE_CHANNEL_LENGTH; i++) {
 			channel_a[i] = tileData[NES_ROM_TILE_LENGTH * (curTile) + i];
 			channel_b[i] = tileData[NES_ROM_TILE_LENGTH * (curTile) + i + NES_ROM_TILE_CHANNEL_LENGTH];
+			v_printf(2, "Channels A/B: %d/%d", channel_a[i], channel_b[i]);
 		}
 		
 		//create composite data
 		for (i = 0; i < NES_ROM_TILE_CHANNEL_LENGTH; i++) {
 			for (j = 7; j >= 0; j--) {
 				int pixel_offset = (i * 8) + (8 - j); //where in the composite we are
-				composite[pixel_offset + curTile * NES_RAW_TILE_LENGTH] = NESCombineBits(channel_a[i], channel_b[i], j);
+				composite[(pixel_offset + curTile * NES_RAW_TILE_LENGTH) - 1] = NESCombineBits(channel_a[i], channel_b[i], j);
+				v_printf(2, "Composite (%d,%d:%d): %d", i, j, (pixel_offset + curTile * NES_RAW_TILE_LENGTH),composite[pixel_offset + curTile * NES_RAW_TILE_LENGTH]);
 			}
 		}
 	}
