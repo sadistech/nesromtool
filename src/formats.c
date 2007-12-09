@@ -53,6 +53,7 @@ int NESWriteTileAsHTML(FILE *ofile, char *data, int data_size, NESSpriteOrder or
 	
 	u16 tile_composite_length = NES_RAW_TILE_LENGTH * NESTileCountFromData(data_size);
 	char *tile_composite = (char*)malloc(tile_composite_length);
+	size_t data_written = 0;
 	
 	//convert the tile data into composite data
 	if (!NESConvertTileDataToComposite(tile_composite, data, data_size)) {
@@ -62,7 +63,7 @@ int NESWriteTileAsHTML(FILE *ofile, char *data, int data_size, NESSpriteOrder or
 	
 	v_printf(VERBOSE_DEBUG, "Converted data to composite...");
 	
-	fwrite("<table colspacing=0 cellspacing=0>\n", 35, 1, ofile);
+	data_written += fwrite("<table colspacing=0 cellspacing=0>\n", 1, 35, ofile);
 	
 	char *html_cell[4] = {
 		"<td bgcolor=\"black\">&nbsp;</td>\n",
@@ -73,15 +74,17 @@ int NESWriteTileAsHTML(FILE *ofile, char *data, int data_size, NESSpriteOrder or
 	int i = 0;
 	for (i = 0; i < tile_composite_length; i++) {
 		if (i % 8 == 0 || i == 0) {
-			fwrite("<tr>\n", 5, 1, ofile);
+			data_written += fwrite("<tr>\n", 1, 5, ofile);
 		}
 		
-		fwrite(html_cell[tile_composite[i]], strlen(html_cell[tile_composite[i]]), 1, ofile);
+		data_written += fwrite(html_cell[tile_composite[i]], 1, strlen(html_cell[tile_composite[i]]), ofile);
 		
 		if (i % 8 == 7) {
-			fwrite("</tr>\n", 6, 1, ofile);
+			data_written += fwrite("</tr>\n", 1, 6, ofile);
 		}
 	}
 	
-	fwrite("</table>\n", 9, 1, ofile);
+	data_written += fwrite("</table>\n", 1, 9, ofile);
+	
+	return data_written;
 }

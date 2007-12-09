@@ -631,10 +631,14 @@ void parse_cmd_extract(char **argv) {
 			
 			v_printf(VERBOSE_DEBUG, "Writing data to file...");
 			
+			size_t data_written = 0; //where we store how much data was written to the file
+			
 			//now, we convert the tile data, if needed, and write it out to a file...
 			if (strcmp(type, RAW_TYPE) == 0) {
 				//extract as raw
-				NESWriteTileAsRaw(ofile, tile_data, tile_data_length, order);
+				
+				data_written = NESWriteTileAsRaw(ofile, tile_data, tile_data_length, order);
+				
 			} else if (strcmp(type, PNG_TYPE) == 0) {
 				//extract as png
 				//not implemented
@@ -647,18 +651,25 @@ void parse_cmd_extract(char **argv) {
 				exit(EXIT_FAILURE);
 			} else if (strcmp(type, NATIVE_TYPE) == 0) {
 				//extract as native tile data
-				NESWriteTileAsNative(ofile, tile_data, tile_data_length);
 				
+				data_written = NESWriteTileAsNative(ofile, tile_data, tile_data_length);
 			} else if (strcmp(type, HTML_TYPE) == 0) {
 				//extract as HTML
 				
-				NESWriteTileAsHTML(ofile, tile_data, tile_data_length, order);
+				data_written = NESWriteTileAsHTML(ofile, tile_data, tile_data_length, order);
 			}
 						
 			//clean up
 			fclose(ofile);
 			
-			v_printf(VERBOSE_DEBUG, "Done.");
+			//make sure we wrote to the file like we hoped
+			// if nothing was written, then something went wrong... so let's report it and bail
+			if (data_written == 0) {
+				fprintf(stderr, "An error occurred while writing to %s.\n", filename);
+				exit(EXIT_FAILURE);
+			}
+			
+			v_printf(VERBOSE_NOTICE, "%d bytes written to %s.", data_written, filename);
 		} // end for() loop over files
 		
 		v_printf(VERBOSE_DEBUG, "Done extracting tile.");
