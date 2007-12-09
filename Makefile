@@ -50,7 +50,7 @@ binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_nesromtool_OBJECTS = main.$(OBJEXT) NESutils.$(OBJEXT) \
 	types.$(OBJEXT) pathfunc.$(OBJEXT) functions.$(OBJEXT) \
-	verbosity.$(OBJEXT)
+	formats.$(OBJEXT) verbosity.$(OBJEXT)
 nesromtool_OBJECTS = $(am_nesromtool_OBJECTS)
 nesromtool_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.
@@ -167,6 +167,8 @@ nesromtool_SOURCES = \
 	src/pathfunc.c \
 	src/functions.h \
 	src/functions.c \
+	src/formats.h \
+	src/formats.c \
 	src/verbosity.h \
 	src/verbosity.c
 
@@ -260,6 +262,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 include ./$(DEPDIR)/NESutils.Po
+include ./$(DEPDIR)/formats.Po
 include ./$(DEPDIR)/functions.Po
 include ./$(DEPDIR)/main.Po
 include ./$(DEPDIR)/pathfunc.Po
@@ -349,6 +352,20 @@ functions.obj: src/functions.c
 #	source='src/functions.c' object='functions.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o functions.obj `if test -f 'src/functions.c'; then $(CYGPATH_W) 'src/functions.c'; else $(CYGPATH_W) '$(srcdir)/src/functions.c'; fi`
+
+formats.o: src/formats.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT formats.o -MD -MP -MF $(DEPDIR)/formats.Tpo -c -o formats.o `test -f 'src/formats.c' || echo '$(srcdir)/'`src/formats.c
+	mv -f $(DEPDIR)/formats.Tpo $(DEPDIR)/formats.Po
+#	source='src/formats.c' object='formats.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o formats.o `test -f 'src/formats.c' || echo '$(srcdir)/'`src/formats.c
+
+formats.obj: src/formats.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT formats.obj -MD -MP -MF $(DEPDIR)/formats.Tpo -c -o formats.obj `if test -f 'src/formats.c'; then $(CYGPATH_W) 'src/formats.c'; else $(CYGPATH_W) '$(srcdir)/src/formats.c'; fi`
+	mv -f $(DEPDIR)/formats.Tpo $(DEPDIR)/formats.Po
+#	source='src/formats.c' object='formats.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o formats.obj `if test -f 'src/formats.c'; then $(CYGPATH_W) 'src/formats.c'; else $(CYGPATH_W) '$(srcdir)/src/formats.c'; fi`
 
 verbosity.o: src/verbosity.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT verbosity.o -MD -MP -MF $(DEPDIR)/verbosity.Tpo -c -o verbosity.o `test -f 'src/verbosity.c' || echo '$(srcdir)/'`src/verbosity.c

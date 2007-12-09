@@ -143,6 +143,7 @@ char NESCombineBits(int a, int b, int n);
 char *NESBreakBits(char c);
 
 bool NESConvertTileDataToComposite(char *buf, char *tileData, int size);
+int NESTileCountFromData(u16 size);
 
 int NESGetOffset(int x, int y, int width);
 

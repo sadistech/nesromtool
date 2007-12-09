@@ -10,6 +10,8 @@ nesromtool_SOURCES = \
 	src/pathfunc.c \
 	src/functions.h \
 	src/functions.c \
+	src/formats.h \
+	src/formats.c \
 	src/verbosity.h \
 	src/verbosity.c
 	

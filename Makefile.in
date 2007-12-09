@@ -50,7 +50,7 @@ binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_nesromtool_OBJECTS = main.$(OBJEXT) NESutils.$(OBJEXT) \
 	types.$(OBJEXT) pathfunc.$(OBJEXT) functions.$(OBJEXT) \
-	verbosity.$(OBJEXT)
+	formats.$(OBJEXT) verbosity.$(OBJEXT)
 nesromtool_OBJECTS = $(am_nesromtool_OBJECTS)
 nesromtool_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@
@@ -167,6 +167,8 @@ nesromtool_SOURCES = \
 	src/pathfunc.c \
 	src/functions.h \
 	src/functions.c \
+	src/formats.h \
+	src/formats.c \
 	src/verbosity.h \
 	src/verbosity.c
 
@@ -260,6 +262,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NESutils.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/formats.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/functions.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pathfunc.Po@am__quote@
@@ -349,6 +352,20 @@ functions.obj: src/functions.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/functions.c' object='functions.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o functions.obj `if test -f 'src/functions.c'; then $(CYGPATH_W) 'src/functions.c'; else $(CYGPATH_W) '$(srcdir)/src/functions.c'; fi`
+
+formats.o: src/formats.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT formats.o -MD -MP -MF $(DEPDIR)/formats.Tpo -c -o formats.o `test -f 'src/formats.c' || echo '$(srcdir)/'`src/formats.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/formats.Tpo $(DEPDIR)/formats.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/formats.c' object='formats.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o formats.o `test -f 'src/formats.c' || echo '$(srcdir)/'`src/formats.c
+
+formats.obj: src/formats.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT formats.obj -MD -MP -MF $(DEPDIR)/formats.Tpo -c -o formats.obj `if test -f 'src/formats.c'; then $(CYGPATH_W) 'src/formats.c'; else $(CYGPATH_W) '$(srcdir)/src/formats.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/formats.Tpo $(DEPDIR)/formats.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/formats.c' object='formats.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o formats.obj `if test -f 'src/formats.c'; then $(CYGPATH_W) 'src/formats.c'; else $(CYGPATH_W) '$(srcdir)/src/formats.c'; fi`
 
 verbosity.o: src/verbosity.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT verbosity.o -MD -MP -MF $(DEPDIR)/verbosity.Tpo -c -o verbosity.o `test -f 'src/verbosity.c' || echo '$(srcdir)/'`src/verbosity.c

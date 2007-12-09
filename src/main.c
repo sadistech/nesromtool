@@ -16,6 +16,7 @@
 #include "commandline.h" /* for commandline parsing */
 #include "NESutils.h"
 #include "functions.h"
+#include "formats.h"
 #include "verbosity.h"
 
 // program options
@@ -544,13 +545,14 @@ void parse_cmd_extract(char **argv) {
 		//ok, now we're finally onto looping over input files!
 		for (current_arg = GET_NEXT_ARG; (current_arg != NULL) ; current_arg = GET_NEXT_ARG) {
 			FILE *ifile = NULL;
+			char *input_filename = current_arg;
 			
-			v_printf(VERBOSE_NOTICE, "Opening file: %s", current_arg);
+			v_printf(VERBOSE_NOTICE, "Opening file: %s", input_filename);
 			
 			//if an error occurs while opening the file,
 			//print an error and move on to next iteration
-			if (!(ifile = fopen(current_arg, "r"))) {
-				perror(current_arg);
+			if (!(ifile = fopen(input_filename, "r"))) {
+				perror(input_filename);
 				continue;
 			}
 			
@@ -601,40 +603,38 @@ void parse_cmd_extract(char **argv) {
 			if ( !NESGetTileDataFromData(tile_data, bank_data, tile_range, 0) ) {
 				//if this happens, it's BAD... we're reading something from internal memory
 				//and if the memory failed to populate, we should have caught this much earlier
-				printf("FATAL ERROR: An error occurred while reading tile data from bank in memory.\n\n");
+				free(bank_data);
+				free(tile_data);
+				free(tile_range);
+				fprintf(stderr, "FATAL ERROR: An error occurred while reading tile data from bank in memory.\n\n");
 				exit(EXIT_FAILURE);
 			}
 			
-			u16 tile_composite_length = 0;
-			char *tile_composite = (char*)malloc(tile_composite_length);
-			
-			//holder for tile converted (to user-specified format) data:
-			char *tile_converted = NULL;
-			u16 tile_converted_length = 0;
+			free(bank_data);
 			
 			v_printf(VERBOSE_DEBUG, "Tile data ready to write...");
+			
+			//open the output file:
+			//if a filename was not specified, we need to specify one.
+			//for now, we'll just use the inputfilename.out (ie: SMB1.NES.out)
+			
+			if (strlen(filename) == 0) {
+				strcpy(filename, input_filename);
+				strcat(filename, ".out");
+			}
+			
+			FILE *ofile = NULL;
+			if (!(ofile = fopen(filename, "w"))) {
+				perror(filename);
+				exit(EXIT_FAILURE);
+			}
+			
+			v_printf(VERBOSE_DEBUG, "Writing data to file...");
 			
 			//now, we convert the tile data, if needed, and write it out to a file...
 			if (strcmp(type, RAW_TYPE) == 0) {
 				//extract as raw
-								
-				tile_converted_length = NES_RAW_TILE_LENGTH * range_count(tile_range);
-				tile_converted = (char*)malloc(tile_converted_length);
-				
-				
-				//convert the tile_data into composite data
-				if (!NESConvertTileDataToComposite(tile_converted, tile_data, tile_data_length)) {
-					printf("An error occurred while converting tile data to composite data in RAW_TYPE\n\n");
-					exit(EXIT_FAILURE);
-				}
-								
-				//if the filename isn't specified, use the same name as our ROM, but put the file extension at the end
-				if (strcmp(filename, "") == 0) {
-					strcpy(filename, (char*)lastPathComponent(current_arg));
-					strcat(filename, ".");
-					strcat(filename, RAW_TYPE_EXT);
-				}
-				
+				NESWriteTileAsRaw(ofile, tile_data, tile_data_length, order);
 			} else if (strcmp(type, PNG_TYPE) == 0) {
 				//extract as png
 				//not implemented
@@ -647,108 +647,18 @@ void parse_cmd_extract(char **argv) {
 				exit(EXIT_FAILURE);
 			} else if (strcmp(type, NATIVE_TYPE) == 0) {
 				//extract as native tile data
-				
-				//convert the tile
-				tile_converted_length = tile_data_length;
-				tile_converted = (char*)malloc(tile_converted_length);
-				memcpy(tile_converted, tile_data, tile_data_length);
-				
-				//if the filename isn't specified, use the same name as our ROM, but put the file extension at the end
-				if (strcmp(filename, "") == 0) {
-					strcpy(filename, (char*)(lastPathComponent(current_arg)));
-					strcat(filename, ".");
-					strcat(filename, NATIVE_TYPE_EXT);
-				}
+				NESWriteTileAsNative(ofile, tile_data, tile_data_length);
 				
 			} else if (strcmp(type, HTML_TYPE) == 0) {
 				//extract as HTML
 				
-				v_printf(VERBOSE_NOTICE, "Extracting tile as HTML");
-				
-				//now, let's generate some HTML...
-				//table has 15 overhead + 2 \n (17)
-				//each cell takes up 31 bytes + \n (32)
-				//each row has 9 bytes overhead + \n (10)
-				
-				tile_composite_length = NES_RAW_TILE_LENGTH * range_count(tile_range);
-				tile_composite = (char*)malloc(tile_composite_length);
-				
-				int number_rows = (tile_composite_length / 8);
-				tile_converted_length = (number_rows * 10) + ((tile_data_length + 1) * 32 * number_rows * 8) + 64;
-				tile_converted = (char*)malloc(tile_converted_length);
-				
-				v_printf(VERBOSE_DEBUG, "Number of Rows: %d", number_rows);
-				
-				//convert the tile data into composite data
-				if (!NESConvertTileDataToComposite(tile_composite, tile_data, tile_data_length)) {
-					printf("An error occurred while converting tile data to composite data in RAW_TYPE\n\n");
-					exit(EXIT_FAILURE);
-				}
-				
-				v_printf(VERBOSE_DEBUG, "Converted data to composite...");
-				
-				printf("tile_converted_length: %d\n", tile_converted_length);
-				
-				strcat(tile_converted, "<table colspacing=0 cellspacing=0>\n");
-				
-				int i = 0;
-				for (i = 0; i < tile_composite_length; i++) {
-					if (i % 8 == 0 || i == 0) {
-						strcat(tile_converted, "<tr>\n");
-					}
-					
-					//printf("Tile (%d): %d\n", i, tile_composite[i]);
-					
-					switch (tile_composite[i]) {
-						case 0:
-							strcat(tile_converted, "<td bgcolor=\"black\">&nbsp;</td>\n");
-							break;
-						case 1:
-							strcat(tile_converted, "<td bgcolor=\"red\">&nbsp;</td>\n");
-							break;
-						case 2:
-							strcat(tile_converted, "<td bgcolor=\"yellow\">&nbsp;</td>\n");
-							break;
-						case 3:
-							strcat(tile_converted, "<td bgcolor=\"blue\">&nbsp;</td>\n");
-							break;
-						default:
-							strcat(tile_converted, "ERROR");
-							printf("ERROR: %d\n", tile_data[i]);
-							break;
-					}
-					
-					if (i % 8 == 7) {
-						strcat(tile_converted, "</tr>\n");
-					}
-				}
-				
-				strcat(tile_converted, "</table>\n");
-				
-				//if the filename isn't specified, use the same name as our ROM, but put the file extension at the end
-				if (strcmp(filename, "") == 0) {
-					strcpy(filename, (char*)lastPathComponent(current_arg));
-					strcat(filename, ".");
-					strcat(filename, HTML_TYPE_EXT);
-				}
-				
-				//printf(tile_converted);
+				NESWriteTileAsHTML(ofile, tile_data, tile_data_length, order);
 			}
-			
-			v_printf(VERBOSE_DEBUG, "Writing data to file...");
-			
-			//write converted data to file... if it fails, show an error
-			if (!write_data_to_file(tile_converted, tile_converted_length, filename)) {
-				printf("%s: Error writing tile data to file!\n\n", filename);
-			}
-			
+						
 			//clean up
-			free(tile_converted);
-			free(tile_range);
-			free(bank_data);
-			fclose(ifile);
+			fclose(ofile);
 			
-			v_printf(VERBOSE_DEBUG, "HTML output done.");
+			v_printf(VERBOSE_DEBUG, "Done.");
 		} // end for() loop over files
 		
 		v_printf(VERBOSE_DEBUG, "Done extracting tile.");

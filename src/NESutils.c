@@ -889,6 +889,14 @@ char *NESConvertTileDataToRom(char *compositeData, int size) {
 	return NULL;
 }
 
+int NESTileCountFromData(u16 size) {
+	/*
+	**	returns the number of tiles in the data based on the size of the data
+	*/
+	
+	return size / NES_ROM_TILE_LENGTH;
+}
+
 #pragma mark -
 
 int NESGetOffset(int x, int y, int width) {
