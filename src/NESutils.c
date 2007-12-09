@@ -133,13 +133,13 @@ bool NESGetTileDataFromData(char *buf, char *data, Range *r, unsigned int adjust
 	**	buf needs to be allocated (NES_ROM_TILE_LENGTH * (r->end - r->start))
 	*/
 
-	v_printf(2, "NESGetTileDataFromData(buf=%x, data=%x, Range=%d->%d, adjust=%d)", &buf, &data, r->start, r->end, adjust);
+	v_printf(VERBOSE_TRACE, "NESGetTileDataFromData(buf=%x, data=%x, Range=%d->%d, adjust=%d)", &buf, &data, r->start, r->end, adjust);
 	
 	//error detection
 	if (!buf || !data || !r || r->start < 0) return false;
 	
 	int shift_amount = ((r->start - 1) * NES_ROM_TILE_LENGTH) + adjust;
-	v_printf(2, "Shifting %d bytes", shift_amount);
+	v_printf(VERBOSE_TRACE_2, "Shifting %d bytes", shift_amount);
 	
 	//move the pointer to the appropriate tile...
 	char *data_pointer = data + shift_amount;
@@ -822,6 +822,13 @@ char *NESBreakBits(char c) {
 #pragma mark-
 
 bool NESConvertTileDataToComposite(char *buf, char *tileData, int size) {
+	/*
+	**	convert native tile data (tileData) to composite data
+	**	composite == 0-3, 1 byte per pixel.
+	*/
+	
+	v_printf(VERBOSE_TRACE, "Start NESConvertTileDataToComposite()");
+	
 	if (!tileData || !size || buf == NULL) return false;
 	if (size % NES_ROM_TILE_LENGTH) return false;
 	
@@ -835,13 +842,13 @@ bool NESConvertTileDataToComposite(char *buf, char *tileData, int size) {
 	char *composite = (char *)malloc(NES_RAW_TILE_LENGTH * tileCount);
 	
 	for (curTile = 0; curTile < tileCount; curTile++) {
-		v_printf(2, "curTile: %d/%d", curTile + 1, tileCount);
+		v_printf(VERBOSE_TRACE_1, "curTile: %d/%d", curTile + 1, tileCount);
 		
 		//initialize channel_a and channel_b
 		for (i = 0; i < NES_ROM_TILE_CHANNEL_LENGTH; i++) {
 			channel_a[i] = tileData[NES_ROM_TILE_LENGTH * (curTile) + i];
 			channel_b[i] = tileData[NES_ROM_TILE_LENGTH * (curTile) + i + NES_ROM_TILE_CHANNEL_LENGTH];
-			//v_printf(2, "Channels A/B: %d/%d", channel_a[i], channel_b[i]);
+			v_printf(VERBOSE_TRACE_2, "Channels A/B: %d/%d", channel_a[i], channel_b[i]);
 		}
 		
 		//create composite data
@@ -849,7 +856,7 @@ bool NESConvertTileDataToComposite(char *buf, char *tileData, int size) {
 			for (j = 7; j >= 0; j--) {
 				int pixel_offset = (i * 8) + (8 - j); //where in the composite we are
 				composite[(pixel_offset + curTile * NES_RAW_TILE_LENGTH) - 1] = NESCombineBits(channel_a[i], channel_b[i], j);
-				//v_printf(2, "Composite (%d,%d:%d): %d", i, j, (pixel_offset + curTile * NES_RAW_TILE_LENGTH),composite[pixel_offset + curTile * NES_RAW_TILE_LENGTH]);
+				v_printf(VERBOSE_TRACE_2, "Composite (%d,%d:%d): %d", i, j, (pixel_offset + curTile * NES_RAW_TILE_LENGTH),composite[pixel_offset + curTile * NES_RAW_TILE_LENGTH]);
 			}
 		}
 	}

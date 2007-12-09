@@ -153,7 +153,7 @@ int main (int argc, char *argv[]) {
 		//turn on verbosity
 		if ( CHECK_ARG( OPT_VERBOSE ) ) {
 			increment_verbosity();
-			v_printf(1, "Verbosity level: %d", get_verbosity());
+			v_printf(VERBOSE_NOTICE, "Verbosity level: %d", get_verbosity());
 			continue;
 		}
 		
@@ -423,7 +423,7 @@ void parse_cmd_extract(char **argv) {
 	char *current_arg = NULL;
 	char *extract_command = GET_NEXT_ARG; //should be oe of -tile, -chr, -prg
 	
-	v_printf(2, "Starting cmd_extract (%s)", extract_command);
+	v_printf(VERBOSE_NOTICE, "Extracting (%s)", extract_command);
 	
 	//if the first modifier doesnt' start with a '-', then something's wrong
 	// so bail.
@@ -437,7 +437,7 @@ void parse_cmd_extract(char **argv) {
 		//extract tile
 		//usage: -tile [-prg | -chr] <bank index> <range> [-h | -v] [-f <output_filename>] [-t <type>]
 		
-		v_printf(1, "Extract tile.");
+		v_printf(VERBOSE_NOTICE, "Extract tile.");
 		
 		//where we store our arguments...
 		char *current_arg = GET_NEXT_ARG;
@@ -463,7 +463,7 @@ void parse_cmd_extract(char **argv) {
 			}
 		}
 
-		v_printf(2, "Extract from banktype: %s", target_bank_type);
+		v_printf(VERBOSE_DEBUG, "Extract from banktype: %s", target_bank_type);
 		
 		//read the bank index:
 		// (for now, this has to be a single number. no ranges allowed. no all allowed, either)
@@ -475,7 +475,7 @@ void parse_cmd_extract(char **argv) {
 		CHECK_ARG_ERROR("Expected bank index.");
 		
 		bank_index = atoi(current_arg);
-		v_printf(2, "Bank index: %d", bank_index);
+		v_printf(VERBOSE_DEBUG, "Bank index: %d", bank_index);
 		
 		//read the tile_range from commandline
 		current_arg = GET_NEXT_ARG;
@@ -490,7 +490,7 @@ void parse_cmd_extract(char **argv) {
 			tile_range->start = atoi(current_arg);
 			tile_range->end = tile_range->start;
 		}
-		v_printf(2, "Tile range: %d -> %d", tile_range->start, tile_range->end);
+		v_printf(VERBOSE_DEBUG, "Tile range: %d -> %d", tile_range->start, tile_range->end);
 		
 		//now for options (which are optional... duh);
 		current_arg = PEEK_ARG;
@@ -531,9 +531,9 @@ void parse_cmd_extract(char **argv) {
 			}
 		}
 		
-		v_printf(2, "Mode: %s", mode);
-		v_printf(2, "Output file: %s", filename);
-		v_printf(2, "Type: %s", type);
+		v_printf(VERBOSE_DEBUG, "Mode: %s", mode);
+		v_printf(VERBOSE_DEBUG, "Output file: %s", filename);
+		v_printf(VERBOSE_DEBUG, "Type: %s", type);
 		
 		//v_printf(2, "PEEK_ARG: %s (%s): %x", current_arg, PEEK_ARG, &current_arg);
 		
@@ -541,7 +541,7 @@ void parse_cmd_extract(char **argv) {
 		for (current_arg = GET_NEXT_ARG; (current_arg != NULL) ; current_arg = GET_NEXT_ARG) {
 			FILE *ifile = NULL;
 			
-			v_printf(1, "Opening file: %s", current_arg);
+			v_printf(VERBOSE_NOTICE, "Opening file: %s", current_arg);
 			
 			//if an error occurs while opening the file,
 			//print an error and move on to next iteration
@@ -585,13 +585,13 @@ void parse_cmd_extract(char **argv) {
 			
 			// bank_data now contains the bank that we're going to read from
 			
-			v_printf(2, "Pulling tile data...");
+			v_printf(VERBOSE_DEBUG, "Pulling tile data...");
 			
 			//pull the tile data out... (The native tile data is stored here)
 			u16 tile_data_length = NES_ROM_TILE_LENGTH * range_count(tile_range);
 			char *tile_data = (char*)malloc(tile_data_length);
 						
-			v_printf(2, "Pulled tile data.");
+			v_printf(VERBOSE_DEBUG, "Pulled tile data.");
 			
 			//error detection
 			if ( !NESGetTileDataFromData(tile_data, bank_data, tile_range, 0) ) {
@@ -608,7 +608,7 @@ void parse_cmd_extract(char **argv) {
 			char *tile_converted = NULL;
 			u16 tile_converted_length = 0;
 			
-			v_printf(2, "Tile data ready to write...");
+			v_printf(VERBOSE_DEBUG, "Tile data ready to write...");
 			
 			//now, we convert the tile data, if needed, and write it out to a file...
 			if (strcmp(type, RAW_TYPE) == 0) {
@@ -659,7 +659,7 @@ void parse_cmd_extract(char **argv) {
 			} else if (strcmp(type, HTML_TYPE) == 0) {
 				//extract as HTML
 				
-				v_printf(1, "Extracting tile as HTML");
+				v_printf(VERBOSE_NOTICE, "Extracting tile as HTML");
 				
 				//now, let's generate some HTML...
 				//table has 15 overhead + 2 \n (17)
@@ -673,7 +673,7 @@ void parse_cmd_extract(char **argv) {
 				tile_converted_length = (number_rows * 10) + ((tile_data_length + 1) * 32 * number_rows * 8) + 17;
 				tile_converted = (char*)malloc(tile_converted_length);
 				
-				v_printf(2, "Number of Rows: %d", number_rows);
+				v_printf(VERBOSE_DEBUG, "Number of Rows: %d", number_rows);
 				
 				//convert the tile data into composite data
 				if (!NESConvertTileDataToComposite(tile_composite, tile_data, tile_data_length)) {
@@ -681,7 +681,7 @@ void parse_cmd_extract(char **argv) {
 					exit(EXIT_FAILURE);
 				}
 				
-				v_printf(2, "Converted data to composite...");
+				v_printf(VERBOSE_DEBUG, "Converted data to composite...");
 				
 				printf("tile_converted_length: %d\n", tile_converted_length);
 				
@@ -731,7 +731,7 @@ void parse_cmd_extract(char **argv) {
 				//printf(tile_converted);
 			}
 			
-			v_printf(2, "Writing data to file...");
+			v_printf(VERBOSE_DEBUG, "Writing data to file...");
 			
 			//write converted data to file... if it fails, show an error
 			if (!write_data_to_file(tile_converted, tile_converted_length, filename)) {
@@ -744,10 +744,10 @@ void parse_cmd_extract(char **argv) {
 			free(bank_data);
 			fclose(ifile);
 			
-			v_printf(2, "Done.");
+			v_printf(VERBOSE_DEBUG, "HTML output done.");
 		} // end for() loop over files
 		
-		v_printf(2, "Done.");
+		v_printf(VERBOSE_DEBUG, "Done extracting tile.");
 				
 	#pragma mark **Extract PRG/CHR
 	} else if (strcmp(extract_command, CMD_EXTRACT_PRG) == 0 || strcmp(extract_command, CMD_EXTRACT_CHR) == 0) {
