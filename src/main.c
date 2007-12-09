@@ -581,11 +581,13 @@ void parse_cmd_extract(char **argv) {
 				//this shouldn't happen, since we should have caught this earlier.
 				printf("FATAL ERROR: Unknown bank type!\n\n");
 				exit(EXIT_FAILURE);
-			}
+			} // endif check bank_type
+			
+			// bank_data now contains the bank that we're going to read from
 			
 			v_printf(2, "Pulling tile data...");
 			
-			//pull the tile data out...
+			//pull the tile data out... (The native tile data is stored here)
 			u16 tile_data_length = NES_ROM_TILE_LENGTH * range_count(tile_range);
 			char *tile_data = (char*)malloc(tile_data_length);
 						
@@ -595,11 +597,14 @@ void parse_cmd_extract(char **argv) {
 			if ( !NESGetTileDataFromData(tile_data, bank_data, tile_range, 0) ) {
 				//if this happens, it's BAD... we're reading something from internal memory
 				//and if the memory failed to populate, we should have caught this much earlier
-				printf("FATAL ERROR: An error occurred while reading tile data.\n\n");
+				printf("FATAL ERROR: An error occurred while reading tile data from bank in memory.\n\n");
 				exit(EXIT_FAILURE);
 			}
 			
-			//holder for tile converted data:
+			u16 tile_composite_length = 0;
+			char *tile_composite = (char*)malloc(tile_composite_length);
+			
+			//holder for tile converted (to user-specified format) data:
 			char *tile_converted = NULL;
 			u16 tile_converted_length = 0;
 			
@@ -661,12 +666,17 @@ void parse_cmd_extract(char **argv) {
 				//each cell takes up 31 bytes + \n (32)
 				//each row has 9 bytes overhead + \n (10)
 				
-				int number_rows = (tile_data_length / 8);
-				tile_converted_length = number_rows * 10 + tile_data_length * 32 + 17 + tile_data_length;
+				tile_composite_length = NES_RAW_TILE_LENGTH * range_count(tile_range);
+				tile_composite = (char*)malloc(tile_composite_length);
+				
+				int number_rows = (tile_composite_length / 8);
+				tile_converted_length = (number_rows * 10) + ((tile_data_length + 1) * 32 * number_rows * 8) + 17;
 				tile_converted = (char*)malloc(tile_converted_length);
 				
+				v_printf(2, "Number of Rows: %d", number_rows);
+				
 				//convert the tile data into composite data
-				if (!NESConvertTileDataToComposite(tile_converted, tile_data, tile_data_length)) {
+				if (!NESConvertTileDataToComposite(tile_composite, tile_data, tile_data_length)) {
 					printf("An error occurred while converting tile data to composite data in RAW_TYPE\n\n");
 					exit(EXIT_FAILURE);
 				}
@@ -678,14 +688,14 @@ void parse_cmd_extract(char **argv) {
 				strcat(tile_converted, "<table>\n");
 				
 				int i = 0;
-				for (i = 0; i < tile_data_length; i++) {
-					if ((i + 1) % 8 == 0) {
+				for (i = 0; i < tile_composite_length; i++) {
+					if (i % 8 == 0 || i == 0) {
 						strcat(tile_converted, "<tr>\n");
 					}
 					
-					printf("Tile: %d\n", tile_data[i]);
+					//printf("Tile (%d): %d\n", i, tile_composite[i]);
 					
-					switch ((int)tile_data[i]) {
+					switch (tile_composite[i]) {
 						case 0:
 							strcat(tile_converted, "<td bgcolor=\"black\">&nbsp;</td>\n");
 							break;
@@ -693,7 +703,7 @@ void parse_cmd_extract(char **argv) {
 							strcat(tile_converted, "<td bgcolor=\"red\">&nbsp;</td>\n");
 							break;
 						case 2:
-							strcat(tile_converted, "<td bgcolor=\"green\">&nbsp;</td>\n");
+							strcat(tile_converted, "<td bgcolor=\"yellow\">&nbsp;</td>\n");
 							break;
 						case 3:
 							strcat(tile_converted, "<td bgcolor=\"blue\">&nbsp;</td>\n");
@@ -704,7 +714,7 @@ void parse_cmd_extract(char **argv) {
 							break;
 					}
 					
-					if (i % 9 == 0) {
+					if (i % 8 == 7) {
 						strcat(tile_converted, "</tr>\n");
 					}
 				}
@@ -718,7 +728,7 @@ void parse_cmd_extract(char **argv) {
 					strcat(filename, HTML_TYPE_EXT);
 				}
 				
-				printf(tile_converted);
+				//printf(tile_converted);
 			}
 			
 			v_printf(2, "Writing data to file...");
