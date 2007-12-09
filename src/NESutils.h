@@ -85,8 +85,13 @@ extern "C" {
 //				3 4							2 4
 typedef enum {
 	nes_horizontal = 'h', // horizontal
-	nes_vertical = 'v', // vertical
+	nes_vertical = 'v' // vertical
 } NESSpriteOrder;
+
+typedef enum {
+	nes_chr_bank = 'c',
+	nes_prg_bank = 'p'
+} NESBankType;
 
 
 //header functions:
@@ -94,10 +99,11 @@ typedef enum {
 char NESGetPrgBankCount(FILE *ifile);
 char NESGetChrBankCount(FILE *ifile);
 
-//reads teh ROM control bytes
+//reads the ROM control bytes
 bool NESGetRomControlBytes(char *buf, FILE *ifile);
 
 //returns the PRG and CHR banks from a file
+bool NESGetBank(char *buf, FILE *ifile, int n, NESBankType type);
 bool NESGetPrgBank(char *buf, FILE *ifile, int n);
 bool NESGetChrBank(char *buf, FILE *ifile, int n);
 

@@ -58,10 +58,29 @@ bool NESGetRomControlBytes(char *buf, FILE *ifile) {
 	return true;
 }
 
+bool NESGetBank(char *buf, FILE *ifile, int n, NESBankType type) {
+	/*
+	**	get the bank of type 'type'
+	**	buf must be pre-allocated with enough space for the bank in question...
+	*/
+	
+	switch (type) {
+		case nes_chr_bank:
+			return NESGetChrBank(buf, ifile, n);
+			break;
+		case nes_prg_bank:
+			return NESGetPrgBank(buf, ifile, n);
+			break;
+		default:
+			return false;
+	}
+	
+}
+
 bool NESGetPrgBank(char *buf, FILE *ifile, int n) {
 	/*
 	**	retreive the nth PRG bank and put the data into buf
-	**	buf needs to be allocated: malloc(NES_PRG_BANK_LENGTH + 1)
+	**	buf needs to be allocated: malloc(NES_PRG_BANK_LENGTH)
 	*/
 	
 	//check to make sure that ifile and buf aren't NULL
@@ -93,7 +112,7 @@ bool NESGetPrgBank(char *buf, FILE *ifile, int n) {
 bool NESGetChrBank(char *buf, FILE *ifile, int n) {
 	/*
 	**	retreive the nth CHR bank and put the data into buf
-	**	buf needs to be allocated: malloc(NES_CHR_BANK_LENGTH + 1)
+	**	buf needs to be allocated: malloc(NES_CHR_BANK_LENGTH)
 	*/
 	
 	//check to make sure that ifile and buf aren't NULL
