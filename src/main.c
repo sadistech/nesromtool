@@ -447,7 +447,7 @@ void parse_cmd_extract(char **argv) {
 		Range *tile_range = (Range*)malloc(sizeof(Range));
 		char order = nes_horizontal; //default
 		char type[10] = RAW_TYPE; //default
-		char filename[255] = ""; //default
+		char output_filepath[255] = ""; //default
 		
 		//check to make sure that we actually grabbed an argument
 		CHECK_ARG_ERROR("Expected bank index or type!");
@@ -517,8 +517,8 @@ void parse_cmd_extract(char **argv) {
 				
 				//filename
 				if (CHECK_ARG(OPT_FILENAME)) {
-					strcpy(filename, GET_NEXT_ARG);
-					v_printf(VERBOSE_DEBUG, "output filename: %s", filename);
+					strcpy(output_filepath, GET_NEXT_ARG);
+					v_printf(VERBOSE_DEBUG, "Output file: %s", output_filepath);
 					continue;
 				}
 				
@@ -537,7 +537,7 @@ void parse_cmd_extract(char **argv) {
 		}
 		
 		v_printf(VERBOSE_DEBUG, "Order: %c", order);
-		v_printf(VERBOSE_DEBUG, "Output file: %s", filename);
+		v_printf(VERBOSE_DEBUG, "Output file: %s", output_filepath);
 		v_printf(VERBOSE_DEBUG, "Type: %s", type);
 		
 		//v_printf(2, "PEEK_ARG: %s (%s): %x", current_arg, PEEK_ARG, &current_arg);
@@ -618,14 +618,14 @@ void parse_cmd_extract(char **argv) {
 			//if a filename was not specified, we need to specify one.
 			//for now, we'll just use the inputfilename.out (ie: SMB1.NES.out)
 			
-			if (strlen(filename) == 0) {
-				strcpy(filename, input_filename);
-				strcat(filename, ".out");
+			if (strlen(output_filepath) == 0) {
+				strcpy(output_filepath, input_filename);
+				strcat(output_filepath, ".out");
 			}
 			
 			FILE *ofile = NULL;
-			if (!(ofile = fopen(filename, "w"))) {
-				perror(filename);
+			if (!(ofile = fopen(output_filepath, "w"))) {
+				perror(output_filepath);
 				exit(EXIT_FAILURE);
 			}
 			
@@ -665,11 +665,11 @@ void parse_cmd_extract(char **argv) {
 			//make sure we wrote to the file like we hoped
 			// if nothing was written, then something went wrong... so let's report it and bail
 			if (data_written == 0) {
-				fprintf(stderr, "An error occurred while writing to %s.\n", filename);
+				fprintf(stderr, "An error occurred while writing to %s.\n", output_filepath);
 				exit(EXIT_FAILURE);
 			}
 			
-			v_printf(VERBOSE_NOTICE, "%d bytes written to %s.", data_written, filename);
+			v_printf(VERBOSE_NOTICE, "%d bytes written to %s.", data_written, output_filepath);
 		} // end for() loop over files
 		
 		v_printf(VERBOSE_DEBUG, "Done extracting tile.");
