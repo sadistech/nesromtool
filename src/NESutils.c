@@ -172,14 +172,14 @@ bool NESGetTilesFromData(char *buf, char *data, Range *r, unsigned int adjust) {
 
 #pragma mark -
 
-bool NESInjectPrgBankData(FILE *ofile, char *prgData, int n) {
+bool NESInjectPrgBank(FILE *ofile, char *prg_data, int n) {
 	/*
 	**	injects a PRG bank (prgData) into ofile in bank n
 	**	replaces existing bank
 	*/
 	
 	//error detection
-	if (!ofile || !prgData) return false;
+	if (!ofile || !prg_data) return false;
 	
 	//don't bank index starts at 1... you can't inject a non-existent bank
 	if (n < 1 || n > NESGetPrgBankCount(ofile)) return false;
@@ -188,21 +188,21 @@ bool NESInjectPrgBankData(FILE *ofile, char *prgData, int n) {
 	NESSeekToBank(ofile, nes_prg_bank, n);
 	
 	//write the data... if fail, return false
-	if (fwrite(prgData, 1, NES_PRG_BANK_LENGTH, ofile) != NES_PRG_BANK_LENGTH) {
+	if (fwrite(prg_data, 1, NES_PRG_BANK_LENGTH, ofile) != NES_PRG_BANK_LENGTH) {
 		return false;
 	}
 	
 	return true; //noErr
 }
 
-bool NESInjectChrBankData(FILE *ofile, char *chrData, int n) {
+bool NESInjectChrBank(FILE *ofile, char *chr_data, int n) {
 	/*
 	**	injects a CHR bank (chrData) info ofile in bank n
 	**	replaces existing bank
 	*/
 	
 	//error detection
-	if (!ofile || !chrData) return false;
+	if (!ofile || !chr_data) return false;
 	
 	//don't bank index starts at 1... you can't inject a non-existent bank
 	if (n < 1 || n > NESGetChrBankCount(ofile)) return false;
@@ -211,7 +211,7 @@ bool NESInjectChrBankData(FILE *ofile, char *chrData, int n) {
 	NESSeekToBank(ofile, nes_chr_bank, n);
 	
 	//write the data... if fail, return false
-	if (fwrite(chrData, 1, NES_CHR_BANK_LENGTH, ofile) != NES_CHR_BANK_LENGTH) {
+	if (fwrite(chr_data, 1, NES_CHR_BANK_LENGTH, ofile) != NES_CHR_BANK_LENGTH) {
 		return false;
 	}
 	
@@ -602,7 +602,7 @@ bool NESExtractChrBank(FILE *fromFile, FILE *toFile, int n) {
 	return true;
 }
 
-bool NESInjectPrgBank(FILE *ofile, FILE *ifile, int n) {
+/*bool NESInjectPrgBank(FILE *ofile, FILE *ifile, int n) {
 	if (!ofile || !ifile) return false; //error
 	
 	if (n < 1 || n > NESGetPrgBankCount(ofile)) return false; //error
@@ -641,7 +641,7 @@ bool NESInjectChrBank(FILE *ofile, FILE *ifile, int n) {
 	bool err = NESInjectChrBankData(ofile, chrData, n);
 	free(chrData);
 	return err;
-}
+}*/
 
 #pragma mark -
 

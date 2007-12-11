@@ -111,8 +111,8 @@ bool NESGetChrBank(char *buf, FILE *ifile, int n);
 bool NESGetTilesFromData(char *buf, char *data, Range *r, unsigned int adjust);
 
 //takes a PRG or CHR bank (full file) from ifile and puts it into the nth bank in ofile
-bool NESInjectPrgBankData(FILE *ofile, char *prgData, int n);
-bool NESInjectChrBankData(FILE *ofile, char *chrData, int n);
+bool NESInjectPrgBank(FILE *ofile, char *prg_data, int n);
+bool NESInjectChrBank(FILE *ofile, char *chr_data, int n);
 
 char *NESGetTileDataRangeFromChrBank(char *chrData, int startIndex, int endIndex);
 
