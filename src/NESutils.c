@@ -94,7 +94,8 @@ bool NESGetPrgBank(char *buf, FILE *ifile, int n) {
 	char *PRG_data = (char *)malloc(NES_PRG_BANK_LENGTH + 1); //temporary placeholder for data
 	
 	//seek to proper offset
-	fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * (n - 1)), SEEK_SET);
+	//fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * (n - 1)), SEEK_SET);
+	NESSeekToBank(ifile, nes_prg_bank, n);
 	
 	//read to placeholder
 	if (fread(PRG_data, 1, NES_PRG_BANK_LENGTH, ifile) != NES_PRG_BANK_LENGTH) {
@@ -125,7 +126,8 @@ bool NESGetChrBank(char *buf, FILE *ifile, int n) {
 	char *chrData = (char *)malloc(NES_CHR_BANK_LENGTH);
 	
 	//move to necessary point in file
-	fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ifile)) + (NES_CHR_BANK_LENGTH * (n - 1)), SEEK_SET);
+	//fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ifile)) + (NES_CHR_BANK_LENGTH * (n - 1)), SEEK_SET);
+	NESSeekToBank(ifile, nes_chr_bank, n);
 	
 	//read data into placeholder
 	if (fread(chrData, 1, NES_CHR_BANK_LENGTH, ifile) != NES_CHR_BANK_LENGTH) {
@@ -805,6 +807,46 @@ bool NESVerifyROM(FILE *ifile) {
 	//(remember,  it's (PRGsize * PRGpagecount) + (CHRsize * CHRpagecount) + headersize + [titlesize])
 	
 	return true;
+}
+
+//seeking around in file
+int NESSeekToBank(FILE *ifile, NESBankType bank_type, int nth_bank) {
+	/*
+	**	Moves the file pointer to the beginning of the nth bank_type bank
+	**	nth_bank works on a 1-based index... (first bank is 1)
+	**	returns the same value as fseek()
+	*/
+	
+	if (bank_type == nes_prg_bank) {
+		return fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * (nth_bank - 1)), SEEK_SET);
+	} else {
+		return fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ifile)) + (NES_CHR_BANK_LENGTH * (nth_bank - 1)), SEEK_SET);
+	}
+
+}
+
+int NESSeekToTile(FILE *ifile, NESBankType bank_type, int nth_bank, int nth_tile) {
+	/*
+	**	Seeks to the nth_tile tile of the nth bank.
+	**	returns the current file offset pointer
+	**	nth_bank and nth_tile are 1-based indexes (first tile/bank is 1)
+	*/
+	
+	//first seek to the bank
+	NESSeekToBank(ifile, bank_type, nth_bank);
+	
+	//then return the value of seeking ahead n tiles
+	return NESSeekAheadNTiles(ifile, nth_tile - 1);
+}
+
+int NESSeekAheadNTiles(FILE *ifile, int n) {
+	/*
+	**	seeks ahead n tiles in the file, from the current pointer.
+	**	good for iterating through tiles
+	**	returns the current file offset pointer
+	*/
+	
+	return fseek(ifile, NES_ROM_TILE_LENGTH, SEEK_CUR);
 }
 
 #pragma mark -

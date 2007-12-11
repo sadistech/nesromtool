@@ -138,6 +138,11 @@ bool NESRemoveTitle(FILE *ofile);
 u32 NESGetFilesize(FILE *ifile);
 bool NESVerifyROM(FILE *ifile);
 
+//seeking around in file
+int NESSeekToBank(FILE *ifile, NESBankType bank_type, int nth_bank);
+int NESSeekToTile(FILE *ifile, NESBankType bank_type, int nth_bank, int nth_tile);
+int NESSeekAheadNTiles(FILE *ifile, int n);
+
 //for converting between ROM tile data and RAW tile data
 char NESCombineBits(int a, int b, int n);
 char *NESBreakBits(char c);
