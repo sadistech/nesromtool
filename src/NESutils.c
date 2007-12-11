@@ -142,7 +142,7 @@ bool NESGetChrBank(char *buf, FILE *ifile, int n) {
 
 #pragma mark -
 
-bool NESGetTileDataFromData(char *buf, char *data, Range *r, unsigned int adjust) {
+bool NESGetTilesFromData(char *buf, char *data, Range *r, unsigned int adjust) {
 	/*
 	**	sets the contents of buf to the tile data from data
 	**	use NESGetPrgBank() or NESGetChrBank() to get data

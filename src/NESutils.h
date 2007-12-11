@@ -108,7 +108,7 @@ bool NESGetPrgBank(char *buf, FILE *ifile, int n);
 bool NESGetChrBank(char *buf, FILE *ifile, int n);
 
 //retreiving tiledata from chr or prg banks
-bool NESGetTileDataFromData(char *buf, char *data, Range *r, unsigned int adjust);
+bool NESGetTilesFromData(char *buf, char *data, Range *r, unsigned int adjust);
 
 //takes a PRG or CHR bank (full file) from ifile and puts it into the nth bank in ofile
 bool NESInjectPrgBankData(FILE *ofile, char *prgData, int n);

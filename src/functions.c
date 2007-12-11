@@ -54,13 +54,14 @@ bool check_is_range(char *val) {
 	return false;
 }
 
-void str_to_range(Range *r, char *val) {
+int str_to_range(Range *r, char *val) {
 	/*
 	**	sets r to the range contained in val
+	**	returns the number of elements in the range
 	*/
 	
 	//error detection...
-	if (!r || !val) return;
+	if (!r || !val) return 0;
 	
 	char buf[10];
 	char *buf_start = buf;
@@ -77,6 +78,8 @@ void str_to_range(Range *r, char *val) {
 	
 	r->start = atoi(buf); //set the start
 	r->end = atoi(val); //set the end
+	
+	return ((r->end) - (r->start) + 1);
 }
 
 bool write_data_to_file(char *data, u32 length, char *path) {

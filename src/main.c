@@ -600,7 +600,7 @@ void parse_cmd_extract(char **argv) {
 			v_printf(VERBOSE_DEBUG, "Pulled tile data.");
 			
 			//error detection
-			if ( !NESGetTileDataFromData(tile_data, bank_data, tile_range, 0) ) {
+			if ( !NESGetTilesFromData(tile_data, bank_data, tile_range, 0) ) {
 				//if this happens, it's BAD... we're reading something from internal memory
 				//and if the memory failed to populate, we should have caught this much earlier
 				free(bank_data);

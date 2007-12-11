@@ -12,7 +12,7 @@ void hr_filesize(char *buf, double filesize);
 void debug_print_argv(char **argv);
 
 bool check_is_range(char *val);
-void str_to_range(Range *r, char *val);
+int str_to_range(Range *r, char *val);
 
 bool write_data_to_file(char *data, u32 length, char *path);
 bool append_data_to_file(char *data, u32 length, char *path);
