@@ -29,15 +29,15 @@ extern "C" {
 
 #define NES_ROM_CONTROL_OFFSET				6			/* contains bits indicating:
 															byte 1:
-																0: Mirror Type (0: horizontal/ 1: Vertical)
-																1: Presence of battery backed RAM
-																2: presence of 512-byte trainer
-																3: 4-screen mirroring (overrides bit 0)
-																4-7: Four (4) lower bits of mapper number
+																bit 0: Mirror Type (0: horizontal/ 1: Vertical)
+																bit 1: Presence of battery backed RAM
+																bit 2: presence of 512-byte trainer
+																bit 3: 4-screen mirroring (overrides bit 0)
+																bits 4-7: Four (4) lower bits of mapper number
 
 															byte 2:
-																0-3: Reserved (should be zero)
-																4-7: Four (4) upper bits of mapper number*/
+																bits 0-3: Reserved (should be zero)
+																bits 4-7: Four (4) upper bits of mapper number*/
 																													
 // Masks for NES_ROM_CONTROL bytes: (apply to byte 1 or 2 only, not the whole thing)
 //first byte:
