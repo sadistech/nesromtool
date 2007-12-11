@@ -184,7 +184,8 @@ bool NESInjectPrgBankData(FILE *ofile, char *prgData, int n) {
 	//don't bank index starts at 1... you can't inject a non-existent bank
 	if (n < 1 || n > NESGetPrgBankCount(ofile)) return false;
 	
-	fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * (n - 1)), SEEK_SET);
+	//fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * (n - 1)), SEEK_SET);
+	NESSeekToBank(ofile, nes_prg_bank, n);
 	
 	//write the data... if fail, return false
 	if (fwrite(prgData, 1, NES_PRG_BANK_LENGTH, ofile) != NES_PRG_BANK_LENGTH) {
@@ -206,7 +207,8 @@ bool NESInjectChrBankData(FILE *ofile, char *chrData, int n) {
 	//don't bank index starts at 1... you can't inject a non-existent bank
 	if (n < 1 || n > NESGetChrBankCount(ofile)) return false;
 	
-	fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ofile)) + (NES_CHR_BANK_LENGTH * (n - 1)), SEEK_SET);
+	//fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ofile)) + (NES_CHR_BANK_LENGTH * (n - 1)), SEEK_SET);
+	NESSeekToBank(ofile, nes_chr_bank, n);
 	
 	//write the data... if fail, return false
 	if (fwrite(chrData, 1, NES_CHR_BANK_LENGTH, ofile) != NES_CHR_BANK_LENGTH) {
@@ -606,7 +608,8 @@ bool NESInjectPrgBank(FILE *ofile, FILE *ifile, int n) {
 	if (n < 1 || n > NESGetPrgBankCount(ofile)) return false; //error
 	
 	//move to nth PRG bank for writing...
-	fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * (n - 1)), SEEK_SET);
+	//fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * (n - 1)), SEEK_SET);
+	NESSeekToBank(ofile, nes_prg_bank, n);
 	
 	char *prgData = (char *)malloc(NES_PRG_BANK_LENGTH);
 	if (fread(prgData, 1, NES_PRG_BANK_LENGTH, ifile) != NES_PRG_BANK_LENGTH) {
@@ -625,7 +628,8 @@ bool NESInjectChrBank(FILE *ofile, FILE *ifile, int n) {
 	
 	if (n < 1 || n > NESGetChrBankCount(ofile)) return false; //error
 	
-	fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ofile)) + (NES_CHR_BANK_LENGTH * (n - 1)), SEEK_SET);
+	//fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ofile)) + (NES_CHR_BANK_LENGTH * (n - 1)), SEEK_SET);
+	NESSeekToBank(ofile, nes_chr_bank, n);
 	
 	char *chrData = (char *)malloc(NES_CHR_BANK_LENGTH);
 	
