@@ -18,19 +18,19 @@ int NESWriteTileAsNative(FILE *ofile, char *data, int data_size) {
 
 int NESWriteTileAsRaw(FILE *ofile, char *data, int data_size, NESSpriteOrder order) {
 	/*
-	**	write tiledata as RAW to ofile
+	**	write tiledata as COMPOSITE to ofile
 	**	returns the number of bytes written
 	*/
 	
 	if (!ofile || !data || data_size == 0) return 0;
 	
-	u16 tile_converted_length = NES_RAW_TILE_LENGTH * NESTileCountFromData(data_size);
+	u16 tile_converted_length = NES_COMPOSITE_TILE_LENGTH * NESTileCountFromData(data_size);
 	char *tile_converted = (char*)malloc(tile_converted_length);
 	
 	
 	//convert the tile_data into composite data
 	if (!NESConvertTileDataToComposite(tile_converted, data, data_size)) {
-		//fprintf(stderr, "An error occurred while converting tile data to composite data in RAW_TYPE\n\n");
+		//fprintf(stderr, "An error occurred while converting tile data to composite data in COMPOSITE_TYPE\n\n");
 		free(tile_converted);
 		return 0;
 	}
@@ -51,13 +51,13 @@ int NESWriteTileAsHTML(FILE *ofile, char *data, int data_size, NESSpriteOrder or
 	//each cell takes up 31 bytes + \n (32)
 	//each row has 9 bytes overhead + \n (10)
 	
-	u16 tile_composite_length = NES_RAW_TILE_LENGTH * NESTileCountFromData(data_size);
+	u16 tile_composite_length = NES_COMPOSITE_TILE_LENGTH * NESTileCountFromData(data_size);
 	char *tile_composite = (char*)malloc(tile_composite_length);
 	size_t data_written = 0;
 	
 	//convert the tile data into composite data
 	if (!NESConvertTileDataToComposite(tile_composite, data, data_size)) {
-		printf("An error occurred while converting tile data to composite data in RAW_TYPE\n\n");
+		printf("An error occurred while converting tile data to composite data in COMPOSITE_TYPE\n\n");
 		exit(EXIT_FAILURE);
 	}
 	

@@ -116,11 +116,15 @@ bool NESGetChrBank(char *buf, FILE *ifile, int n) {
 	**	buf needs to be allocated: malloc(NES_CHR_BANK_LENGTH)
 	*/
 	
+	v_printf(VERBOSE_TRACE, "NESGetChrBank => %0x, %0x, %d", buf, ifile, n);
+			
 	//check to make sure that ifile and buf aren't NULL
 	if (!ifile || !buf) return false;
-	
+	v_printf(VERBOSE_TRACE_2, "No null values!");
+		
 	//bail if we try to get a nonexistent bank
 	if (n < 1 || n > NESGetChrBankCount(ifile)) return false;
+	v_printf(VERBOSE_TRACE_2, "Passed error checking.");
 	
 	//temporary placeholder for data
 	char *chrData = (char *)malloc(NES_CHR_BANK_LENGTH);
@@ -132,12 +136,15 @@ bool NESGetChrBank(char *buf, FILE *ifile, int n) {
 	//read data into placeholder
 	if (fread(chrData, 1, NES_CHR_BANK_LENGTH, ifile) != NES_CHR_BANK_LENGTH) {
 		free(chrData);
+		v_printf(VERBOSE_TRACE_2, "Failed to read CHR bank from file!");
 		return false;
 	}
 	
 	//copy data into buf
 	memcpy(buf, chrData, NES_CHR_BANK_LENGTH);
 	free(chrData);
+	
+	v_printf(VERBOSE_TRACE_2, "Copied CHR bank into buffer -- NESGetChrBank Done.");
 	
 	return true;
 }
@@ -240,7 +247,7 @@ bool NESInjectChrBank(FILE *ofile, char *chr_data, int n) {
 		channel_b[i] = chrData[NES_ROM_TILE_LENGTH * (n - 1) + i + NES_ROM_TILE_CHANNEL_LENGTH];
 	}
 	
-	char *composite = (char *)malloc(NES_RAW_TILE_LENGTH);
+	char *composite = (char *)malloc(NES_COMPOSITE_TILE_LENGTH);
 	
 	for (i = 0; i < NES_ROM_TILE_CHANNEL_LENGTH; i++) {
 		for (j = 7; j >= 0; j--) {
@@ -273,7 +280,7 @@ bool NESExtractTile(FILE *ifile, FILE *ofile, int chrIndex, int n) {
 	
 	char *compositeData;// = NESTileToComposite(tileData, 
 	
-	if (fwrite(NESGetTileDataFromChrBank(chrData, n), 1, NES_RAW_TILE_LENGTH, ofile) != NES_RAW_TILE_LENGTH) {
+	if (fwrite(NESGetTileDataFromChrBank(chrData, n), 1, NES_COMPOSITE_TILE_LENGTH, ofile) != NES_COMPOSITE_TILE_LENGTH) {
 		free(chrData);
 		return false;
 	}
@@ -294,7 +301,7 @@ bool NESExtractTileRange(FILE *ifile, FILE *ofile, int chrIndex, int startIndex,
 	
 	if (!chrData) return false;
 	
-	if (fwrite(NESGetTileDataRangeFromChrBank(chrData, startIndex, endIndex), 1, NES_RAW_TILE_LENGTH * (endIndex - startIndex), ofile) != (NES_RAW_TILE_LENGTH * (endIndex - startIndex))) {
+	if (fwrite(NESGetTileDataRangeFromChrBank(chrData, startIndex, endIndex), 1, NES_COMPOSITE_TILE_LENGTH * (endIndex - startIndex), ofile) != (NES_COMPOSITE_TILE_LENGTH * (endIndex - startIndex))) {
 		free(chrData);
 		return false;
 	}
@@ -345,8 +352,8 @@ bool NESInjectTileFile(FILE *ofile, FILE *tileFile, int chrIndex, int tileIndex)
 
 //	printf("chrIndex OK!\n");
 
-	char *tileData = (char *)malloc(NES_RAW_TILE_LENGTH);
-	if (fread(tileData, 1, NES_RAW_TILE_LENGTH, tileFile) != NES_RAW_TILE_LENGTH) { //if it reads not enough bytes...
+	char *tileData = (char *)malloc(NES_COMPOSITE_TILE_LENGTH);
+	if (fread(tileData, 1, NES_COMPOSITE_TILE_LENGTH, tileFile) != NES_COMPOSITE_TILE_LENGTH) { //if it reads not enough bytes...
 		free(tileData);
 		return false;
 	}
@@ -371,24 +378,25 @@ bool NESInjectTileData(FILE *ofile, char *tileData, int chrIndex, int tileIndex)
 	
 	if (prgCount < 1 || chrIndex > NESGetChrBankCount(ofile)) return false; //error
 	
-	fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * prgCount) + (NES_CHR_BANK_LENGTH * (chrIndex - 1)) + ((tileIndex - 1) * NES_ROM_TILE_LENGTH), SEEK_SET);
+	NESSeekToTile(ofile, nes_chr_bank, chrIndex, tileIndex);
+	//fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * prgCount) + (NES_CHR_BANK_LENGTH * (chrIndex - 1)) + ((tileIndex - 1) * NES_ROM_TILE_LENGTH), SEEK_SET);
 	
 	int i = 0;
 	
 	char *composite = (char *)malloc(NES_ROM_TILE_LENGTH);
 	unsigned char chan_a = 0;
 	unsigned char chan_b = 0;
-	char *curPixel = "00";
+	char channel_buffer[2];
 	
-	for (i = 0; i < NES_RAW_TILE_LENGTH; i++) {
-		curPixel = NESBreakBits(tileData[i]);
+	for (i = 0; i < NES_COMPOSITE_TILE_LENGTH; i++) {
+		NESBreakBits(tileData[i], channel_buffer);
 		
-		chan_a += abs(curPixel[0] - '0');
-		chan_b += abs(curPixel[1] - '0');
+		chan_a += abs(channel_buffer[0] - '0');
+		chan_b += abs(channel_buffer[1] - '0');
 
-		if ((i + 1) % 8 == 0) {
-			composite[i / 8] = chan_a;
-			composite[(i / 8) + 8] = chan_b;
+		if ((i + 1) % NES_ROM_TILE_CHANNEL_LENGTH == 0) {
+			composite[i / NES_ROM_TILE_CHANNEL_LENGTH] = chan_a;
+			composite[(i / NES_ROM_TILE_CHANNEL_LENGTH) + NES_ROM_TILE_CHANNEL_LENGTH] = chan_b;
 			
 			chan_a = 0;
 			chan_b = 0;
@@ -446,7 +454,7 @@ bool NESInjectCompoundTile(FILE *ofile, char *tileData, int size, int columns, N
 	
 	printf("passed error checking...\n");
 	
-	int tileCount = (size / NES_RAW_TILE_LENGTH);
+	int tileCount = (size / NES_COMPOSITE_TILE_LENGTH);
 	int rows = tileCount / columns;
 	
 	int finalWidth = columns * NES_TILE_WIDTH;
@@ -472,8 +480,8 @@ bool NESInjectCompoundTile(FILE *ofile, char *tileData, int size, int columns, N
 				}
 				
 				for (i = 0; i < NES_TILE_WIDTH; i++) { 					//pixel
-					finalData[(curTile * NES_RAW_TILE_LENGTH) + (tileRow * NES_TILE_WIDTH) + i] =
-							tileData[(curRow * NES_RAW_TILE_LENGTH * columns) + (tileRow * finalWidth) + (curCol * NES_TILE_WIDTH) + i];
+					finalData[(curTile * NES_COMPOSITE_TILE_LENGTH) + (tileRow * NES_TILE_WIDTH) + i] =
+							tileData[(curRow * NES_COMPOSITE_TILE_LENGTH * columns) + (tileRow * finalWidth) + (curCol * NES_TILE_WIDTH) + i];
 				}
 			}
 		}
@@ -486,12 +494,12 @@ bool NESInjectCompoundTile(FILE *ofile, char *tileData, int size, int columns, N
 	
 	for (curTile = 0; curTile < tileCount; curTile++) {
 		
-		char *tile = (char*)malloc(NES_RAW_TILE_LENGTH);
+		char *tile = (char*)malloc(NES_COMPOSITE_TILE_LENGTH);
 		
 		if (!tile) return false;
 		
-		for (i = 0; i < NES_RAW_TILE_LENGTH; i++) {
-			tile[i] = finalData[curTile * NES_RAW_TILE_LENGTH + i];
+		for (i = 0; i < NES_COMPOSITE_TILE_LENGTH; i++) {
+			tile[i] = finalData[curTile * NES_COMPOSITE_TILE_LENGTH + i];
 		}
 		
 		printf("Injecting tile %d\t", curTile);
@@ -523,11 +531,11 @@ char *NESMakeCompoundTile(char *tileData, int size, int columns, NESSpriteOrder 
 	int finalWidth = columns * NES_TILE_WIDTH;
 //	int finalHeight = (size / columns) * NES_TILE_HEIGHT;
 	
-	int totalTiles = (size / NES_RAW_TILE_LENGTH);
+	int totalTiles = (size / NES_COMPOSITE_TILE_LENGTH);
 	int rows = (totalTiles / columns);
 	
 	//where the big tile will be drawn
-	char *finalData = (char *)malloc(totalTiles * NES_RAW_TILE_LENGTH);
+	char *finalData = (char *)malloc(totalTiles * NES_COMPOSITE_TILE_LENGTH);
 	
 	int curCol = 0; 	//column of tiles (0 based indexes)
 	int curRow = 0; 	//row of tiles (0 based indexes)
@@ -549,8 +557,8 @@ char *NESMakeCompoundTile(char *tileData, int size, int columns, NESSpriteOrder 
 				}
 				
 				for (i = 0; i < NES_TILE_WIDTH; i++) { 					//pixel
-					finalData[(curRow * NES_RAW_TILE_LENGTH * columns) + (tileRow * finalWidth) + (curCol * NES_TILE_WIDTH) + i] =
-							tileData[(curTile * NES_RAW_TILE_LENGTH) + (tileRow * NES_TILE_WIDTH) + i];
+					finalData[(curRow * NES_COMPOSITE_TILE_LENGTH * columns) + (tileRow * finalWidth) + (curCol * NES_TILE_WIDTH) + i] =
+							tileData[(curTile * NES_COMPOSITE_TILE_LENGTH) + (tileRow * NES_TILE_WIDTH) + i];
 				}
 			}
 		}
@@ -857,34 +865,134 @@ int NESSeekAheadNTiles(FILE *ifile, int n) {
 
 //where the magic happens!! :D
 char NESCombineBits(int a, int b, int n) {
-//	return (((a >> n) % 2) + (((b >> n) % 2) * 2));	
+	/*
+	**	creates a composite pixel from a bit n of channels a and b
+	**	returns either 0, 1, 2, or 3
+	*/
+	
 	return ((a >> n) & 1) | (((b >> n) & 1) << 1);
 }
 
-char *NESBreakBits(char c) {
-	//there's gotta be a faster (or at least better) way of doing this!
-	
+void NESBreakBits(char pixel, char *buf) {
 	/*
-	Working on a better way:
-	char **values = ["00", "10", "01", "11"];
-	return values[c];
+	**	used in taking composite data to convert to channels a and b
+	**	buf should be a 2-byte array.
+	**	channel_a is buf[0], channel_b is buf[1]
+	**	sets those to either a 0 or 1... for bits...
 	*/
 	
-	switch (c) {
+	//there's gotta be a faster (or at least better) way of doing this!
+	
+	switch (pixel) {
 		case 0:
-			return "00";
+			memcpy(buf, "00", 2);
+			return;
 		case 1:
-			return "10";
+			memcpy(buf, "01", 2);
+			return;
 		case 2:
-			return "01";
+			memcpy(buf, "10", 2);
+			return;
 		case 3:
-			return "11";
+			memcpy(buf, "11", 2);
+			return;
 		default:
-			return "00";
+			memcpy(buf, "00", 2);
+			return;
 	}
 }
 
-#pragma mark-
+#pragma mark -
+
+int NESTileToComposite(char *tile_data, char *buf) {
+	/*
+	**	convert a single tile from Tile data to composite data
+	**	tile_data is native to the ROM (16-byte, 2 channel binary data)
+	**	if anything fails, buf will be untouched
+	**	return 1 on success, 0 on error.
+	*/
+	
+	if (!tile_data || !buf) return 0;
+	
+	//temporary storage for converted data
+	char *new_composite = (char*)malloc(NES_TILE_WIDTH * NES_TILE_HEIGHT);
+	
+	//temporary storage for channels
+	unsigned char channel_a[NES_ROM_TILE_CHANNEL_LENGTH], channel_b[NES_ROM_TILE_CHANNEL_LENGTH];
+	
+	//initialize channel_a and channel_b
+	int i = 0; int j = 0;
+	for (i = 0; i < NES_ROM_TILE_CHANNEL_LENGTH; i++) {
+		channel_a[i] = tile_data[i];
+		channel_b[i] = tile_data[NES_ROM_TILE_CHANNEL_LENGTH + i];
+		v_printf(VERBOSE_TRACE_2, "Channels A/B: %d/%d", channel_a[i], channel_b[i]);
+	}
+	
+	//create composite data
+	for (i = 0; i < NES_ROM_TILE_CHANNEL_LENGTH; i++) {
+		for (j = 7; j >= 0; j--) {
+			int pixel_offset = (i * 8) + (8 - j); //where in the composite we are
+			new_composite[(pixel_offset) - 1] = NESCombineBits(channel_a[i], channel_b[i], j);
+			v_printf(VERBOSE_TRACE_2, "Composite (%d,%d:%d): %d", i, j, (pixel_offset), new_composite[pixel_offset - 1]);
+		}
+	}
+	
+	memcpy(buf, new_composite, NES_TILE_WIDTH * NES_TILE_HEIGHT);
+	free(new_composite);
+	
+	return 1;
+}
+
+int NESCompositeToTile(char *composite_data, char *buf) {
+	/*
+	**	convert a single composite tile into tile format
+	**	
+	**	return 0 on error, 1 on success
+	*/
+	
+	if (!composite_data || !buf) return 0;
+	
+	char *new_tile = (char*)malloc(NES_ROM_TILE_LENGTH);
+	
+	char byte_a = 0; //temporary channel_a byte
+	char byte_b = 0; //temporary channel_b byte
+	char pixel[2]; //temporary bit cache for splitting into channels
+	
+	int i = 0; //horiz
+	int j = 0; //vert
+	
+	//loop over the pixels in composite_data
+	//loop row by row, pixel by pixel
+	for (j = 0; j < NES_TILE_WIDTH; j++) { 	//looping over rows of pixels
+		for (i = 0; i < NES_TILE_HEIGHT; i++) { //looping over pixels in the row
+			//shift the bits
+			byte_a <<= 1;
+			byte_b <<= 1;
+			
+			NESBreakBits(composite_data[j * NES_TILE_WIDTH + i], pixel);
+						
+			//set the values of the byte
+			if (pixel[1] == '1') byte_a++;
+			if (pixel[0] == '1') byte_b++;
+		} //end of pixel loop
+		
+		//set the channels in the new tile
+		new_tile[j] = byte_a; //channel A
+		new_tile[j + NES_ROM_TILE_CHANNEL_LENGTH] = byte_b; //channel B
+		
+		//reset the holders...
+		byte_a = 0;
+		byte_b = 0;
+	}
+	
+	//copy into buffer and free memory
+	memcpy(buf, new_tile, NES_ROM_TILE_LENGTH);
+	free(new_tile);
+	
+	return 1;
+}
+
+#pragma mark -
 
 bool NESConvertTileDataToComposite(char *buf, char *tileData, int size) {
 	/*
@@ -894,7 +1002,7 @@ bool NESConvertTileDataToComposite(char *buf, char *tileData, int size) {
 	
 	v_printf(VERBOSE_TRACE, "Start NESConvertTileDataToComposite()");
 	
-	if (!tileData || !size || buf == NULL) return false;
+	if (!tileData || !size || !buf) return false;
 	if (size % NES_ROM_TILE_LENGTH) return false;
 	
 	int tileCount = size / NES_ROM_TILE_LENGTH;
@@ -904,7 +1012,7 @@ bool NESConvertTileDataToComposite(char *buf, char *tileData, int size) {
 	int j = 0;
 	int curTile = 0;
 	
-	char *composite = (char *)malloc(NES_RAW_TILE_LENGTH * tileCount);
+	char *composite = (char *)malloc(NES_COMPOSITE_TILE_LENGTH * tileCount);
 	
 	for (curTile = 0; curTile < tileCount; curTile++) {
 		v_printf(VERBOSE_TRACE_1, "curTile: %d/%d", curTile + 1, tileCount);
@@ -920,13 +1028,13 @@ bool NESConvertTileDataToComposite(char *buf, char *tileData, int size) {
 		for (i = 0; i < NES_ROM_TILE_CHANNEL_LENGTH; i++) {
 			for (j = 7; j >= 0; j--) {
 				int pixel_offset = (i * 8) + (8 - j); //where in the composite we are
-				composite[(pixel_offset + curTile * NES_RAW_TILE_LENGTH) - 1] = NESCombineBits(channel_a[i], channel_b[i], j);
-				v_printf(VERBOSE_TRACE_2, "Composite (%d,%d:%d): %d", i, j, (pixel_offset + curTile * NES_RAW_TILE_LENGTH),composite[pixel_offset + curTile * NES_RAW_TILE_LENGTH]);
+				composite[(pixel_offset + curTile * NES_COMPOSITE_TILE_LENGTH) - 1] = NESCombineBits(channel_a[i], channel_b[i], j);
+				v_printf(VERBOSE_TRACE_2, "Composite (%d,%d:%d): %d", i, j, (pixel_offset + curTile * NES_COMPOSITE_TILE_LENGTH),composite[pixel_offset + curTile * NES_COMPOSITE_TILE_LENGTH]);
 			}
 		}
 	}
 	
-	memcpy(buf, composite, NES_RAW_TILE_LENGTH * tileCount);
+	memcpy(buf, composite, NES_COMPOSITE_TILE_LENGTH * tileCount);
 	
 	return true;
 }

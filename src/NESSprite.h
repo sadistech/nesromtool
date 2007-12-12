@@ -19,8 +19,7 @@ extern "C" {
 #endif
 
 typedef struct nesTileStruct{
-	int width;
-	int height;
+	int width; /* how many tiles wide */
 	char *tileData;
 } NESTile;
 

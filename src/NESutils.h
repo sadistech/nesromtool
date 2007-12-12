@@ -67,7 +67,7 @@ extern "C" {
 
 #define NES_ROM_TILE_CHANNEL_LENGTH 		8			/* length of a single tile channel, in bytes: (NES_ROM_TILE_LENGTH / 2) = 8 bytes */
 
-#define NES_RAW_TILE_LENGTH 				64			/* datalength for single-tile RAW file (.raw) - 8 x 8 bytes (pixels) */
+#define NES_COMPOSITE_TILE_LENGTH 			64			/* datalength for single-tile COMPOSITE file (.raw) - 8 x 8 bytes (pixels) */
 
 #define NES_TILE_WIDTH 						8			/* width, in pixels, of a single tile */
 #define NES_TILE_HEIGHT 					8			/* height, in pixels, of a single tile */
@@ -143,9 +143,13 @@ int NESSeekToBank(FILE *ifile, NESBankType bank_type, int nth_bank);
 int NESSeekToTile(FILE *ifile, NESBankType bank_type, int nth_bank, int nth_tile);
 int NESSeekAheadNTiles(FILE *ifile, int n);
 
-//for converting between ROM tile data and RAW tile data
+//for converting between ROM tile data and Composite tile data
 char NESCombineBits(int a, int b, int n);
-char *NESBreakBits(char c);
+void NESBreakBits(char pixel, char *buf);
+
+//conversion functions:
+int NESTileToComposite(char *tile_data, char *composite_data);
+int NESCompositeToTile(char *composite_data, char *tile_data);
 
 bool NESConvertTileDataToComposite(char *buf, char *tileData, int size);
 int NESTileCountFromData(u16 size);

@@ -18,6 +18,7 @@ static int verbosity = 0;
 void v_printf(int verbose_level, char *fmt, ...);
 int get_verbosity();
 int increment_verbosity();
+void set_verbosity(int v);
 
 #ifdef __cplusplus
 };
