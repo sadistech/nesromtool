@@ -950,7 +950,11 @@ void NESCompositeRowToChannels(char *tile_row, char *buf) {
 	**	buf[0] == channel_a, buf[1] == channel_b
 	*/
 	
+	v_printf(VERBOSE_TRACE, "NESCompositeRowToChannels()");
+	
 	if (!tile_row || !buf) return;
+	
+	v_printf(VERBOSE_TRACE_2, "Passed errorchecking.");
 	
 	//initialize
 	buf[0] = 0; //channel_a
@@ -959,6 +963,8 @@ void NESCompositeRowToChannels(char *tile_row, char *buf) {
 	int i = 0;
 	for (i = 0; i < NES_TILE_WIDTH; i++) {
 		//shift the bits to the left
+		v_printf(VERBOSE_TRACE_2, "Checking %d", tile_row[i]);
+		
 		buf[0] <<= 1; 
 		buf[1] <<= 1;
 		
@@ -966,6 +972,8 @@ void NESCompositeRowToChannels(char *tile_row, char *buf) {
 		if (tile_row[i] & 1) buf[0]++;
 		if (tile_row[i] & 2) buf[1]++;
 	}
+	
+	v_printf(VERBOSE_TRACE_2, "Done.");
 }
 
 int NESCompositeToTile(char *composite_data, char *buf) {
