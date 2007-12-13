@@ -149,6 +149,7 @@ void NESBreakBits(char pixel, char *buf);
 
 //conversion functions:
 int NESTileToComposite(char *tile_data, char *composite_data);
+void NESCompositeRowToChannels(char *tile_row, char *buf);
 int NESCompositeToTile(char *composite_data, char *tile_data);
 
 bool NESConvertTileDataToComposite(char *buf, char *tileData, int size);

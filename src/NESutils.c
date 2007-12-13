@@ -943,6 +943,31 @@ int NESTileToComposite(char *tile_data, char *buf) {
 	return 1;
 }
 
+void NESCompositeRowToChannels(char *tile_row, char *buf) {
+	/*
+	**	converts tile_row (an 8-byte character array) into channels
+	**	buf should be allocated as 2 bytes.
+	**	buf[0] == channel_a, buf[1] == channel_b
+	*/
+	
+	if (!tile_row || !buf) return;
+	
+	//initialize
+	buf[0] = 0; //channel_a
+	buf[1] = 0; //channel_b
+	
+	int i = 0;
+	for (i = 0; i < NES_TILE_WIDTH; i++) {
+		//shift the bits to the left
+		buf[0] <<= 1; 
+		buf[1] <<= 1;
+		
+		//break into channels
+		if (tile_row[i] & 1) buf[0]++;
+		if (tile_row[i] & 2) buf[1]++;
+	}
+}
+
 int NESCompositeToTile(char *composite_data, char *buf) {
 	/*
 	**	convert a single composite tile into tile format
@@ -954,36 +979,22 @@ int NESCompositeToTile(char *composite_data, char *buf) {
 	
 	char *new_tile = (char*)malloc(NES_ROM_TILE_LENGTH);
 	
-	char byte_a = 0; //temporary channel_a byte
-	char byte_b = 0; //temporary channel_b byte
-	char pixel[2]; //temporary bit cache for splitting into channels
+	char channel[2]; //temporary cache for splitting into channels
 	
-	int i = 0; //horiz
-	int j = 0; //vert
+	int i = 0;
 	
 	//loop over the pixels in composite_data
 	//loop row by row, pixel by pixel
-	for (j = 0; j < NES_TILE_WIDTH; j++) { 	//looping over rows of pixels
-		for (i = 0; i < NES_TILE_HEIGHT; i++) { //looping over pixels in the row
-			//shift the bits
-			byte_a <<= 1;
-			byte_b <<= 1;
-			
-			NESBreakBits(composite_data[j * NES_TILE_WIDTH + i], pixel);
-						
-			//set the values of the byte
-			if (pixel[1] == '1') byte_a++;
-			if (pixel[0] == '1') byte_b++;
-		} //end of pixel loop
+	for (i = 0; i < NES_TILE_HEIGHT; i++) { //looping over pixels in rows
+		//NESBreakBits(composite_data[j * NES_TILE_WIDTH + i], pixel);
+		NESCompositeRowToChannels(composite_data, channel);
 		
 		//set the channels in the new tile
-		new_tile[j] = byte_a; //channel A
-		new_tile[j + NES_ROM_TILE_CHANNEL_LENGTH] = byte_b; //channel B
+		new_tile[i] = channel[0]; //channel A
+		new_tile[i + NES_ROM_TILE_CHANNEL_LENGTH] = channel[1]; //channel B
 		
-		//reset the holders...
-		byte_a = 0;
-		byte_b = 0;
-	}
+		composite_data += NES_TILE_WIDTH;
+	} //end of pixel loop
 	
 	//copy into buffer and free memory
 	memcpy(buf, new_tile, NES_ROM_TILE_LENGTH);
