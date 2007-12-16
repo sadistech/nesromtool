@@ -57,6 +57,12 @@ char color_palette[4] =		"0136"; //default color palette (uses ANSI terminal col
                              
 #define CMD_EXTRACT_PRG		"-prg"		/* extract PRG bank */
 #define CMD_EXTRACT_CHR		"-chr"		/* extract CHR bank */
+
+// inject
+#define CMD_INJECT			"inject"
+#define CMD_INJECT_TILE		"-tile"
+#define CMD_INJECT_PRG		"-prg"
+#define CMD_INJECT_CHR		"-chr"
 	
 
 //program options (global ones)
@@ -120,6 +126,7 @@ void print_usage(bool extended);
 void parse_cmd_info(char **argv);
 void parse_cmd_title(char **argv);
 void parse_cmd_extract(char **argv);
+void parse_cmd_inject(char **argv);
 
 //globals
 //********************
@@ -179,6 +186,7 @@ int main (int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 		
+	//run parsing function based on the command:
 	if (strcmp(command, CMD_INFO) == 0) {
 		//info command
 		parse_cmd_info(argv);
@@ -188,6 +196,9 @@ int main (int argc, char *argv[]) {
 	} else if (strcmp(command, CMD_EXTRACT) == 0) {
 		//extract command
 		parse_cmd_extract(argv);
+	} else if (strcmp(command, CMD_INJECT) == 0) {
+		//inject command
+		parse_cmd_inject(argv);
 	} else {
 		//error! unknown command!
 		printf("Unknown command: %s\n\n", command);
@@ -857,5 +868,48 @@ void parse_cmd_extract(char **argv) {
 	}	else {
 		//illegal command
 		printf("unknown extraction type (%s)\n", extract_command);
+		exit(EXIT_FAILURE);
+	}
+}
+
+void parse_cmd_inject(char **argv) {
+	/*
+	**	parse argv for injection options
+	**	has one required parameter followed by options specific to that parameter
+	**	-tile, -chr, -prg
+	*/
+	
+	char *current_arg = NULL;
+	char *inject_type = GET_NEXT_ARG; //should be oe of -tile, -chr, -prg
+	
+	v_printf(VERBOSE_NOTICE, "Injecting (%s)", inject_type);
+	
+	//if the first modifier doesnt' start with a '-', then something's wrong
+	// so bail.
+	if (!IS_OPT(inject_type)) {
+		printf("No modifier specified for extract command.\nSee usage (%s --help)\n\n", program_name);
+		exit(EXIT_FAILURE);
+	}
+	
+	//now, let's parse based on what type of injection we're doing.
+	
+	#pragma mark **Inject Tile
+	if (strcmp(inject_type, CMD_INJECT_TILE) == 0) {
+		// usage:
+		// inject -tile 
+		fprintf(stderr, "Inject Tile. Not implemented\n");
+		exit(EXIT_FAILURE);
+	#pragma mark **Inject PRG
+	} else if (strcmp(inject_type, CMD_INJECT_PRG) == 0) {
+		fprintf(stderr, "Inject PRG Bank. Not implemented\n");
+		exit(EXIT_FAILURE);
+	#pragma mark **Inject CHR
+	} else if (strcmp(inject_type, CMD_INJECT_CHR) == 0) {
+		fprintf(stderr, "Inject CHR Bank. Not implemented\n");
+		exit(EXIT_FAILURE);
+	} else {
+		//illegal type
+		fprintf(stderr, "Unknown injection type (%s)\n", inject_type);
+		exit(EXIT_FAILURE);
 	}
 }
