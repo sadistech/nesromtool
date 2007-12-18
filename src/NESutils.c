@@ -344,6 +344,7 @@ bool NESExtractCompoundTileData(char *chrData, FILE *ofile, int fromIndex, int t
 #pragma mark -
 
 bool NESInjectTileFile(FILE *ofile, FILE *tileFile, int chrIndex, int tileIndex) {
+	/* BROKEN */
 	if (!ofile || !tileFile) return false; //bad!
 	
 //	printf("files are ok!\n");
@@ -360,14 +361,29 @@ bool NESInjectTileFile(FILE *ofile, FILE *tileFile, int chrIndex, int tileIndex)
 	
 //	printf("read data!\n");
 	
-	bool success = NESInjectTileData(ofile, tileData, chrIndex, tileIndex);
+	bool success = false;//NESInjectTileData(ofile, tileData, chrIndex, tileIndex);
 	
 	free(tileData);
 	
 	return success;
 }
 
-bool NESInjectTileData(FILE *ofile, char *tileData, int chrIndex, int tileIndex) {
+bool NESInjectTileData(FILE *rom_file, char *tile_data, int tile_count, NESBankType bank_type, int bank_index, int tile_index) {
+	/*
+	**
+	*/
+	
+	if (!rom_file || !tile_data) return false;
+	
+	int data_size = tile_count * NES_ROM_TILE_LENGTH;
+	
+	NESSeekToBank(rom_file, bank_type, bank_index);
+	NESSeekAheadNTiles(rom_file, tile_index);
+	
+	return (fwrite(tile_data, NES_ROM_TILE_LENGTH, tile_count, rom_file) == tile_count);
+}
+
+bool NESInjectRawTileData(FILE *ofile, char *tileData, int chrIndex, int tileIndex) {
 	if (!ofile || !tileData) return false; //error
 	
 	if (tileIndex < 1 || tileIndex > NES_MAX_TILES_CHR) return false; //error
@@ -447,6 +463,8 @@ bool NESInjectCompoundTileFile(FILE *ofile, FILE *ifile, int columns, NESSpriteO
 }
 
 bool NESInjectCompoundTile(FILE *ofile, char *tileData, int size, int columns, NESSpriteOrder order, int chrIndex, int startIndex) {
+	/* BROKEN! */
+	
 	if (!ofile || !tileData) return false;
 	if (columns < 1) return false;
 	if (chrIndex < 1 || chrIndex > NESGetChrBankCount(ofile)) return false;
@@ -504,7 +522,7 @@ bool NESInjectCompoundTile(FILE *ofile, char *tileData, int size, int columns, N
 		
 		printf("Injecting tile %d\t", curTile);
 		
-		bool err = NESInjectTileData(ofile, tile, chrIndex, startIndex + curTile);
+		bool err = false; //NESInjectTileData(ofile, tile, chrIndex, startIndex + curTile);
 		free(tile);
 		
 		return err;

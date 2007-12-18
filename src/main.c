@@ -44,6 +44,7 @@ char color_palette[4] =		"0136"; //default color palette (uses ANSI terminal col
 
 //info
 #define CMD_INFO			"info"
+#define CMD_INFO_ALL		"-a"
 
 //title
 #define CMD_TITLE			"title"
@@ -242,6 +243,15 @@ void parse_cmd_info(char **argv) {
 	//takes no options... so get right into reading filename(s)
 		
 	char *current_arg = GET_NEXT_ARG;
+	bool print_all = false;
+	
+	if (IS_OPT(current_arg)) {
+		if (strcmp(current_arg, CMD_INFO_ALL) == 0) {
+			print_all = true;
+		}
+	}
+	
+	current_arg = GET_NEXT_ARG;
 	
 	if (current_arg == NULL) {
 		printf("no filenames specified!\n");
@@ -321,6 +331,23 @@ void parse_cmd_info(char **argv) {
 		printf("\n");
 		
 		free(title);
+		
+		if (print_all) {
+			// print offsets, too
+			int i = 0;
+			int prg_count = NESGetPrgBankCount(ifile);
+			int chr_count = NESGetChrBankCount(ifile);
+			
+			for (i = 1; i <= prg_count; i++) {
+				NESSeekToBank(ifile, nes_prg_bank, i);
+				printf("PRG Bank %d offset: %08X\n", i, (unsigned int)ftell(ifile));
+			}
+			
+			for (i = 1; i <= chr_count; i++) {
+				NESSeekToBank(ifile, nes_chr_bank, i);
+				printf("CHR Bank %d offset: %08X\n", i, (unsigned int)ftell(ifile));
+			}
+		}
 		
 		fclose(ifile);
 	}
@@ -457,7 +484,7 @@ void parse_cmd_extract(char **argv) {
 		int bank_index = 0;
 		Range *tile_range = (Range*)malloc(sizeof(Range));
 		char order = nes_horizontal; //default
-		char type[10] = RAW_TYPE; //default
+		char type[10] = NATIVE_TYPE; //default
 		char output_filepath[255] = ""; //default
 		
 		//check to make sure that we actually grabbed an argument
@@ -470,7 +497,7 @@ void parse_cmd_extract(char **argv) {
 			} else if ( CHECK_ARG(OPT_PRG_BANK) ) {
 				target_bank_type = OPT_PRG_BANK;
 			} else {
-				printf("Unknown bank type: %s\n", current_arg);
+				fprintf(stderr, "Unknown bank type: %s\n", current_arg);
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -896,9 +923,78 @@ void parse_cmd_inject(char **argv) {
 	#pragma mark **Inject Tile
 	if (strcmp(inject_type, CMD_INJECT_TILE) == 0) {
 		// usage:
-		// inject -tile 
-		fprintf(stderr, "Inject Tile. Not implemented\n");
-		exit(EXIT_FAILURE);
+		// inject -tile <filename> <bank_type> <bank_offset> <start_at_nth_tile>
+		
+		char *input_filename;
+		NESBankType bank_type;
+		int bank_index;
+		int start_tile;
+		
+		//read input filename (the tile we're injecting)
+		current_arg = GET_NEXT_ARG;
+		CHECK_ARG_ERROR("Expected input filename!");
+		input_filename = current_arg;
+		
+		//read bank-type (what type of bank we're injecting into)
+		current_arg = GET_NEXT_ARG;
+		CHECK_ARG_ERROR("Expected bank type!");
+		if (strcmp(current_arg, OPT_CHR_BANK) == 0) {
+			bank_type = nes_chr_bank;
+		} else if (strcmp(current_arg, OPT_PRG_BANK) == 0) {
+			bank_type = nes_prg_bank;
+		} else {
+			fprintf(stderr, "Unknown banktype (%s)!\n", current_arg);
+			exit(EXIT_FAILURE);
+		}
+		
+		//read bank-offset (which bank we're injecting into)
+		current_arg = GET_NEXT_ARG;
+		CHECK_ARG_ERROR("Expected bank offset!");
+		bank_index = atoi(current_arg);
+		
+		//read the tile offset
+		current_arg = GET_NEXT_ARG;
+		CHECK_ARG_ERROR("Expected start-at-tile!");
+		start_tile = atoi(current_arg);
+		
+		FILE *tile_file = NULL;
+		
+		if (!(tile_file = fopen(input_filename, "r"))) {
+			perror(input_filename);
+			exit(EXIT_FAILURE);
+		}
+		
+		int tile_data_length = NESGetFilesize(tile_file);
+		rewind(tile_file);
+		char *tile_data = (char*)malloc(tile_data_length);
+		
+		if (fread(tile_data, 1, tile_data_length, tile_file) != tile_data_length) {
+			fclose(tile_file);
+			perror(input_filename);
+			exit(EXIT_FAILURE);
+		}
+		
+		fclose(tile_file);
+		
+		//now, process the file(s):
+		while((current_arg = GET_NEXT_ARG) != NULL) {
+			FILE *rom_file = NULL; //the file we're injecting
+			
+			if (!(rom_file = fopen(current_arg, "r+"))) {
+				perror(current_arg);
+				continue; // just continue...
+			}
+			
+			if (!NESInjectTileData(rom_file, tile_data, 1, bank_type, bank_index, start_tile)) {
+				fprintf(stderr, "Error injecting tile!\n");
+				fclose(rom_file);
+				exit(EXIT_FAILURE);
+			}
+			
+			fclose(rom_file);
+		}
+		
+		
 	#pragma mark **Inject PRG
 	} else if (strcmp(inject_type, CMD_INJECT_PRG) == 0) {
 		fprintf(stderr, "Inject PRG Bank. Not implemented\n");

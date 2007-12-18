@@ -117,7 +117,9 @@ bool NESInjectChrBank(FILE *ofile, char *chr_data, int n);
 char *NESGetTileDataRangeFromChrBank(char *chrData, int startIndex, int endIndex);
 
 //tile injection stuff
-bool NESInjectTileData(FILE *ofile, char *tileData, int chrIndex, int tileIndex);
+
+bool NESInjectTileData(FILE *rom_file, char *tile_data, int tile_count, NESBankType bank_type, int bank_index, int tile_index);
+bool NESInjectRawTileData(FILE *ofile, char *tileData, int chrIndex, int tileIndex);
 
 bool NESInjectTileStripFile(FILE *ofile, FILE *ifile, int chrIndex, int startIndex);
 bool NESInjectTileStrip(FILE *ofile, char *tileData, int size, int chrIndex, int startIndex);

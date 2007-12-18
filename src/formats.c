@@ -13,6 +13,13 @@ int NESWriteTileAsNative(FILE *ofile, char *data, int data_size) {
 	
 	if (!ofile || !data || data_size == 0) return 0;
 	
+	int i = 0;
+	for(i = 0; i < data_size; i++) {
+		printf("%0X ", data[i]);
+	}
+	printf("\n");
+
+	
 	return fwrite(data, data_size, 1, ofile);
 }
 
