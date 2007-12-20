@@ -193,9 +193,9 @@ bool NESGetTilesFromData(char *buf, char *data, Range *r, unsigned int adjust) {
 
 #pragma mark -
 
-bool NESInjectPrgBank(FILE *ofile, char *prg_data, int n) {
+bool NESInjectPrgBank(FILE *ofile, char *prg_data, int bank_index) {
 	/*
-	**	injects a PRG bank (prgData) into ofile in bank n
+	**	injects a single PRG bank (prg_data) into ofile in bank bank_index
 	**	replaces existing bank
 	*/
 	
@@ -203,10 +203,11 @@ bool NESInjectPrgBank(FILE *ofile, char *prg_data, int n) {
 	if (!ofile || !prg_data) return false;
 	
 	//don't bank index starts at 1... you can't inject a non-existent bank
-	if (n < 1 || n > NESGetPrgBankCount(ofile)) return false;
+	if (bank_index < 0 || bank_index >= NESGetPrgBankCount(ofile)) return false;
 	
-	//fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * (n - 1)), SEEK_SET);
-	NESSeekToBank(ofile, nes_prg_bank, n);
+	if (NESSeekToBank(ofile, nes_prg_bank, bank_index) != 0) {
+		return false;
+	}
 	
 	//write the data... if fail, return false
 	if (fwrite(prg_data, 1, NES_PRG_BANK_LENGTH, ofile) != NES_PRG_BANK_LENGTH) {
@@ -216,9 +217,9 @@ bool NESInjectPrgBank(FILE *ofile, char *prg_data, int n) {
 	return true; //noErr
 }
 
-bool NESInjectChrBank(FILE *ofile, char *chr_data, int n) {
+bool NESInjectChrBank(FILE *ofile, char *chr_data, int bank_index) {
 	/*
-	**	injects a CHR bank (chrData) info ofile in bank n
+	**	injects a CHR bank (chr_data) info ofile in bank bank_index
 	**	replaces existing bank
 	*/
 	
@@ -226,10 +227,11 @@ bool NESInjectChrBank(FILE *ofile, char *chr_data, int n) {
 	if (!ofile || !chr_data) return false;
 	
 	//don't bank index starts at 1... you can't inject a non-existent bank
-	if (n < 1 || n > NESGetChrBankCount(ofile)) return false;
+	if (bank_index < 0 || bank_index >= NESGetChrBankCount(ofile)) return false;
 	
-	//fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ofile)) + (NES_CHR_BANK_LENGTH * (n - 1)), SEEK_SET);
-	NESSeekToBank(ofile, nes_chr_bank, n);
+	if (NESSeekToBank(ofile, nes_chr_bank, bank_index) != 0) {
+		return false;
+	}
 	
 	//write the data... if fail, return false
 	if (fwrite(chr_data, 1, NES_CHR_BANK_LENGTH, ofile) != NES_CHR_BANK_LENGTH) {
@@ -308,30 +310,6 @@ bool NESExtractCompoundTileData(char *chrData, FILE *ofile, int fromIndex, int t
 
 #pragma mark -
 
-bool NESInjectTileFile(FILE *ofile, FILE *tileFile, int chrIndex, int tileIndex) {
-	/* BROKEN */
-	if (!ofile || !tileFile) return false; //bad!
-	
-//	printf("files are ok!\n");
-	
-	if (chrIndex < 1 || chrIndex > NESGetChrBankCount(ofile)) return false;
-
-//	printf("chrIndex OK!\n");
-
-	char *tileData = (char *)malloc(NES_COMPOSITE_TILE_LENGTH);
-	if (fread(tileData, 1, NES_COMPOSITE_TILE_LENGTH, tileFile) != NES_COMPOSITE_TILE_LENGTH) { //if it reads not enough bytes...
-		free(tileData);
-		return false;
-	}
-	
-//	printf("read data!\n");
-	
-	bool success = false;//NESInjectTileData(ofile, tileData, chrIndex, tileIndex);
-	
-	free(tileData);
-	
-	return success;
-}
 
 bool NESInjectTileData(FILE *rom_file, char *tile_data, int tile_count, NESBankType bank_type, int bank_index, int tile_index) {
 	/*
