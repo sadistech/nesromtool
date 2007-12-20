@@ -322,7 +322,12 @@ bool NESInjectTileData(FILE *rom_file, char *tile_data, int tile_count, NESBankT
 	**	data is injected into bank bank_index starting at tile tile_index
 	*/
 	
+	v_printf(VERBOSE_TRACE, "NESInjectTileData(rom_file=0x%08X, tile_data=0x%08x, tile_count=%d, bank_type=%c, bank_index=%d, tile_index=%d)",
+		rom_file, tile_data, tile_count, bank_type, bank_index, tile_index);
+	
 	if (!rom_file || !tile_data) return false;
+	
+	v_printf(VERBOSE_TRACE_2, "Passed error checking.");
 	
 	int data_size = tile_count * NES_ROM_TILE_LENGTH;
 	
@@ -333,6 +338,8 @@ bool NESInjectTileData(FILE *rom_file, char *tile_data, int tile_count, NESBankT
 	if (NESSeekAheadNTiles(rom_file, tile_index) != 0) {
 		return false;
 	}
+	
+	v_printf(VERBOSE_TRACE_2, "writing...");
 	
 	return (fwrite(tile_data, NES_ROM_TILE_LENGTH, tile_count, rom_file) == tile_count);
 }
@@ -753,6 +760,9 @@ int NESSeekAheadNTiles(FILE *ifile, int n) {
 	**	good for iterating through tiles
 	**	returns the current file offset pointer
 	*/
+	
+	v_printf(VERBOSE_TRACE, "NESSeekAheadNTiles(ifile=%08x, n=%d)", ifile, n);
+	v_printf(VERBOSE_TRACE_2, "Seeking ahead: %d", NES_ROM_TILE_LENGTH * n);
 	
 	return fseek(ifile, NES_ROM_TILE_LENGTH * n, SEEK_CUR);
 }

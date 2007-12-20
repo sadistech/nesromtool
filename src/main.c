@@ -964,6 +964,11 @@ void parse_cli_inject(char **argv) {
 			exit(EXIT_FAILURE);
 		}
 		
+		v_printf(VERBOSE_DEBUG, "filename: %s", input_filename);
+		v_printf(VERBOSE_DEBUG, "bank_type: %c", bank_type);
+		v_printf(VERBOSE_DEBUG, "bank_index: %d", bank_index);
+		v_printf(VERBOSE_DEBUG, "start_tile: %d", start_tile);
+		
 		int tile_data_length = NESGetFilesize(tile_file);
 		rewind(tile_file);
 		char *tile_data = (char*)malloc(tile_data_length);
