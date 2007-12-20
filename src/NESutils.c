@@ -23,7 +23,11 @@ char NESGetPrgBankCount(FILE *ifile) {
 	*/
 	
 	if (!ifile) return -1;
-	fseek(ifile, NES_PRG_COUNT_OFFSET, SEEK_SET);
+	
+	if (fseek(ifile, NES_PRG_COUNT_OFFSET, SEEK_SET) != 0) {
+		return -1;
+	}
+	
 	return (char)fgetc(ifile);
 }
 
@@ -34,7 +38,11 @@ char NESGetChrBankCount(FILE* ifile) {
 	*/
 
 	if (!ifile) return -1;
-	fseek(ifile, NES_CHR_COUNT_OFFSET, SEEK_SET);
+	
+	if (fseek(ifile, NES_CHR_COUNT_OFFSET, SEEK_SET) != 0) {
+		return -1;
+	}
+	
 	return (char)fgetc(ifile);
 }
 
