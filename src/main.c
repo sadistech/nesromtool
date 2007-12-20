@@ -249,9 +249,8 @@ void parse_cli_info(char **argv) {
 		if (strcmp(current_arg, ACTION_INFO_ALL) == 0) {
 			print_all = true;
 		}
+		current_arg = GET_NEXT_ARG;
 	}
-	
-	current_arg = GET_NEXT_ARG;
 	
 	if (current_arg == NULL) {
 		printf("no filenames specified!\n");
