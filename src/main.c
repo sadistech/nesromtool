@@ -634,9 +634,7 @@ void parse_cli_extract(char **argv) {
 			//pull the tile data out... (The native tile data is stored here)
 			u16 tile_data_length = NES_ROM_TILE_LENGTH * range_count(tile_range);
 			char *tile_data = (char*)malloc(tile_data_length);
-						
-			v_printf(VERBOSE_DEBUG, "Pulled tile data.");
-			
+									
 			//error detection
 			if ( !NESGetTilesFromData(tile_data, bank_data, tile_range, 0) ) {
 				//if this happens, it's BAD... we're reading something from internal memory
@@ -647,6 +645,8 @@ void parse_cli_extract(char **argv) {
 				fprintf(stderr, "FATAL ERROR: An error occurred while reading tile data from bank in memory.\n\n");
 				exit(EXIT_FAILURE);
 			}
+			
+			v_printf(VERBOSE_DEBUG, "Pulled tile data.");
 			
 			free(bank_data);
 			

@@ -180,13 +180,17 @@ bool NESGetTilesFromData(char *buf, char *data, Range *r, unsigned int adjust) {
 	//error detection
 	if (!buf || !data || !r || r->start < 0) return false;
 	
-	int shift_amount = ((r->start - 1) * NES_ROM_TILE_LENGTH) + adjust;
+	int shift_amount = (r->start * NES_ROM_TILE_LENGTH) + adjust;
 	v_printf(VERBOSE_TRACE_2, "Shifting %d bytes", shift_amount);
 	
 	//move the pointer to the appropriate tile...
 	char *data_pointer = data + shift_amount;
+	
+	v_printf(VERBOSE_TRACE_2, "pointer moved...");
 		
 	memcpy(buf, data_pointer, range_count(r) * NES_ROM_TILE_LENGTH);
+	
+	v_printf(VERBOSE_TRACE_2, "Done.");
 	
 	return true;
 }
