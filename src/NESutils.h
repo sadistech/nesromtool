@@ -131,7 +131,7 @@ bool NESInjectCompoundTile(FILE *ofile, char *tileData, int size, int columns, N
 char *NESMakeCompoundTile(char *tileData, int size, int columns, NESSpriteOrder order);
 
 //title functions
-bool NESHasTitle(FILE *ifile);
+int NESHasTitle(FILE *ifile);
 void NESGetTitle(char *buf, FILE *ifile, int strip);
 bool NESSetTitle(FILE *ofile, char *title);
 bool NESRemoveTitle(FILE *ofile);

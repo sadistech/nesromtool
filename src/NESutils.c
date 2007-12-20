@@ -539,11 +539,10 @@ char *NESMakeCompoundTile(char *tileData, int size, int columns, NESSpriteOrder 
 
 #pragma mark *** TITLES ***
 
-bool NESHasTitle(FILE *ifile) {
+int NESHasTitle(FILE *ifile) {
 	/*
 	**	checks ifile (NES ROM) to see if it has title data
-	**	returns false if no title data or title data blank
-	**	returns true if title data exists
+	**	returns the length of the title or 0 if there is none
 	*/
 	if (!ifile) return false;
 	
@@ -560,17 +559,13 @@ bool NESHasTitle(FILE *ifile) {
 		
 		NESGetTitle(title, ifile, false);
 		
-		//check if the title starts with a \0... if it does, then assume the title is blank... since technically it is.
-		if (title[0] == 0) {
-			free(title);
-			return false;
-		} else {
-			free(title);
-			return true;
-		}
+		int title_length = strlen(title);
+		free(title);
+		
+		return title_length;
 	}
 	
-	return false;
+	return 0;
 }
 
 void NESGetTitle(char *buf, FILE *ifile, bool strip) {
