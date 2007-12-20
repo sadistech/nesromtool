@@ -15,7 +15,7 @@ int NESWriteTileAsNative(FILE *ofile, char *data, int data_size) {
 	
 	int i = 0;
 	for(i = 0; i < data_size; i++) {
-		printf("%0X ", data[i]);
+		printf("%02X ", (unsigned char)data[i]);
 	}
 	printf("\n");
 
