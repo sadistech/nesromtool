@@ -340,12 +340,12 @@ void parse_cmd_info(char **argv) {
 			
 			for (i = 1; i <= prg_count; i++) {
 				NESSeekToBank(ifile, nes_prg_bank, i);
-				printf("PRG Bank %d offset: %08X\n", i, (unsigned int)ftell(ifile));
+				printf("PRG Bank %d offset: 0x%08X\n", i, (unsigned int)ftell(ifile));
 			}
 			
 			for (i = 1; i <= chr_count; i++) {
 				NESSeekToBank(ifile, nes_chr_bank, i);
-				printf("CHR Bank %d offset: %08X\n", i, (unsigned int)ftell(ifile));
+				printf("CHR Bank %d offset: 0x%08X\n", i, (unsigned int)ftell(ifile));
 			}
 		}
 		
