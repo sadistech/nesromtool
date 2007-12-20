@@ -589,15 +589,13 @@ void NESGetTitle(char *buf, FILE *ifile, bool strip) {
 	// check if ifile or buf are NULL, if so, bail
 	if (!ifile || !buf) return;
 	
-	//also bail if we don't have a titleblock
-	if (!NESHasTitle(ifile)) {
+	//seek to the location of the title data
+	if (fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ifile)) + (NES_CHR_BANK_LENGTH * NESGetChrBankCount(ifile)), SEEK_SET) != 0) {
 		return;
 	}
 	
 	//allocate the titleData
 	char *title_data = (char *)malloc(NES_TITLE_BLOCK_LENGTH + 1);
-	
-	fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ifile)) + (NES_CHR_BANK_LENGTH * NESGetChrBankCount(ifile)), SEEK_SET);
 	
 	//read the title_data... set count to the number of bytes read.
 	int count = fread(title_data, 1, NES_TITLE_BLOCK_LENGTH, ifile);

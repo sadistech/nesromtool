@@ -324,8 +324,12 @@ void parse_cli_info(char **argv) {
 		//print title info
 		//outputs '[n/a]' if no title is found...
 		char *title = (char*)malloc(NES_TITLE_BLOCK_LENGTH);
-		NESGetTitle(title, ifile, 1);
-		printf("Title:              %s\n", (title[0] != 0) ? title : "[n/a]");
+		if (NESHasTitle(ifile)) {
+			NESGetTitle(title, ifile, 1);
+			printf("Title:              %s\n", title);
+		} else {
+			printf("Title:              [n/a]\n");
+		}
 		
 		printf("\n");
 		
