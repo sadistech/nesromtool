@@ -57,7 +57,9 @@ bool NESGetRomControlBytes(char *buf, FILE *ifile) {
 	
 	if (!buf || !ifile) return false;
 	
-	fseek(ifile, NES_ROM_CONTROL_OFFSET, SEEK_SET);
+	if (fseek(ifile, NES_ROM_CONTROL_OFFSET, SEEK_SET) != 0) {
+		return false;
+	}
 	
 	if (fread(buf, NES_ROM_CONTROL_LENGTH, 1, ifile) != 1) {
 		return false;
