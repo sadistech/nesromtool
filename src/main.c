@@ -43,27 +43,27 @@ char color_palette[4] =		"0136"; //default color palette (uses ANSI terminal col
 //*******************
 
 //info
-#define CMD_INFO			"info"
-#define CMD_INFO_ALL		"-a"
+#define ACTION_INFO			"info"
+#define ACTION_INFO_ALL		"-a"
 
 //title
-#define CMD_TITLE			"title"
-#define CMD_TITLE_SET		"-set"		/* set title */
-#define CMD_TITLE_REMOVE	"-remove"	/* remove title */
-#define CMD_TITLE_PRINT		"-print"	/* print title (default) */
+#define ACTION_TITLE			"title"
+#define ACTION_TITLE_SET		"-set"		/* set title */
+#define ACTION_TITLE_REMOVE	"-remove"	/* remove title */
+#define ACTION_TITLE_PRINT		"-print"	/* print title (default) */
 
 //extract
-#define CMD_EXTRACT			"extract"
-#define CMD_EXTRACT_TILE	"-tile"		/* extract tile(s) */
+#define ACTION_EXTRACT			"extract"
+#define ACTION_EXTRACT_TILE	"-tile"		/* extract tile(s) */
                              
-#define CMD_EXTRACT_PRG		"-prg"		/* extract PRG bank */
-#define CMD_EXTRACT_CHR		"-chr"		/* extract CHR bank */
+#define ACTION_EXTRACT_PRG		"-prg"		/* extract PRG bank */
+#define ACTION_EXTRACT_CHR		"-chr"		/* extract CHR bank */
 
 // inject
-#define CMD_INJECT			"inject"
-#define CMD_INJECT_TILE		"-tile"
-#define CMD_INJECT_PRG		"-prg"
-#define CMD_INJECT_CHR		"-chr"
+#define ACTION_INJECT			"inject"
+#define ACTION_INJECT_TILE		"-tile"
+#define ACTION_INJECT_PRG		"-prg"
+#define ACTION_INJECT_CHR		"-chr"
 	
 
 //program options (global ones)
@@ -124,10 +124,10 @@ char color_palette[4] =		"0136"; //default color palette (uses ANSI terminal col
 void print_usage(bool extended);
 
 //command parsing functions
-void parse_cmd_info(char **argv);
-void parse_cmd_title(char **argv);
-void parse_cmd_extract(char **argv);
-void parse_cmd_inject(char **argv);
+void parse_cli_info(char **argv);
+void parse_cli_title(char **argv);
+void parse_cli_extract(char **argv);
+void parse_cli_inject(char **argv);
 
 //globals
 //********************
@@ -188,18 +188,18 @@ int main (int argc, char *argv[]) {
 	}
 		
 	//run parsing function based on the command:
-	if (strcmp(command, CMD_INFO) == 0) {
+	if (strcmp(command, ACTION_INFO) == 0) {
 		//info command
-		parse_cmd_info(argv);
-	} else if (strcmp(command, CMD_TITLE) == 0) {
+		parse_cli_info(argv);
+	} else if (strcmp(command, ACTION_TITLE) == 0) {
 		//title command
-		parse_cmd_title(argv);
-	} else if (strcmp(command, CMD_EXTRACT) == 0) {
+		parse_cli_title(argv);
+	} else if (strcmp(command, ACTION_EXTRACT) == 0) {
 		//extract command
-		parse_cmd_extract(argv);
-	} else if (strcmp(command, CMD_INJECT) == 0) {
+		parse_cli_extract(argv);
+	} else if (strcmp(command, ACTION_INJECT) == 0) {
 		//inject command
-		parse_cmd_inject(argv);
+		parse_cli_inject(argv);
 	} else {
 		//error! unknown command!
 		printf("Unknown command: %s\n\n", command);
@@ -218,7 +218,7 @@ void print_usage(bool extended) {
 	printf("\n");
 	printf("%s-%s (http://nesromtool.sourceforge.net)\n", PACKAGE, VERSION);
 	printf("Written by spike grobstein <spike@sadistech.com>\n\n");
-	printf("USAGE: %s [options] <command> [command options] <file> [<file> ...]\n\n", program_name);
+	printf("USAGE: %s [ options ] <action> [ action-options ... ] <file> [ <file> ... ]\n\n", program_name);
 
 	if (extended) {
 		printf("INSERT EXTENDED HELP HERE...\n\n");
@@ -229,7 +229,7 @@ void print_usage(bool extended) {
 
 #pragma mark -
 
-void parse_cmd_info(char **argv) {
+void parse_cli_info(char **argv) {
 	/*
 	**	parses program arguments for the info command
 	**	prints out various info about the ROM file...
@@ -246,7 +246,7 @@ void parse_cmd_info(char **argv) {
 	bool print_all = false;
 	
 	if (IS_OPT(current_arg)) {
-		if (strcmp(current_arg, CMD_INFO_ALL) == 0) {
+		if (strcmp(current_arg, ACTION_INFO_ALL) == 0) {
 			print_all = true;
 		}
 	}
@@ -353,7 +353,7 @@ void parse_cmd_info(char **argv) {
 	}
 }
 
-void parse_cmd_title(char **argv) {
+void parse_cli_title(char **argv) {
 	/*
 	**	title functions...
 	**	the first element of argv should be the first element after the 'title' command
@@ -364,7 +364,7 @@ void parse_cmd_title(char **argv) {
 	//	-remove
 	//	-print (default)
 	
-	char title_command[10] = CMD_TITLE_PRINT; //default
+	char title_command[10] = ACTION_TITLE_PRINT; //default
 	
 	char *current_arg = GET_NEXT_ARG;
 	
@@ -375,7 +375,7 @@ void parse_cmd_title(char **argv) {
 	}
 			
 	#pragma mark **Print Title
-	if (strcmp(title_command, CMD_TITLE_PRINT) == 0) {
+	if (strcmp(title_command, ACTION_TITLE_PRINT) == 0) {
 		//print the title:
 		for ( ; (current_arg != NULL) ; current_arg = GET_NEXT_ARG) {
 			FILE *ifile = NULL;
@@ -403,7 +403,7 @@ void parse_cmd_title(char **argv) {
 		}
 		
 	#pragma mark **Set Title
-	} else if (strcmp(title_command, CMD_TITLE_SET) == 0) {
+	} else if (strcmp(title_command, ACTION_TITLE_SET) == 0) {
 		//set a new title
 		char *new_title = current_arg;
 		current_arg = GET_NEXT_ARG;
@@ -426,7 +426,7 @@ void parse_cmd_title(char **argv) {
 			fclose(ifile);
 		}
 	#pragma mark **Remove Title
-	} else if (strcmp(title_command, CMD_TITLE_REMOVE) == 0) {
+	} else if (strcmp(title_command, ACTION_TITLE_REMOVE) == 0) {
 		//remove the title
 		for (; (current_arg != NULL) ; current_arg = GET_NEXT_ARG) {
 			FILE *ifile = NULL;
@@ -450,7 +450,7 @@ void parse_cmd_title(char **argv) {
 	}
 }
 
-void parse_cmd_extract(char **argv) {
+void parse_cli_extract(char **argv) {
 	/*
 	**	extraction stuff
 	**	takes one required argument:
@@ -472,7 +472,7 @@ void parse_cmd_extract(char **argv) {
 	}
 	
 	#pragma mark **Extract Tile
-	if (strcmp(extract_command, CMD_EXTRACT_TILE) == 0) {
+	if (strcmp(extract_command, ACTION_EXTRACT_TILE) == 0) {
 		//extract tile
 		//usage: -tile [-prg | -chr] <bank index> <range> [-h | -v] [-f <output_filename>] [-t <type>]
 		
@@ -713,7 +713,7 @@ void parse_cmd_extract(char **argv) {
 		v_printf(VERBOSE_DEBUG, "Done extracting tile.");
 				
 	#pragma mark **Extract PRG/CHR
-	} else if (strcmp(extract_command, CMD_EXTRACT_PRG) == 0 || strcmp(extract_command, CMD_EXTRACT_CHR) == 0) {
+	} else if (strcmp(extract_command, ACTION_EXTRACT_PRG) == 0 || strcmp(extract_command, ACTION_EXTRACT_CHR) == 0) {
 		//extract PRG or CHR bank
 		// format is:
 		// -prg <bank index> [options]
@@ -785,7 +785,7 @@ void parse_cmd_extract(char **argv) {
 				continue;
 			}
 			
-			if (strcmp(extract_command,  CMD_EXTRACT_PRG) == 0) {
+			if (strcmp(extract_command,  ACTION_EXTRACT_PRG) == 0) {
 				//extract the PRG bank
 				
 				char *data = (char*)malloc(NES_PRG_BANK_LENGTH);
@@ -836,7 +836,7 @@ void parse_cmd_extract(char **argv) {
 					}
 				}
 				
-			} else if (strcmp(extract_command, CMD_EXTRACT_CHR) == 0) {
+			} else if (strcmp(extract_command, ACTION_EXTRACT_CHR) == 0) {
 				//extract the CHR bank
 				
 				char *data = (char*)malloc(NES_CHR_BANK_LENGTH);
@@ -899,7 +899,7 @@ void parse_cmd_extract(char **argv) {
 	}
 }
 
-void parse_cmd_inject(char **argv) {
+void parse_cli_inject(char **argv) {
 	/*
 	**	parse argv for injection options
 	**	has one required parameter followed by options specific to that parameter
@@ -921,7 +921,7 @@ void parse_cmd_inject(char **argv) {
 	//now, let's parse based on what type of injection we're doing.
 	
 	#pragma mark **Inject Tile
-	if (strcmp(inject_type, CMD_INJECT_TILE) == 0) {
+	if (strcmp(inject_type, ACTION_INJECT_TILE) == 0) {
 		// usage:
 		// inject -tile <filename> <bank_type> <bank_offset> <start_at_nth_tile>
 		
@@ -996,11 +996,11 @@ void parse_cmd_inject(char **argv) {
 		
 		
 	#pragma mark **Inject PRG
-	} else if (strcmp(inject_type, CMD_INJECT_PRG) == 0) {
+	} else if (strcmp(inject_type, ACTION_INJECT_PRG) == 0) {
 		fprintf(stderr, "Inject PRG Bank. Not implemented\n");
 		exit(EXIT_FAILURE);
 	#pragma mark **Inject CHR
-	} else if (strcmp(inject_type, CMD_INJECT_CHR) == 0) {
+	} else if (strcmp(inject_type, ACTION_INJECT_CHR) == 0) {
 		fprintf(stderr, "Inject CHR Bank. Not implemented\n");
 		exit(EXIT_FAILURE);
 	} else {
