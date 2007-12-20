@@ -68,7 +68,7 @@ bool NESGetRomControlBytes(char *buf, FILE *ifile) {
 	return true;
 }
 
-bool NESGetBank(char *buf, FILE *ifile, int n, NESBankType type) {
+bool NESGetBank(char *buf, FILE *ifile, int bank_index, NESBankType type) {
 	/*
 	**	get the bank of type 'type'
 	**	buf must be pre-allocated with enough space for the bank in question...
@@ -76,10 +76,10 @@ bool NESGetBank(char *buf, FILE *ifile, int n, NESBankType type) {
 	
 	switch (type) {
 		case nes_chr_bank:
-			return NESGetChrBank(buf, ifile, n);
+			return NESGetChrBank(buf, ifile, bank_index);
 			break;
 		case nes_prg_bank:
-			return NESGetPrgBank(buf, ifile, n);
+			return NESGetPrgBank(buf, ifile, bank_index);
 			break;
 		default:
 			return false;
@@ -87,9 +87,9 @@ bool NESGetBank(char *buf, FILE *ifile, int n, NESBankType type) {
 	
 }
 
-bool NESGetPrgBank(char *buf, FILE *ifile, int n) {
+bool NESGetPrgBank(char *buf, FILE *ifile, int bank_index) {
 	/*
-	**	retreive the nth PRG bank and put the data into buf
+	**	retreive the bank_index PRG bank and put the data into buf
 	**	buf needs to be allocated: malloc(NES_PRG_BANK_LENGTH)
 	*/
 	
@@ -99,13 +99,15 @@ bool NESGetPrgBank(char *buf, FILE *ifile, int n) {
 	}
 	
 	//bail if we try to get a nonexistent PRG bank
-	if (n < 1 || n > NESGetPrgBankCount(ifile)) return false;
+	if (bank_index < 0 || bank_index >= NESGetPrgBankCount(ifile)) return false;
 	
 	char *PRG_data = (char *)malloc(NES_PRG_BANK_LENGTH + 1); //temporary placeholder for data
 	
 	//seek to proper offset
 	//fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * (n - 1)), SEEK_SET);
-	NESSeekToBank(ifile, nes_prg_bank, n);
+	if (NESSeekToBank(ifile, nes_prg_bank, bank_index) != 0) {
+		return false;
+	}
 	
 	//read to placeholder
 	if (fread(PRG_data, 1, NES_PRG_BANK_LENGTH, ifile) != NES_PRG_BANK_LENGTH) {
@@ -120,20 +122,20 @@ bool NESGetPrgBank(char *buf, FILE *ifile, int n) {
 	return true;
 }
 
-bool NESGetChrBank(char *buf, FILE *ifile, int n) {
+bool NESGetChrBank(char *buf, FILE *ifile, int bank_index) {
 	/*
-	**	retreive the nth CHR bank and put the data into buf
+	**	retreive the bank_index CHR bank and put the data into buf
 	**	buf needs to be allocated: malloc(NES_CHR_BANK_LENGTH)
 	*/
 	
-	v_printf(VERBOSE_TRACE, "NESGetChrBank => %0x, %0x, %d", buf, ifile, n);
+	v_printf(VERBOSE_TRACE, "NESGetChrBank => %0x, %0x, %d", buf, ifile, bank_index);
 			
 	//check to make sure that ifile and buf aren't NULL
 	if (!ifile || !buf) return false;
 	v_printf(VERBOSE_TRACE_2, "No null values!");
 		
 	//bail if we try to get a nonexistent bank
-	if (n < 1 || n > NESGetChrBankCount(ifile)) return false;
+	if (bank_index < 0 || bank_index >= NESGetChrBankCount(ifile)) return false;
 	v_printf(VERBOSE_TRACE_2, "Passed error checking.");
 	
 	//temporary placeholder for data
@@ -141,7 +143,9 @@ bool NESGetChrBank(char *buf, FILE *ifile, int n) {
 	
 	//move to necessary point in file
 	//fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ifile)) + (NES_CHR_BANK_LENGTH * (n - 1)), SEEK_SET);
-	NESSeekToBank(ifile, nes_chr_bank, n);
+	if (NESSeekToBank(ifile, nes_chr_bank, bank_index) != 0) {
+		return false;
+	}
 	
 	//read data into placeholder
 	if (fread(chrData, 1, NES_CHR_BANK_LENGTH, ifile) != NES_CHR_BANK_LENGTH) {
@@ -270,55 +274,6 @@ bool NESInjectChrBank(FILE *ofile, char *chr_data, int n) {
 //}
 
 #pragma mark -
-
-/*
-bool NESExtractTile(FILE *ifile, FILE *ofile, int chrIndex, int n) {
-	if (!ifile || !ofile) return false;
-	
-	if (chrIndex < 1 || chrIndex > NESGetChrBankCount(ifile)) return false;
-	if (n < 1 || n > NES_MAX_TILES_CHR) return false;
-	
-	char *chrData = (char*)malloc(NES_CHR_BANK_LENGTH);
-	NESGetChrBank(chrData, ifile, chrIndex);
-	
-	if (!chrData) return false; //error
-	
-	char *tileData = NESGetTileDataFromChrBank(chrData, n);
-	free(chrData);
-	
-	if (!tileData) return false;
-	
-	char *compositeData;// = NESTileToComposite(tileData, 
-	
-	if (fwrite(NESGetTileDataFromChrBank(chrData, n), 1, NES_COMPOSITE_TILE_LENGTH, ofile) != NES_COMPOSITE_TILE_LENGTH) {
-		free(chrData);
-		return false;
-	}
-	
-	free(chrData);
-	return true; //noErr
-}*/
-
-/*
-bool NESExtractTileRange(FILE *ifile, FILE *ofile, int chrIndex, int startIndex, int endIndex) {
-	if (!ifile || !ofile) return false;
-	
-	if (chrIndex < 1 || chrIndex > NESGetChrBankCount(ifile)) return false;
-	if (startIndex < 1 || startIndex > NES_MAX_TILES_CHR || endIndex < startIndex || endIndex > NES_MAX_TILES_CHR) return false;
-	
-	char *chrData = (char*)malloc(NES_CHR_BANK_LENGTH);
-	NESGetChrBank(chrData, ifile, chrIndex);
-	
-	if (!chrData) return false;
-	
-	if (fwrite(NESGetTileDataRangeFromChrBank(chrData, startIndex, endIndex), 1, NES_COMPOSITE_TILE_LENGTH * (endIndex - startIndex), ofile) != (NES_COMPOSITE_TILE_LENGTH * (endIndex - startIndex))) {
-		free(chrData);
-		return false;
-	}
-	
-	free(chrData);
-	return true;
-}*/
 
 char *NESGetCompoundTileDataFromChrBank(char *chrData, NESSpriteOrder order, int columns, int startIndex, int endIndex) {
 	return NULL;
@@ -597,90 +552,6 @@ char *NESMakeCompoundTile(char *tileData, int size, int columns, NESSpriteOrder 
 
 #pragma mark -
 
-#pragma mark *** HIGH LEVEL ***
-
-bool NESExtractPrgBank(FILE *fromFile, FILE *toFile, int n) {
-	//gets the nth PRG bank and saves it to a file.
-	
-	//no need to do any error checking since it happens in NESGetPrgBank()
-
-	char *PRG_data = (char*)malloc(NES_PRG_BANK_LENGTH);
-	
-	NESGetPrgBank(PRG_data, fromFile, n);
-	
-	if (!PRG_data) return false;
-	
-	if (fwrite(PRG_data, 1, NES_PRG_BANK_LENGTH, toFile) != NES_PRG_BANK_LENGTH) {
-		free(PRG_data);
-		return false;
-	}
-	
-	free(PRG_data);
-	return true; //noErr
-}
-
-bool NESExtractChrBank(FILE *fromFile, FILE *toFile, int n) {
-	//extracts a CHRbank from a ROM into its own file
-	//all errorchecking occurs in NESGetChrBank()
-	
-	char *chrData = (char*)malloc(NES_CHR_BANK_LENGTH);
-	NESGetChrBank(chrData, fromFile, n);
-	
-	if (!chrData) return false;
-	
-	if (fwrite(chrData, 1, NES_CHR_BANK_LENGTH, toFile) != NES_CHR_BANK_LENGTH) {
-		free(chrData);
-		return false;
-	}
-	
-	free(chrData);
-	
-	return true;
-}
-
-/*bool NESInjectPrgBank(FILE *ofile, FILE *ifile, int n) {
-	if (!ofile || !ifile) return false; //error
-	
-	if (n < 1 || n > NESGetPrgBankCount(ofile)) return false; //error
-	
-	//move to nth PRG bank for writing...
-	//fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * (n - 1)), SEEK_SET);
-	NESSeekToBank(ofile, nes_prg_bank, n);
-	
-	char *prgData = (char *)malloc(NES_PRG_BANK_LENGTH);
-	if (fread(prgData, 1, NES_PRG_BANK_LENGTH, ifile) != NES_PRG_BANK_LENGTH) {
-		free(prgData);
-		return false;
-	}
-	
-	bool err = NESInjectPrgBankData(ofile, prgData, n);
-	free(prgData);
-	return err;
-}
-
-
-bool NESInjectChrBank(FILE *ofile, FILE *ifile, int n) {
-	if (!ofile || !ifile) return false; //error
-	
-	if (n < 1 || n > NESGetChrBankCount(ofile)) return false; //error
-	
-	//fseek(ofile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ofile)) + (NES_CHR_BANK_LENGTH * (n - 1)), SEEK_SET);
-	NESSeekToBank(ofile, nes_chr_bank, n);
-	
-	char *chrData = (char *)malloc(NES_CHR_BANK_LENGTH);
-	
-	if (fread(chrData, 1, NES_CHR_BANK_LENGTH, ifile) != NES_CHR_BANK_LENGTH) {
-		free(chrData);
-		return false;
-	}
-	
-	bool err = NESInjectChrBankData(ofile, chrData, n);
-	free(chrData);
-	return err;
-}*/
-
-#pragma mark -
-
 #pragma mark *** TITLES ***
 
 bool NESHasTitle(FILE *ifile) {
@@ -850,33 +721,35 @@ bool NESVerifyROM(FILE *ifile) {
 }
 
 //seeking around in file
-int NESSeekToBank(FILE *ifile, NESBankType bank_type, int nth_bank) {
+int NESSeekToBank(FILE *ifile, NESBankType bank_type, int bank_index) {
 	/*
-	**	Moves the file pointer to the beginning of the nth bank_type bank
-	**	nth_bank works on a 1-based index... (first bank is 1)
-	**	returns the same value as fseek()
+	**	Moves the file pointer to the beginning of the bank_index bank_type bank
+	**	bank_index works on a 0-based index... (first bank is 0)
+	**	returns the same value as fseek() (0 on success)
 	*/
 	
 	if (bank_type == nes_prg_bank) {
-		return fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * (nth_bank - 1)), SEEK_SET);
+		return fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * bank_index), SEEK_SET);
 	} else {
-		return fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ifile)) + (NES_CHR_BANK_LENGTH * (nth_bank - 1)), SEEK_SET);
+		return fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ifile)) + (NES_CHR_BANK_LENGTH * bank_index), SEEK_SET);
 	}
 
 }
 
-int NESSeekToTile(FILE *ifile, NESBankType bank_type, int nth_bank, int nth_tile) {
+int NESSeekToTile(FILE *ifile, NESBankType bank_type, int bank_index, int tile_index) {
 	/*
-	**	Seeks to the nth_tile tile of the nth bank.
+	**	Seeks to the tile_index tile of the bank_index bank.
 	**	returns the current file offset pointer
-	**	nth_bank and nth_tile are 1-based indexes (first tile/bank is 1)
+	**	bank_index and tile_index are 0-based indexes (first tile/bank is 0)
 	*/
 	
+	//TODO: Add errorchecking
+	
 	//first seek to the bank
-	NESSeekToBank(ifile, bank_type, nth_bank);
+	NESSeekToBank(ifile, bank_type, bank_index);
 	
 	//then return the value of seeking ahead n tiles
-	return NESSeekAheadNTiles(ifile, nth_tile - 1);
+	return NESSeekAheadNTiles(ifile, tile_index);
 }
 
 int NESSeekAheadNTiles(FILE *ifile, int n) {
@@ -886,7 +759,7 @@ int NESSeekAheadNTiles(FILE *ifile, int n) {
 	**	returns the current file offset pointer
 	*/
 	
-	return fseek(ifile, NES_ROM_TILE_LENGTH, SEEK_CUR);
+	return fseek(ifile, NES_ROM_TILE_LENGTH * n, SEEK_CUR);
 }
 
 #pragma mark -
