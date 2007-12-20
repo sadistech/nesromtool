@@ -555,7 +555,7 @@ int NESHasTitle(FILE *ifile) {
 	// if there's additional data beyond that, it's safe to assume that titledata exists...
 	// but we're going to check the contents of the title anyway to make sure there really is a title.
 	if (filesize >= (NES_HEADER_SIZE + PRG_count * NES_PRG_BANK_LENGTH + CHR_count * NES_CHR_BANK_LENGTH + NES_TITLE_BLOCK_LENGTH)) {
-		char *title = (char*)malloc(NES_TITLE_BLOCK_SIZE);
+		char *title = (char*)malloc(NES_TITLE_BLOCK_LENGTH);
 		
 		NESGetTitle(title, ifile, false);
 		
