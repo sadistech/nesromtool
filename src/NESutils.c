@@ -313,15 +313,22 @@ bool NESExtractCompoundTileData(char *chrData, FILE *ofile, int fromIndex, int t
 
 bool NESInjectTileData(FILE *rom_file, char *tile_data, int tile_count, NESBankType bank_type, int bank_index, int tile_index) {
 	/*
-	**
+	**	Injects tile_data into rom_file into the bank_type bank
+	**	tile_data contains tile_count tiles
+	**	data is injected into bank bank_index starting at tile tile_index
 	*/
 	
 	if (!rom_file || !tile_data) return false;
 	
 	int data_size = tile_count * NES_ROM_TILE_LENGTH;
 	
-	NESSeekToBank(rom_file, bank_type, bank_index);
-	NESSeekAheadNTiles(rom_file, tile_index);
+	if (NESSeekToBank(rom_file, bank_type, bank_index) != 0) {
+		return false;
+	}
+	
+	if (NESSeekAheadNTiles(rom_file, tile_index) != 0) {
+		return false;
+	}
 	
 	return (fwrite(tile_data, NES_ROM_TILE_LENGTH, tile_count, rom_file) == tile_count);
 }
