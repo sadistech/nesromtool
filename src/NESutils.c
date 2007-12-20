@@ -556,7 +556,18 @@ bool NESHasTitle(FILE *ifile) {
 	// if there's additional data beyond that, it's safe to assume that titledata exists...
 	// TODO: check contents of titledata to see if it's empty and return false if so... (currently, we're just assuming there is title if there's allocated space)
 	if (filesize >= (NES_HEADER_SIZE + PRG_count * NES_PRG_BANK_LENGTH + CHR_count * NES_CHR_BANK_LENGTH + NES_TITLE_BLOCK_LENGTH)) {
-		return true;
+		char *title = (char*)malloc(NES_TITLE_BLOCK_SIZE);
+		
+		NESGetTitle(title, ifile, false);
+		
+		//check if the title starts with a \0... if it does, then assume the title is blank... since technically it is.
+		if (title[0] == 0) {
+			free(title);
+			return false;
+		} else {
+			free(title);
+			return true;
+		}
 	}
 	
 	return false;
