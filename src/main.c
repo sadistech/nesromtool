@@ -330,9 +330,7 @@ void parse_cli_info(char **argv) {
 		} else {
 			printf("Title:              [n/a]\n");
 		}
-		
-		printf("\n");
-		
+				
 		free(title);
 		
 		if (print_all) {
@@ -341,16 +339,34 @@ void parse_cli_info(char **argv) {
 			int prg_count = NESGetPrgBankCount(ifile);
 			int chr_count = NESGetChrBankCount(ifile);
 			
+			char *format = NULL; //placeholder for the format of the offset output
+			
+			//if there are more than 9 PRG banks, then pad the output with a zero
+			if (prg_count > 9) {
+				format = "  PRG Bank %02d offset: 0x%08X\n";
+			} else {
+				format = "  PRG Bank %d offset: 0x%08X\n";
+			}
+			
 			for (i = 1; i <= prg_count; i++) {
 				NESSeekToBank(ifile, nes_prg_bank, i);
-				printf("PRG Bank %d offset: 0x%08X\n", i, (unsigned int)ftell(ifile));
+				printf(format, i, (unsigned int)ftell(ifile));
+			}
+			
+			//if there are more than 9 CHR banks, then pad the output with a zero
+			if (chr_count > 9) {
+				format = "  CHR Bank %02d offset: 0x%08X\n";
+			} else {
+				format = "  CHR Bank %d offset: 0x%08X\n";
 			}
 			
 			for (i = 1; i <= chr_count; i++) {
 				NESSeekToBank(ifile, nes_chr_bank, i);
-				printf("CHR Bank %d offset: 0x%08X\n", i, (unsigned int)ftell(ifile));
+				printf(format, i, (unsigned int)ftell(ifile));
 			}
 		}
+		
+		printf("\n");
 		
 		fclose(ifile);
 	}
