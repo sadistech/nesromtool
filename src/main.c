@@ -123,6 +123,8 @@ char color_palette[4] =		"0136"; //default color palette (uses ANSI terminal col
 //usage
 void print_usage(bool extended);
 
+void parse_line(int argc, char **argv);
+
 //command parsing functions
 void parse_cli_info(char **argv);
 void parse_cli_title(char **argv);
@@ -145,8 +147,8 @@ int main (int argc, char *argv[]) {
 	char *current_arg = NULL;
 	
 	//first, read program options... loop over args until we reach one that doesn't start with '-'
-	for (current_arg = GET_NEXT_ARG ; (current_arg[0] == '-') ; current_arg = GET_NEXT_ARG) {
-
+	for (current_arg = PEEK_ARG ; (current_arg[0] == '-') ; current_arg = PEEK_ARG) {
+		current_arg = GET_NEXT_ARG;
 		// print help and quit
 		if ( CHECK_ARG( OPT_HELP ) ) {
 			print_usage(true);
@@ -177,8 +179,19 @@ int main (int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 	
+	parse_line(argc, argv);
+	
+	//end of program
+	return 0;
+}
+
+void parse_line(int argc, char **argv) {
+	/*
+	**	parse a line of input
+	*/
+	
 	//read command
-	char *command = current_arg;
+	char *command = GET_NEXT_ARG;
 	//printf("Command: %s\n", current_arg); //debug line...
 	
 	//if there is nothing else to do, print error and exit
@@ -205,9 +218,6 @@ int main (int argc, char *argv[]) {
 		printf("Unknown command: %s\n\n", command);
 		exit(EXIT_FAILURE);
 	}
-	
-	//end of program
-	return 0;
 }
 
 void print_usage(bool extended) {
