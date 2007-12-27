@@ -401,6 +401,8 @@ void parse_cli_title(char **argv) {
 	
 	char *current_arg = GET_NEXT_ARG;
 	
+	CHECK_ARG_ERROR("Expected a sub-action (set, remove or print)!");
+	
 	//if the next arg starts with a -, it's a command
 	if (current_arg[0] == '-') {
 		strcpy(title_command, current_arg);
@@ -907,7 +909,9 @@ void parse_cli_inject(char **argv) {
 	**	-tile, -chr, -prg
 	*/
 	
-	char *current_arg = NULL;
+	char *current_arg = GET_NEXT_ARG;
+	CHECK_ARG_ERROR("Expected an injection type (tile, chr or prg)!");
+	
 	char *inject_type = GET_NEXT_ARG; //should be oe of -tile, -chr, -prg
 	
 	v_printf(VERBOSE_NOTICE, "Injecting (%s)", inject_type);
