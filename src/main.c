@@ -24,19 +24,19 @@
 
 // help
 #define OPT_HELP 			"-?"
-#define OPT_HELP_ALT 		"--help"
+#define OPT_HELP_LONG 		"--help"
 
 // verbose
 #define OPT_VERBOSE 		"-v"
-#define OPT_VERBOSE_ALT		"--verbose"
+#define OPT_VERBOSE_LONG		"--verbose"
 
 // version info
 #define OPT_VERSION			"--version"
-#define OPT_VERSION_ALT		"" /* no alternate for version */
+#define OPT_VERSION_LONG		"" /* no alternate for version */
 
 // set color palette (for drawing tiles to the terminal)
 #define OPT_COLOR			"-c"
-#define OPT_COLOR_ALT		"--color"
+#define OPT_COLOR_LONG		"--color"
 char color_palette[4] =		"0136"; //default color palette (uses ANSI terminal color codes)
 
 // program commands
@@ -48,22 +48,28 @@ char color_palette[4] =		"0136"; //default color palette (uses ANSI terminal col
 
 //title
 #define ACTION_TITLE			"title"
-#define ACTION_TITLE_SET		"-set"		/* set title */
-#define ACTION_TITLE_REMOVE	"-remove"	/* remove title */
-#define ACTION_TITLE_PRINT		"-print"	/* print title (default) */
+#define ACTION_TITLE_SET		"set"		/* set title */
+#define ACTION_TITLE_REMOVE		"remove"	/* remove title */
+#define ACTION_TITLE_PRINT		"print"	/* print title (default) */
 
 //extract
 #define ACTION_EXTRACT			"extract"
-#define ACTION_EXTRACT_TILE	"-tile"		/* extract tile(s) */
+#define ACTION_EXTRACT_TILE		"tile"		/* extract tile(s) */
                              
-#define ACTION_EXTRACT_PRG		"-prg"		/* extract PRG bank */
-#define ACTION_EXTRACT_CHR		"-chr"		/* extract CHR bank */
+#define ACTION_EXTRACT_PRG		"prg"		/* extract PRG bank */
+#define ACTION_EXTRACT_CHR		"chr"		/* extract CHR bank */
+
+#define OPT_BANK				"-b"
+#define OPT_BANK_LONG			"--bank"
+
+#define OPT_OUTPUT_FILE			"-o"
+#define OPT_OUTPUT_FILE_LONG	"--output"
 
 // inject
 #define ACTION_INJECT			"inject"
-#define ACTION_INJECT_TILE		"-tile"
-#define ACTION_INJECT_PRG		"-prg"
-#define ACTION_INJECT_CHR		"-chr"
+#define ACTION_INJECT_TILE		"tile"
+#define ACTION_INJECT_PRG		"prg"
+#define ACTION_INJECT_CHR		"chr"
 	
 
 //program options (global ones)
@@ -71,35 +77,33 @@ char color_palette[4] =		"0136"; //default color palette (uses ANSI terminal col
 
 /* specify filename */
 #define OPT_FILENAME			"-f"
-#define OPT_FILENAME_ALT		"--file"
+#define OPT_FILENAME_LONG		"--file"
 
 /* extract banks as a single file */
 #define OPT_SINGLE_FILE			"-s"
-#define OPT_SINGLE_FILE_ALT		"--single-file"
+#define OPT_SINGLE_FILE_LONG	"--single-file"
 
 /* extract all banks (use in place of index or range) */
 #define OPT_ALL					"-a"
-#define OPT_ALL_ALT				"--all"
+#define OPT_ALL_LONG			"--all"
 
 /* use horizontal ordering for tile extraction */
 #define OPT_H_ORDER				"-h"
-#define OPT_H_ORDER_ALT			"--horizontal"
+#define OPT_H_ORDER_LONG		"--horizontal"
 
 /* use vertical ordering for tile extraction */
 #define OPT_V_ORDER				"-v"
-#define OPT_V_ORDER_ALT			"--vertical"
+#define OPT_V_ORDER_LONG		"--vertical"
 
 /* specify filetype for extraction */
 #define OPT_FILETYPE			"-t"
-#define OPT_FILETYPE_ALT		"--type"
+#define OPT_FILETYPE_LONG		"--type"
 
 /* extract tile from PRG bank */
-#define OPT_PRG_BANK			"-p"
-#define OPT_PRG_BANK_ALT		"--prg"
+#define ARG_PRG_BANK			"prg"
 
 /* extract tile from CHR bank (default) */
-#define OPT_CHR_BANK			"-c"
-#define OPT_CHR_BANK_ALT		"--chr"
+#define ARG_CHR_BANK			"chr"
 
 /* types for graphic formats */
 #define RAW_TYPE				"raw"		/* bitmap with 0, 1, 2, 3 for colors... easily imported into photoshop and brought back in */
@@ -489,7 +493,7 @@ void parse_cli_extract(char **argv) {
 	*/
 	
 	char *current_arg = NULL;
-	char *extract_command = GET_NEXT_ARG; //should be oe of -tile, -chr, -prg
+	char *extract_command = GET_NEXT_ARG; //should be oe of tile, chr, prg
 	
 	v_printf(VERBOSE_NOTICE, "Extracting (%s)", extract_command);
 	
@@ -503,55 +507,34 @@ void parse_cli_extract(char **argv) {
 	#pragma mark **Extract Tile
 	if (strcmp(extract_command, ACTION_EXTRACT_TILE) == 0) {
 		//extract tile
-		//usage: -tile [-prg | -chr] <bank index> <range> [-h | -v] [-f <output_filename>] [-t <type>]
+		//usage: tile [ prg | chr ] <bank index> <range> [-h | -v] [-f <output_filename>] [-t <type>]
+		// new usage: tile <bank index> <tile range> [ options ]
+		//	options:
+		//		-b <bank>				-- default to CHR
+		//		-o <output_filename>	-- default to FILENAME.EXT in CWD
+		//		-f <file format>		-- default to NATIVE
+		//*		-v | -h					-- default to horizontal (for compound extraction)
+		//*		-c						-- turn on compound extraction?
 		
 		v_printf(VERBOSE_NOTICE, "Extract tile.");
 		
 		//where we store our arguments...
 		char *current_arg = GET_NEXT_ARG;
-		char *target_bank_type = OPT_CHR_BANK; //default
+		
+		NESBankType target_bank_type = nes_chr_bank; //default
 		int bank_index = 0;
 		Range *tile_range = (Range*)malloc(sizeof(Range));
 		char order = nes_horizontal; //default
-		char type[10] = NATIVE_TYPE; //default
+		char *type = NATIVE_TYPE; //default
 		char output_filepath[255] = ""; //default
 		
-		//check to make sure that we actually grabbed an argument
-		CHECK_ARG_ERROR("Expected bank index or type!");
-		
-		//read the bank type
-		if (IS_OPT(current_arg)) {
-			if ( CHECK_ARG(OPT_CHR_BANK) ) {
-				target_bank_type = OPT_CHR_BANK;
-			} else if ( CHECK_ARG(OPT_PRG_BANK) ) {
-				target_bank_type = OPT_PRG_BANK;
-			} else {
-				fprintf(stderr, "Unknown bank type: %s\n", current_arg);
-				exit(EXIT_FAILURE);
-			}
-		}
-
-		v_printf(VERBOSE_DEBUG, "Extract from banktype: %s", target_bank_type);
-		
-		//read the bank index:
-		// (for now, this has to be a single number. no ranges allowed. no all allowed, either)
-		
-		//if the previous argument wasn't an option, use it as the next, otherwise read a new one
-		if ( IS_OPT(current_arg) ) {
-			current_arg = GET_NEXT_ARG;
-		}
-		CHECK_ARG_ERROR("Expected bank index.");
-		
+		//read the bank index
+		CHECK_ARG_ERROR("Expected bank index!");
 		bank_index = atoi(current_arg);
-		v_printf(VERBOSE_DEBUG, "Bank index: %d", bank_index);
 		
-		//read the tile_range from commandline
+		//read the range:
 		current_arg = GET_NEXT_ARG;
-		CHECK_ARG_ERROR("Expected tile range.");
 		
-		//if it's a range, set the range...
-		//otherwise, it's 1 tile. so start and end of range are the same!
-		//TODO: add support for a '-a' option!
 		if (check_is_range(current_arg)) {
 			str_to_range(tile_range, current_arg);
 		} else {
@@ -560,48 +543,58 @@ void parse_cli_extract(char **argv) {
 		}
 		v_printf(VERBOSE_DEBUG, "Tile range: %d -> %d", tile_range->start, tile_range->end);
 		
+		//now, let's loop until we hit something that's not an option
+		// we've gotta read all the options:
+		for(current_arg = PEEK_ARG; IS_OPT(current_arg); current_arg = PEEK_ARG) {
+			current_arg = GET_NEXT_ARG;
+			
+			// read the bank info
+			if (MATCH_OPT(current_arg, OPT_BANK)) {
+				current_arg = GET_NEXT_ARG;
+				if (strcmp(current_arg, ARG_PRG_BANK) == 0) {
+					target_bank_type = nes_prg_bank;
+				} else if (strcmp(current_arg, ARG_CHR_BANK) == 0) {
+					target_bank_type = nes_chr_bank;
+				} else {
+					fprintf(stderr, "%s is an invalid bank-type. Please use '%s' or '%s'\n\n",
+						current_arg, ARG_PRG_BANK, ARG_CHR_BANK);
+					exit(EXIT_FAILURE);
+				}
+				
+				continue;
+			}
+			
+			// read the output file
+			if (MATCH_OPT(current_arg, OPT_OUTPUT_FILE)) {
+				strcpy(output_filepath, GET_NEXT_ARG);
+				continue;
+			}
+			
+			// read the filetype
+			if (MATCH_OPT(current_arg, OPT_FILETYPE)) {
+				current_arg = GET_NEXT_ARG;
+				if (strcmp(current_arg, RAW_TYPE) == 0) {
+					type = RAW_TYPE;
+				} else if (strcmp(current_arg, GIF_TYPE) == 0) {
+					type = GIF_TYPE;
+				} else if (strcmp(current_arg, PNG_TYPE) == 0) {
+					type = PNG_TYPE;
+				} else if (strcmp(current_arg, NATIVE_TYPE) == 0) {
+					type = NATIVE_TYPE;
+				} else if (strcmp(current_arg, HTML_TYPE) == 0) {
+					type = HTML_TYPE;
+				} else {
+					fprintf(stderr, "%s is an invalid filetype. Please see the help for a list of valid types.\n\n", current_arg);
+					exit(EXIT_FAILURE);
+				}
+				
+				continue;
+			}
+		}
+	
 		//now for options (which are optional... duh);
 		current_arg = PEEK_ARG;
 		CHECK_ARG_ERROR("No filenames specified.");
-		
-		// if current_arg is an option, then keep looping until we hit one that isn't.
-		if ( current_arg != NULL && IS_OPT(current_arg) ) {
-			for (current_arg = PEEK_ARG; IS_OPT(current_arg) ; current_arg = PEEK_ARG) {
-				current_arg = GET_NEXT_ARG;
-				//horizontal order
-				if (CHECK_ARG(OPT_H_ORDER)) {
-					order = nes_horizontal;
-					v_printf(VERBOSE_DEBUG, "setting order: horizontal");
-					continue;
-				}
-				
-				//vertical order
-				if (CHECK_ARG(OPT_V_ORDER)) {
-					order = nes_vertical;
-					v_printf(VERBOSE_DEBUG, "setting order: vertical");
-					continue;
-				}
-				
-				//filename
-				if (CHECK_ARG(OPT_FILENAME)) {
-					strcpy(output_filepath, GET_NEXT_ARG);
-					v_printf(VERBOSE_DEBUG, "Output file: %s", output_filepath);
-					continue;
-				}
-				
-				//filetype:
-				if (CHECK_ARG(OPT_FILETYPE)) {
-					current_arg = GET_NEXT_ARG;
-					CHECK_ARG_ERROR("Expected filetype!");
-					strcpy(type, current_arg);
-					v_printf(VERBOSE_DEBUG, "Output filetype: %s", type);
-					continue;
-				}
-				
-				printf("Unknown option: %s\n", current_arg);
-				exit(EXIT_FAILURE);
-			}
-		}
 		
 		v_printf(VERBOSE_DEBUG, "Order: %c", order);
 		v_printf(VERBOSE_DEBUG, "Output file: %s", output_filepath);
@@ -626,7 +619,7 @@ void parse_cli_extract(char **argv) {
 			char *bank_data = NULL; //where we store the bank we are going to pull from
 			
 			//read the appropriate bank into bank_data
-			if (target_bank_type == OPT_CHR_BANK) {
+			if (target_bank_type == nes_chr_bank) {
 				//read CHR bank
 				bank_data = (char*)malloc(NES_CHR_BANK_LENGTH);
 				
@@ -638,7 +631,7 @@ void parse_cli_extract(char **argv) {
 					continue;
 				}
 				
-			} else if (target_bank_type == OPT_PRG_BANK) {
+			} else if (target_bank_type == nes_prg_bank) {
 				//read PRG bank
 				bank_data = (char*)malloc(NES_PRG_BANK_LENGTH);
 				
@@ -745,65 +738,73 @@ void parse_cli_extract(char **argv) {
 	} else if (strcmp(extract_command, ACTION_EXTRACT_PRG) == 0 || strcmp(extract_command, ACTION_EXTRACT_CHR) == 0) {
 		//extract PRG or CHR bank
 		// format is:
-		// -prg <bank index> [options]
-		//  <bank index> can be a single number (ie: 3), a range (ie: 2-5), or '-a' for "all"
-		// options are:
-		//  -s : extract as a single file (useful for when extracting ranges)
-		//	-f <filename> : extract to <filename>
-		
-		char *bank_info = GET_NEXT_ARG; //read the bank index
-		Range *r = (Range*)malloc(sizeof(Range));; //for extracting a range of banks
-		
-		//use '-a' for the range for all banks... or specify a number or a range
-		if (strcmp(bank_info, OPT_ALL) == 0) {
-			r->start = 1;
-			r->end = -1; //set to -1 to mark it to mean the last bank...
-		} else {
-			//if it's a range, parse it and create
-			if (check_is_range(bank_info)) {
-				str_to_range(r, bank_info);
-			} else {
-				int bank_index = atoi(bank_info);
-				r->start = bank_index;
-				r->end = bank_index;
-			}
-		}
+		// new usage:
+		//	extract [prg | chr] <bank range>
+		//	options:
+		//		-o <filename>
+		//		-s
 		
 		//options:
-		int extract_single_file = false;
-		char target_filepath[255] = "";
+		char *current_arg = NULL;
 		
-		//check additional options:
+		v_printf(VERBOSE_DEBUG, "extract_command: %s", extract_command);
 		
-		current_arg = PEEK_ARG;
-		if (current_arg[0] == '-') {
-			for (current_arg = GET_NEXT_ARG; current_arg[0] == '-' ; current_arg = GET_NEXT_ARG) {
-				//single file
-				if (strcmp(current_arg, OPT_SINGLE_FILE) == 0) {
-					extract_single_file = true;
-					continue;
-				}
-				
-				//set filename
-				if (strcmp(current_arg, OPT_FILENAME) == 0) {
-					printf("set filepath: %s\n", PEEK_ARG);
-					strcpy(target_filepath, GET_NEXT_ARG);
-					continue;
-				}
-				
-				printf("Unknown option: %s\n", current_arg);
-				exit(EXIT_FAILURE);
+		NESBankType bank_type = nes_chr_bank;
+		Range *bank_range = (Range*)malloc(sizeof(Range));
+		char output_filepath[255] = "";
+		bool output_single_file = false;
+		
+		//first, read required params:
+		//we already read the bank-type (it's in extract_command), so let's set that properly
+		if (strcmp(extract_command, ACTION_EXTRACT_PRG) == 0) {
+			bank_type = nes_prg_bank;
+		} else if (strcmp(extract_command, ACTION_EXTRACT_CHR) == 0) {
+			bank_type = nes_chr_bank;
+		} else {
+			fprintf(stderr, "%s is not a valid bank-type! Please use '%s' or '%s'\n\n",
+				extract_command, ACTION_EXTRACT_PRG, ACTION_EXTRACT_CHR);
+			exit(EXIT_FAILURE);
+		}
+		
+		current_arg = GET_NEXT_ARG;
+		CHECK_ARG_ERROR("Expected bank range!");
+		
+		if (strcmp(current_arg, OPT_ALL) == 0) {
+			bank_range->start = 0;
+			if (bank_type == nes_prg_bank) {
+				bank_range->end = -1;
+			} else {
+				bank_range->end = -1;
+			}
+		} else {
+			//if it's a range, parse it and create
+			if (check_is_range(current_arg)) {
+				str_to_range(bank_range, current_arg);
+			} else {
+				int bank_index = atoi(current_arg);
+				bank_range->start = bank_index;
+				bank_range->end = bank_index;
 			}
 		}
 		
-		//due to the way the above loop works, if additional options were specified,
-		//then current_arg will contain the first filename...
-		//so, if current_arg doesn't contain an option (start with a dash),
-		//then we don't want to GET_NEXT_ARG it
-		if (current_arg[0] == '-') {
+		//check additional options (optional):
+		
+		for(current_arg = PEEK_ARG; IS_OPT(current_arg); current_arg = PEEK_ARG) {
 			current_arg = GET_NEXT_ARG;
+			
+			//output to a single file?
+			if (MATCH_OPT(current_arg, OPT_SINGLE_FILE)) {
+				output_single_file = true;
+				continue;
+			}
+			
+			if (MATCH_OPT(current_arg, OPT_OUTPUT_FILE)) {
+				strcpy(output_filepath, GET_NEXT_ARG);
+				continue;
+			}
 		}
 	
+		//loop over files...
 		for (; (current_arg != NULL) ; current_arg = GET_NEXT_ARG) {
 			FILE *ifile = NULL;
 			
@@ -814,107 +815,76 @@ void parse_cli_extract(char **argv) {
 				continue;
 			}
 			
-			if (strcmp(extract_command,  ACTION_EXTRACT_PRG) == 0) {
-				//extract the PRG bank
+			char extension[10] = ""; //placeholder for generated file extensions
+			int bank_data_size = 0;
+			char *bank_data = NULL;
+			
+			if (bank_type == nes_prg_bank) {
+				strcpy(extension, "prg");
 				
-				char *data = (char*)malloc(NES_PRG_BANK_LENGTH);
-				
-				//check to see if the range's end == -1...
-				//that serves as a hint that we want to extract every bank...
-				//if so, we need to set it to the last PRG bank index
-				if (r->end == -1) {
-					r->end = NESGetPrgBankCount(ifile);
+				if (bank_range->end == -1) {
+					bank_range->end = NESGetPrgBankCount(ifile) - 1;
 				}
 				
-				int i = 0;
-				//extract every prg... loop over the range...
-				for (i = r->start; i <= r->end; i++) {
-					if (!NESGetPrgBank(data, ifile, i)) {
+				bank_data_size = NES_PRG_BANK_LENGTH;
+			} else {
+				strcpy(extension, "chr");
+				
+				if (bank_range->end == -1) {
+					bank_range->end = NESGetChrBankCount(ifile) - 1;
+				}
+				
+				bank_data_size = NES_CHR_BANK_LENGTH;
+			}
+			
+			bank_data = (char*)malloc(bank_data_size);
+			
+			v_printf(VERBOSE_DEBUG, "extension: %s", extension);
+			v_printf(VERBOSE_DEBUG, "bank_data_size: %d", bank_data_size);
+			v_printf(VERBOSE_DEBUG, "Range: %d->%d", bank_range->start, bank_range->end);
+			
+			int i = 0;
+			
+			for (i = bank_range->start; i <= bank_range->end; i++) {
+				if (bank_type == nes_prg_bank) {
+					if (!NESGetPrgBank(bank_data, ifile, i)) {
 						printf("error reading PRG data from: %s\n", current_arg);
 						continue;
 					}
-					
-					//default is to write to files in current working directory
-					// default filename is NESROMNAME.NES.#.prg
-					char filepath[255];
-					
-					//if a filepath wasn't specified, use the default
-					if (target_filepath[0] == '\0') {
-						if (extract_single_file) {
-							//if single-file, then FILENAME.prg
-							sprintf(filepath, "%s.prg", lastPathComponent(current_arg));
-						} else {
-							//if multi-file, then FILENAME.#.prg
-							sprintf(filepath, "%s.%d.prg", lastPathComponent(current_arg), i);
-						}
-					} else { //otherwise, use the specified one		
-						strcpy(filepath, target_filepath);
-					}
-					
-					//write the data to the files
-					if (extract_single_file) {
-						if (!append_data_to_file(data, NES_PRG_BANK_LENGTH, filepath)) {
-							printf("An error occurred while writing a PRG bank (%s)\n", filepath);
-							continue;
-						}
-					} else {
-						if (!write_data_to_file(data, NES_PRG_BANK_LENGTH, filepath)) {
-							printf("An error occurred while writing a PRG bank (%s)\n", filepath);
-							continue;
-						}
-					}
-				}
-				
-			} else if (strcmp(extract_command, ACTION_EXTRACT_CHR) == 0) {
-				//extract the CHR bank
-				
-				char *data = (char*)malloc(NES_CHR_BANK_LENGTH);
-				
-				//check to see if the range's end == -1...
-				//that serves as a hint that we want to extract every bank...
-				//if so, we need to set it to the last PRG bank index
-				if (r->end == -1) {
-					r->end = NESGetChrBankCount(ifile);
-				}
-				
-				int i = 0;
-				//extract every prg... loop over the range...
-				for (i = r->start; i <= r->end; i++) {
-					if (!NESGetChrBank(data, ifile, i)) {
+				} else {
+					if (!NESGetChrBank(bank_data, ifile, i)) {
 						printf("error reading CHR data from: %s\n", current_arg);
 						continue;
 					}
-					
-					//default is to write to files in current working directory
-					// default filename is NESROMNAME.NES.#.chr
-					char filepath[255];
-					
-					//if a filepath wasn't specified, use the default
-					if (target_filepath[0] == '\0') {
-						if (extract_single_file) {
-							//if single-file, then FILENAME.chr
-							sprintf(filepath, "%s.chr", lastPathComponent(current_arg));
-						} else {
-							//if multi-file, then FILENAME.#.chr
-							sprintf(filepath, "%s.%d.chr", lastPathComponent(current_arg), i);
-						}
-					} else { //otherwise, use the specified one		
-						strcpy(filepath, target_filepath);
-					}
-					
-					printf("filename: %s\n", filepath);
-					
-					//write the data to the files
-					if (extract_single_file) {
-						if (!append_data_to_file(data, NES_CHR_BANK_LENGTH, filepath)) {
-							printf("An error occurred while writing a CHR bank (%s)\n", filepath);
-							continue;
-						}
+				}
+				
+				//default is to write to files in current working directory
+				// default filename is NESROMNAME.NES.#.prg
+				char filepath[255];
+				
+				//if a filepath wasn't specified, use the default
+				if (output_filepath[0] == '\0') {
+					if (output_single_file) {
+						//if single-file, then FILENAME.prg
+						sprintf(filepath, "%s.%s", lastPathComponent(current_arg));
 					} else {
-						if (!write_data_to_file(data, NES_CHR_BANK_LENGTH, filepath)) {
-							printf("An error occurred while writing a CHR bank (%s)\n", filepath);
-							continue;
-						}
+						//if multi-file, then FILENAME.#.prg
+						sprintf(filepath, "%s.%d.%s", lastPathComponent(current_arg), i, extension);
+					}
+				} else { //otherwise, use the specified one		
+					strcpy(filepath, output_filepath);
+				}
+				
+				//write the data to the files
+				if (output_single_file) {
+					if (!append_data_to_file(bank_data, bank_data_size, filepath)) {
+						printf("An error occurred while writing a bank (%s)\n", filepath);
+						continue;
+					}
+				} else {
+					if (!write_data_to_file(bank_data, bank_data_size, filepath)) {
+						printf("An error occurred while writing a bank (%s)\n", filepath);
+						continue;
 					}
 				}
 			}
@@ -967,9 +937,9 @@ void parse_cli_inject(char **argv) {
 		//read bank-type (what type of bank we're injecting into)
 		current_arg = GET_NEXT_ARG;
 		CHECK_ARG_ERROR("Expected bank type!");
-		if (strcmp(current_arg, OPT_CHR_BANK) == 0) {
+		if (strcmp(current_arg, ARG_CHR_BANK) == 0) {
 			bank_type = nes_chr_bank;
-		} else if (strcmp(current_arg, OPT_PRG_BANK) == 0) {
+		} else if (strcmp(current_arg, ARG_PRG_BANK) == 0) {
 			bank_type = nes_prg_bank;
 		} else {
 			fprintf(stderr, "Unknown banktype (%s)!\n", current_arg);
