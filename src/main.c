@@ -1007,8 +1007,69 @@ void parse_cli_inject(char **argv) {
 		
 	#pragma mark **Inject PRG
 	} else if (strcmp(inject_type, ACTION_INJECT_PRG) == 0) {
-		fprintf(stderr, "Inject PRG Bank. Not implemented\n");
-		exit(EXIT_FAILURE);
+		// usage:
+		// inject prg <bank index> <prg file> [ target rom file(s) ]
+		
+		int bank_index = 0;
+		FILE *prg_file = NULL;
+		char *prg_data = NULL;
+		int prg_data_size = 0;
+		
+		current_arg = GET_NEXT_ARG;
+		CHECK_ARG_ERROR("Expected bank index!");
+		
+		bank_index = atoi(current_arg);
+		
+		current_arg = GET_NEXT_ARG;
+		CHECK_ARG_ERROR("Expected PRG file!");
+		
+		//open the prg_file
+		if (!(prg_file = fopen(current_arg, "r"))) {
+			perror(current_arg);
+			exit(EXIT_FAILURE);
+		}
+		
+		//alocate and read the prg_data in
+		prg_data_size = NESGetFilesize(prg_file);
+		
+		if (prg_data_size != NES_PRG_BANK_LENGTH) {
+			fprintf(stderr, "Injecting only a single PRG bank is currently supported.\n\n");
+			EXIT_FAILURE;
+		}
+		
+		prg_data = (char*)malloc(prg_data_size);
+		
+		//rewind the file...
+		rewind(prg_file);
+		
+		//read the prg bank in...
+		if (fread(prg_data, 1, prg_data_size, prg_file) != prg_data_size) {
+			fprintf(stderr, "Error reading in PRG data!\n\n");
+			exit(EXIT_FAILURE);
+		}
+		
+		fclose(prg_file); //close the file
+		
+		//now, process the file(s):
+		while((current_arg = GET_NEXT_ARG) != NULL) {
+			FILE *rom_file = NULL; //the file we're injecting
+			
+			if (!(rom_file = fopen(current_arg, "r+"))) {
+				perror(current_arg);
+				continue; // if it fails, just continue to the next file...
+			}
+			
+			if (!NESInjectPrgBank(rom_file, prg_data, bank_index)) {
+				fprintf(stderr, "Error injecting PRG bank into %s!\n", current_arg);
+				fclose(rom_file);
+				continue; //if it fails, just move on to the next one.
+			}
+			
+			fclose(rom_file);
+		}
+		
+		free(prg_data);
+		
 	#pragma mark **Inject CHR
 	} else if (strcmp(inject_type, ACTION_INJECT_CHR) == 0) {
 		fprintf(stderr, "Inject CHR Bank. Not implemented\n");
