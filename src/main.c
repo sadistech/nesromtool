@@ -497,7 +497,7 @@ void parse_cli_extract(char **argv) {
 	char *current_arg = GET_NEXT_ARG;
 	CHECK_ARG_ERROR("Expected extraction type!");
 	
-	char *extract_command = GET_NEXT_ARG; //should be oe of tile, chr, prg
+	char *extract_command = current_arg; //should be oe of tile, chr, prg
 	
 	v_printf(VERBOSE_NOTICE, "Extracting (%s)", extract_command);
 	
@@ -912,7 +912,7 @@ void parse_cli_inject(char **argv) {
 	char *current_arg = GET_NEXT_ARG;
 	CHECK_ARG_ERROR("Expected an injection type (tile, chr or prg)!");
 	
-	char *inject_type = GET_NEXT_ARG; //should be oe of -tile, -chr, -prg
+	char *inject_type = current_arg; //should be oe of -tile, -chr, -prg
 	
 	v_printf(VERBOSE_NOTICE, "Injecting (%s)", inject_type);
 	
