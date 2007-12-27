@@ -492,7 +492,9 @@ void parse_cli_extract(char **argv) {
 	**	-prg (for prg extraction, duh)
 	*/
 	
-	char *current_arg = NULL;
+	char *current_arg = GET_NEXT_ARG;
+	CHECK_ARG_ERROR("Expected extraction type!");
+	
 	char *extract_command = GET_NEXT_ARG; //should be oe of tile, chr, prg
 	
 	v_printf(VERBOSE_NOTICE, "Extracting (%s)", extract_command);
