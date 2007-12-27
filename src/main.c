@@ -1021,7 +1021,7 @@ void parse_cli_inject(char **argv) {
 		bank_index = atoi(current_arg);
 		
 		current_arg = GET_NEXT_ARG;
-		CHECK_ARG_ERROR("Expected PRG file!");
+		CHECK_ARG_ERROR("Expected PRG file path!");
 		
 		//open the prg_file
 		if (!(prg_file = fopen(current_arg, "r"))) {
@@ -1072,8 +1072,68 @@ void parse_cli_inject(char **argv) {
 		
 	#pragma mark **Inject CHR
 	} else if (strcmp(inject_type, ACTION_INJECT_CHR) == 0) {
-		fprintf(stderr, "Inject CHR Bank. Not implemented\n");
-		exit(EXIT_FAILURE);
+		// usage:
+		// inject chr <bank index> <chr file> [ target rom file(s) ]
+		
+		int bank_index = 0;
+		FILE *chr_file = NULL;
+		char *chr_data = NULL;
+		int chr_data_size = 0;
+		
+		current_arg = GET_NEXT_ARG;
+		CHECK_ARG_ERROR("Expected bank index!");
+		
+		bank_index = atoi(current_arg);
+		
+		current_arg = GET_NEXT_ARG;
+		CHECK_ARG_ERROR("Expected CHR file path!");
+		
+		//open the chr_file
+		if (!(chr_file = fopen(current_arg, "r"))) {
+			perror(current_arg);
+			exit(EXIT_FAILURE);
+		}
+		
+		//alocate and read the chr_data in
+		chr_data_size = NESGetFilesize(chr_file);
+		
+		if (chr_data_size != NES_CHR_BANK_LENGTH) {
+			fprintf(stderr, "Injecting only a single CHR bank is currently supported.\n\n");
+			EXIT_FAILURE;
+		}
+		
+		chr_data = (char*)malloc(chr_data_size);
+		
+		//rewind the file...
+		rewind(chr_file);
+		
+		//read the chr bank in...
+		if (fread(chr_data, 1, chr_data_size, chr_file) != chr_data_size) {
+			fprintf(stderr, "Error reading in CHR data!\n\n");
+			exit(EXIT_FAILURE);
+		}
+		
+		fclose(chr_file); //close the file
+		
+		//now, process the file(s):
+		while((current_arg = GET_NEXT_ARG) != NULL) {
+			FILE *rom_file = NULL; //the file we're injecting
+			
+			if (!(rom_file = fopen(current_arg, "r+"))) {
+				perror(current_arg);
+				continue; // if it fails, just continue to the next file...
+			}
+			
+			if (!NESInjectChrBank(rom_file, chr_data, bank_index)) {
+				fprintf(stderr, "Error injecting CHR bank into %s!\n", current_arg);
+				fclose(rom_file);
+				continue; //if it fails, just move on to the next one.
+			}
+			
+			fclose(rom_file);
+		}
+		
+		free(chr_data);
 	} else {
 		//illegal type
 		fprintf(stderr, "Unknown injection type (%s)\n", inject_type);
