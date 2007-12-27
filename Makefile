@@ -50,7 +50,7 @@ binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_nesromtool_OBJECTS = main.$(OBJEXT) NESutils.$(OBJEXT) \
 	types.$(OBJEXT) pathfunc.$(OBJEXT) functions.$(OBJEXT) \
-	formats.$(OBJEXT) verbosity.$(OBJEXT)
+	formats.$(OBJEXT) verbosity.$(OBJEXT) ips.$(OBJEXT)
 nesromtool_OBJECTS = $(am_nesromtool_OBJECTS)
 nesromtool_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.
@@ -170,7 +170,10 @@ nesromtool_SOURCES = \
 	src/formats.h \
 	src/formats.c \
 	src/verbosity.h \
-	src/verbosity.c
+	src/verbosity.c \
+	src/patching.h \
+	src/patching/ips.h \
+	src/patching/ips.c
 
 EXTRA_DIST = reconf
 all: config.h
@@ -264,6 +267,7 @@ distclean-compile:
 include ./$(DEPDIR)/NESutils.Po
 include ./$(DEPDIR)/formats.Po
 include ./$(DEPDIR)/functions.Po
+include ./$(DEPDIR)/ips.Po
 include ./$(DEPDIR)/main.Po
 include ./$(DEPDIR)/pathfunc.Po
 include ./$(DEPDIR)/types.Po
@@ -380,6 +384,20 @@ verbosity.obj: src/verbosity.c
 #	source='src/verbosity.c' object='verbosity.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o verbosity.obj `if test -f 'src/verbosity.c'; then $(CYGPATH_W) 'src/verbosity.c'; else $(CYGPATH_W) '$(srcdir)/src/verbosity.c'; fi`
+
+ips.o: src/patching/ips.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ips.o -MD -MP -MF $(DEPDIR)/ips.Tpo -c -o ips.o `test -f 'src/patching/ips.c' || echo '$(srcdir)/'`src/patching/ips.c
+	mv -f $(DEPDIR)/ips.Tpo $(DEPDIR)/ips.Po
+#	source='src/patching/ips.c' object='ips.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ips.o `test -f 'src/patching/ips.c' || echo '$(srcdir)/'`src/patching/ips.c
+
+ips.obj: src/patching/ips.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ips.obj -MD -MP -MF $(DEPDIR)/ips.Tpo -c -o ips.obj `if test -f 'src/patching/ips.c'; then $(CYGPATH_W) 'src/patching/ips.c'; else $(CYGPATH_W) '$(srcdir)/src/patching/ips.c'; fi`
+	mv -f $(DEPDIR)/ips.Tpo $(DEPDIR)/ips.Po
+#	source='src/patching/ips.c' object='ips.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ips.obj `if test -f 'src/patching/ips.c'; then $(CYGPATH_W) 'src/patching/ips.c'; else $(CYGPATH_W) '$(srcdir)/src/patching/ips.c'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \

@@ -13,7 +13,10 @@ nesromtool_SOURCES = \
 	src/formats.h \
 	src/formats.c \
 	src/verbosity.h \
-	src/verbosity.c
+	src/verbosity.c \
+	src/patching.h \
+	src/patching/ips.h \
+	src/patching/ips.c
 	
 
 EXTRA_DIST = reconf

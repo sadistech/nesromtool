@@ -50,7 +50,7 @@ binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_nesromtool_OBJECTS = main.$(OBJEXT) NESutils.$(OBJEXT) \
 	types.$(OBJEXT) pathfunc.$(OBJEXT) functions.$(OBJEXT) \
-	formats.$(OBJEXT) verbosity.$(OBJEXT)
+	formats.$(OBJEXT) verbosity.$(OBJEXT) ips.$(OBJEXT)
 nesromtool_OBJECTS = $(am_nesromtool_OBJECTS)
 nesromtool_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@
@@ -170,7 +170,10 @@ nesromtool_SOURCES = \
 	src/formats.h \
 	src/formats.c \
 	src/verbosity.h \
-	src/verbosity.c
+	src/verbosity.c \
+	src/patching.h \
+	src/patching/ips.h \
+	src/patching/ips.c
 
 EXTRA_DIST = reconf
 all: config.h
@@ -264,6 +267,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NESutils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/formats.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/functions.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ips.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pathfunc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/types.Po@am__quote@
@@ -380,6 +384,20 @@ verbosity.obj: src/verbosity.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/verbosity.c' object='verbosity.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o verbosity.obj `if test -f 'src/verbosity.c'; then $(CYGPATH_W) 'src/verbosity.c'; else $(CYGPATH_W) '$(srcdir)/src/verbosity.c'; fi`
+
+ips.o: src/patching/ips.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ips.o -MD -MP -MF $(DEPDIR)/ips.Tpo -c -o ips.o `test -f 'src/patching/ips.c' || echo '$(srcdir)/'`src/patching/ips.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ips.Tpo $(DEPDIR)/ips.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/patching/ips.c' object='ips.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ips.o `test -f 'src/patching/ips.c' || echo '$(srcdir)/'`src/patching/ips.c
+
+ips.obj: src/patching/ips.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ips.obj -MD -MP -MF $(DEPDIR)/ips.Tpo -c -o ips.obj `if test -f 'src/patching/ips.c'; then $(CYGPATH_W) 'src/patching/ips.c'; else $(CYGPATH_W) '$(srcdir)/src/patching/ips.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ips.Tpo $(DEPDIR)/ips.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/patching/ips.c' object='ips.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ips.obj `if test -f 'src/patching/ips.c'; then $(CYGPATH_W) 'src/patching/ips.c'; else $(CYGPATH_W) '$(srcdir)/src/patching/ips.c'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \

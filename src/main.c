@@ -19,6 +19,8 @@
 #include "formats.h"
 #include "verbosity.h"
 
+#include "patching.h"
+
 // program options
 //******************
 
@@ -70,6 +72,13 @@ char color_palette[4] =		"0136"; //default color palette (uses ANSI terminal col
 #define ACTION_INJECT_TILE		"tile"
 #define ACTION_INJECT_PRG		"prg"
 #define ACTION_INJECT_CHR		"chr"
+
+//patching
+#define ACTION_PATCH			"patch"
+#define ACTION_PATCH_IPS		"ips"
+#define ACTION_PATCH_NINJA		"ninja" /* not yet supported! */
+#define ACTION_PATCH_CREATE		"create"
+#define ACTION_PATCH_APPLY		"apply"
 	
 
 //program options (global ones)
@@ -134,6 +143,7 @@ void parse_cli_info(char **argv);
 void parse_cli_title(char **argv);
 void parse_cli_extract(char **argv);
 void parse_cli_inject(char **argv);
+void parse_cli_patch(char **argv);
 
 //globals
 //********************
@@ -217,6 +227,9 @@ void parse_line(int argc, char **argv) {
 	} else if (strcmp(command, ACTION_INJECT) == 0) {
 		//inject command
 		parse_cli_inject(argv);
+	} else if (strcmp(command, ACTION_PATCH) == 0) {
+		//patch action
+		parse_cli_patch(argv);
 	} else {
 		//error! unknown command!
 		printf("Unknown command: %s\n\n", command);
@@ -1137,6 +1150,78 @@ void parse_cli_inject(char **argv) {
 	} else {
 		//illegal type
 		fprintf(stderr, "Unknown injection type (%s)\n", inject_type);
+		exit(EXIT_FAILURE);
+	}
+}
+
+void parse_cli_patch(char **argv) {
+	/*
+	**	usage:
+	**	patch ips apply <patch_file> [ <rom_file> ... ]
+	**	patch ips create <original_file> <modified_file> <patch_output_file>
+	*/
+	
+	char *current_arg = GET_NEXT_ARG;
+	CHECK_ARG_ERROR("Expected patch-type! only 'ips' is supported");
+	
+	char *patch_type = current_arg;
+	char *patch_method; //either apply or create
+	
+	if (strcmp(patch_type, ACTION_PATCH_IPS) != 0) {
+		fprintf(stderr, "Patch-type '%s' is not supported. Please use '%s'\n\n", patch_type, ACTION_PATCH_IPS);
+		exit(EXIT_FAILURE);
+	}
+	
+	current_arg = GET_NEXT_ARG;
+	CHECK_ARG_ERROR("Expected patch method (apply or create)!");
+	
+	patch_method = current_arg;
+	
+	if (strcmp(patch_method, ACTION_PATCH_APPLY) == 0) {
+		//apply the patch
+		//usage: patch <type> apply <patch_file> [ <rom_files> ... ]
+		
+		current_arg = GET_NEXT_ARG;
+		CHECK_ARG_ERROR("Expected patch file!");
+		
+		FILE *patch = NULL;
+		
+		if (!(patch = fopen(current_arg, "r"))) {
+			perror(current_arg);
+			exit(EXIT_FAILURE);
+		}
+		
+		//now, process the file(s):
+		while((current_arg = GET_NEXT_ARG) != NULL) {
+			FILE *rom_file = NULL; //the file we're injecting
+			
+			if (!(rom_file = fopen(current_arg, "r+"))) {
+				perror(current_arg);
+				continue; // if it fails, just continue to the next file...
+			}
+			
+			//apply the patch...
+			int err = 0;
+			if ((err = IPS_apply(rom_file, patch)) <= 0) {
+				//if IPS_apply returns anything <= 0, something went wrong.
+				fprintf(stderr, "An error occurred while applying the patch to %s (%d)!\n\n", current_arg, err);
+				fclose(rom_file);
+				continue;
+			}
+			
+			fclose(rom_file);
+		}
+		
+		fclose(patch);
+		
+	} else if (strcmp(patch_method, ACTION_PATCH_CREATE) == 0) {
+		//create a patch
+		//usage: patch <type> create <original_file> <modified_file> <patch_output_file>
+		fprintf(stderr, "Creating patches is not yet implemented.\n\n");
+		exit(EXIT_FAILURE);
+	} else {
+		//unknown patch method
+		fprintf(stderr, "Unknown patch method '%s'! Please use either '%s' or '%s'\n\n", patch_method, ACTION_PATCH_APPLY, ACTION_PATCH_CREATE);
 		exit(EXIT_FAILURE);
 	}
 }
