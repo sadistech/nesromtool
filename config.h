@@ -11,13 +11,13 @@
 #define PACKAGE_NAME "nesromtool"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "nesromtool 1.00a"
+#define PACKAGE_STRING "nesromtool 0.70"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "nesromtool"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.00a"
+#define PACKAGE_VERSION "0.70"
 
 /* Version number of package */
-#define VERSION "1.00a"
+#define VERSION "0.70"

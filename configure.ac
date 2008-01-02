@@ -1,4 +1,4 @@
-AC_INIT([nesromtool], [1.00a],
+AC_INIT([nesromtool], [0.70],
 	[Spike Grobstein <spike@sadistech.com>],
 	[nesromtool])
 AM_CONFIG_HEADER(config.h)
