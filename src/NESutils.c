@@ -565,9 +565,9 @@ int NESHasTitle(FILE *ifile) {
 	//if the header_size + PRG_Banks + CHR_banks == filesize, then no titledata block...
 	// if there's additional data beyond that, it's safe to assume that titledata exists...
 	// but we're going to check the contents of the title anyway to make sure there really is a title.
-	if (filesize >= (NES_HEADER_SIZE + PRG_count * NES_PRG_BANK_LENGTH + CHR_count * NES_CHR_BANK_LENGTH + NES_TITLE_BLOCK_LENGTH)) {
+	if (filesize > (NES_HEADER_SIZE + PRG_count * NES_PRG_BANK_LENGTH + CHR_count * NES_CHR_BANK_LENGTH)) {
 		char *title = (char*)malloc(NES_TITLE_BLOCK_LENGTH);
-		
+				
 		NESGetTitle(title, ifile, false);
 		
 		int title_length = strlen(title);
@@ -589,19 +589,21 @@ void NESGetTitle(char *buf, FILE *ifile, bool strip) {
 	// check if ifile or buf are NULL, if so, bail
 	if (!ifile || !buf) return;
 	
+	long rom_filesize = NESGetFilesize(ifile);
+	
 	//seek to the location of the title data
 	if (fseek(ifile, NES_HEADER_SIZE + (NES_PRG_BANK_LENGTH * NESGetPrgBankCount(ifile)) + (NES_CHR_BANK_LENGTH * NESGetChrBankCount(ifile)), SEEK_SET) != 0) {
 		return;
 	}
 	
 	//allocate the titleData
-	char *title_data = (char *)malloc(NES_TITLE_BLOCK_LENGTH + 1);
+	char *title_data = (char *)malloc(rom_filesize);
 	
 	//read the title_data... set count to the number of bytes read.
-	int count = fread(title_data, 1, NES_TITLE_BLOCK_LENGTH, ifile);
+	int count = fread(title_data, 1, rom_filesize, ifile);
 	
 	//yeah, I'm a little strict... this should probably be fixed so we're not quite as strict...
-	if (count != NES_TITLE_BLOCK_LENGTH) {
+	if (count != rom_filesize) {
 		free(title_data);
 		return;
 	}
@@ -619,7 +621,7 @@ void NESGetTitle(char *buf, FILE *ifile, bool strip) {
 	}
 	
 	//copy title_data into buf and free it
-	memcpy(buf, title_data, NES_TITLE_BLOCK_LENGTH);
+	memcpy(buf, title_data, rom_filesize);
 	free(title_data);
 }
 

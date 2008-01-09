@@ -206,9 +206,7 @@ int IPS_read_record(FILE *pfile, IPS_Record *pr) {
 	
 	pr->offset = IPS_BYTE3_TO_UINT(patch_offset);
 	pr->size = IPS_BYTE2_TO_UINT(patch_size);
-	
-	printf("offset: %d, size: %d\n", pr->offset, pr->size);
-	
+		
 	//check if this is an RLE encoded patch...
 	if (pr->size == 0) {
 		if (fread(patch_size, IPS_RLE_SIZE_LENGTH, 1, pfile) != 1) {

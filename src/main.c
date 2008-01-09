@@ -416,11 +416,8 @@ void parse_cli_title(char **argv) {
 	
 	CHECK_ARG_ERROR("Expected a sub-action (set, remove or print)!");
 	
-	//if the next arg starts with a -, it's a command
-	if (current_arg[0] == '-') {
-		strcpy(title_command, current_arg);
-		current_arg = GET_NEXT_ARG;
-	}
+	strcpy(title_command, current_arg);
+	current_arg = GET_NEXT_ARG;
 			
 	#pragma mark **Print Title
 	if (strcmp(title_command, ACTION_TITLE_PRINT) == 0) {
