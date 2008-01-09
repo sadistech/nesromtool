@@ -1,3 +1,10 @@
+/*
+**	Written by spike grobstein
+**	spike@sadistech.com
+**
+**	This is all based on the work shown at http://zerosoft.zophar.net/ips.htm
+*/
+
 #ifndef _IPS_H_
 #define _IPS_H_
 
@@ -16,7 +23,8 @@
 #define IPS_RLE_SIZE_LENGTH		2 		/* the data length of an RLE size segment */
 #define IPS_RLE_DATA_LENGTH		1 		/* the data length of an RLE encoded data segment */
 
-// some macros (copied from http://zerosoft.zophar.net/ips.htm):
+// the following 2 macros were copied from http://zerosoft.zophar.net/ips.htm :
+// values are stored in IPS patchfiles as big-endian
 #define IPS_BYTE3_TO_UINT(bp) \
      (((unsigned int)(bp)[0] << 16) & 0x00FF0000) | \
      (((unsigned int)(bp)[1] << 8) & 0x0000FF00) | \
