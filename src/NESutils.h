@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef _NES_UTIL_H_
-#define _NES_UTIL_H_
+#ifndef _NES_UTILS_H_
+#define _NES_UTILS_H_
 
 #include <stdio.h>
 #include "types.h"
@@ -163,4 +163,4 @@ int NESGetOffset(int x, int y, int width);
 };
 #endif
 
-#endif /* _NES_UTIL_H_ */
+#endif /* _NES_UTILS_H_ */

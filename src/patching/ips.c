@@ -39,7 +39,11 @@ int IPS_apply(FILE *source, FILE *patch) {
 	
 	//loop and read IPS_Records. keep looping until IPS_read_record() returns -1 (EOF) or reaches an error
 	for (patch_count = 0; (err = IPS_read_record(patch, pr)) > 0; patch_count++) {
-		fseek(source, pr->offset, SEEK_SET); //go to location in file
+		//go to location in file
+		if (fseek(source, pr->offset, SEEK_SET) != 0) {
+			//there was an error seeking in the file.
+			return -15; // unexpected EOF on source file.
+		}
 		
 		//check if the record is RLE encoded
 		if (pr->is_rle) {

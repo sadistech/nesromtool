@@ -3,6 +3,7 @@
 **	spike@sadistech.com
 **
 **	This is all based on the work shown at http://zerosoft.zophar.net/ips.htm
+**	
 */
 
 #ifndef _IPS_H_
