@@ -1,4 +1,4 @@
-NESutils.o NESutils.o: src/NESutils.c /usr/include/stdio.h \
+nesutils.o nesutils.o: src/nesutils.c /usr/include/stdio.h \
   /usr/include/_types.h /usr/include/sys/_types.h \
   /usr/include/sys/cdefs.h /usr/include/machine/_types.h \
   /usr/include/i386/_types.h /usr/include/string.h /usr/include/stdlib.h \
@@ -13,7 +13,7 @@ NESutils.o NESutils.o: src/NESutils.c /usr/include/stdio.h \
   /usr/include/libkern/i386/_OSByteOrder.h /usr/include/alloca.h \
   /usr/include/machine/types.h /usr/include/i386/types.h \
   /usr/include/unistd.h /usr/include/sys/unistd.h \
-  /usr/include/sys/select.h /usr/include/sys/_select.h src/NESutils.h \
+  /usr/include/sys/select.h /usr/include/sys/_select.h src/nesutils.h \
   src/types.h src/verbosity.h
 
 /usr/include/stdio.h:
@@ -78,7 +78,7 @@ NESutils.o NESutils.o: src/NESutils.c /usr/include/stdio.h \
 
 /usr/include/sys/_select.h:
 
-src/NESutils.h:
+src/nesutils.h:
 
 src/types.h:
 

@@ -1,6 +1,6 @@
 /*
- *  NESutils.h
- *  NESRomTool
+ *  nesutils.h
+ *  nesutils
  *
  *  Created by spike on Sat May 24 2003.
  *  Copyright (c) 2003 Sadistech. All rights reserved.

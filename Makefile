@@ -48,7 +48,7 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_nesromtool_OBJECTS = main.$(OBJEXT) NESutils.$(OBJEXT) \
+am_nesromtool_OBJECTS = main.$(OBJEXT) nesutils.$(OBJEXT) \
 	types.$(OBJEXT) pathfunc.$(OBJEXT) functions.$(OBJEXT) \
 	formats.$(OBJEXT) verbosity.$(OBJEXT) ips.$(OBJEXT)
 nesromtool_OBJECTS = $(am_nesromtool_OBJECTS)
@@ -158,8 +158,8 @@ top_builddir = .
 top_srcdir = .
 nesromtool_SOURCES = \
 	src/main.c \
-	src/NESutils.c \
-	src/NESutils.h \
+	src/nesutils.c \
+	src/nesutils.h \
 	src/types.h \
 	src/types.c \
 	src/commandline.h \
@@ -264,11 +264,11 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/NESutils.Po
 include ./$(DEPDIR)/formats.Po
 include ./$(DEPDIR)/functions.Po
 include ./$(DEPDIR)/ips.Po
 include ./$(DEPDIR)/main.Po
+include ./$(DEPDIR)/nesutils.Po
 include ./$(DEPDIR)/pathfunc.Po
 include ./$(DEPDIR)/types.Po
 include ./$(DEPDIR)/verbosity.Po
@@ -301,19 +301,19 @@ main.obj: src/main.c
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o main.obj `if test -f 'src/main.c'; then $(CYGPATH_W) 'src/main.c'; else $(CYGPATH_W) '$(srcdir)/src/main.c'; fi`
 
-NESutils.o: src/NESutils.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT NESutils.o -MD -MP -MF $(DEPDIR)/NESutils.Tpo -c -o NESutils.o `test -f 'src/NESutils.c' || echo '$(srcdir)/'`src/NESutils.c
-	mv -f $(DEPDIR)/NESutils.Tpo $(DEPDIR)/NESutils.Po
-#	source='src/NESutils.c' object='NESutils.o' libtool=no \
+nesutils.o: src/nesutils.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT nesutils.o -MD -MP -MF $(DEPDIR)/nesutils.Tpo -c -o nesutils.o `test -f 'src/nesutils.c' || echo '$(srcdir)/'`src/nesutils.c
+	mv -f $(DEPDIR)/nesutils.Tpo $(DEPDIR)/nesutils.Po
+#	source='src/nesutils.c' object='nesutils.o' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o NESutils.o `test -f 'src/NESutils.c' || echo '$(srcdir)/'`src/NESutils.c
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o nesutils.o `test -f 'src/nesutils.c' || echo '$(srcdir)/'`src/nesutils.c
 
-NESutils.obj: src/NESutils.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT NESutils.obj -MD -MP -MF $(DEPDIR)/NESutils.Tpo -c -o NESutils.obj `if test -f 'src/NESutils.c'; then $(CYGPATH_W) 'src/NESutils.c'; else $(CYGPATH_W) '$(srcdir)/src/NESutils.c'; fi`
-	mv -f $(DEPDIR)/NESutils.Tpo $(DEPDIR)/NESutils.Po
-#	source='src/NESutils.c' object='NESutils.obj' libtool=no \
+nesutils.obj: src/nesutils.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT nesutils.obj -MD -MP -MF $(DEPDIR)/nesutils.Tpo -c -o nesutils.obj `if test -f 'src/nesutils.c'; then $(CYGPATH_W) 'src/nesutils.c'; else $(CYGPATH_W) '$(srcdir)/src/nesutils.c'; fi`
+	mv -f $(DEPDIR)/nesutils.Tpo $(DEPDIR)/nesutils.Po
+#	source='src/nesutils.c' object='nesutils.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o NESutils.obj `if test -f 'src/NESutils.c'; then $(CYGPATH_W) 'src/NESutils.c'; else $(CYGPATH_W) '$(srcdir)/src/NESutils.c'; fi`
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o nesutils.obj `if test -f 'src/nesutils.c'; then $(CYGPATH_W) 'src/nesutils.c'; else $(CYGPATH_W) '$(srcdir)/src/nesutils.c'; fi`
 
 types.o: src/types.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT types.o -MD -MP -MF $(DEPDIR)/types.Tpo -c -o types.o `test -f 'src/types.c' || echo '$(srcdir)/'`src/types.c

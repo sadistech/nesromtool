@@ -12,7 +12,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "NESutils.h"
+#include "nesutils.h"
 
 #ifdef __cplusplus
 extern "C" {

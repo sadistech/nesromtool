@@ -1,6 +1,6 @@
 /*
- *  NESutils.c
- *  NESRomTool
+ *  nesutils.c
+ *  nesromtool
  *
  *  Created by spike on Sat May 24 2003.
  *  Copyright (c) 2003 Sadistech. All rights reserved.
@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "NESutils.h"
+#include "nesutils.h"
 #include "verbosity.h"
 
 

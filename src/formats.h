@@ -2,7 +2,7 @@
 #define _FORMATS_H_
 
 #include "types.h"
-#include "NESutils.h"
+#include "nesutils.h"
 #include <stdio.h>
 
 #ifdef __cplusplus

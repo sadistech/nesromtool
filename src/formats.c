@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "formats.h"
-#include "NESutils.h"
 #include "verbosity.h"
 
 

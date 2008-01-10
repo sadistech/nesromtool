@@ -48,7 +48,7 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_nesromtool_OBJECTS = main.$(OBJEXT) NESutils.$(OBJEXT) \
+am_nesromtool_OBJECTS = main.$(OBJEXT) nesutils.$(OBJEXT) \
 	types.$(OBJEXT) pathfunc.$(OBJEXT) functions.$(OBJEXT) \
 	formats.$(OBJEXT) verbosity.$(OBJEXT) ips.$(OBJEXT)
 nesromtool_OBJECTS = $(am_nesromtool_OBJECTS)
@@ -158,8 +158,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 nesromtool_SOURCES = \
 	src/main.c \
-	src/NESutils.c \
-	src/NESutils.h \
+	src/nesutils.c \
+	src/nesutils.h \
 	src/types.h \
 	src/types.c \
 	src/commandline.h \
@@ -264,11 +264,11 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NESutils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/formats.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/functions.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ips.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nesutils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pathfunc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/types.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/verbosity.Po@am__quote@
@@ -301,19 +301,19 @@ main.obj: src/main.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o main.obj `if test -f 'src/main.c'; then $(CYGPATH_W) 'src/main.c'; else $(CYGPATH_W) '$(srcdir)/src/main.c'; fi`
 
-NESutils.o: src/NESutils.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT NESutils.o -MD -MP -MF $(DEPDIR)/NESutils.Tpo -c -o NESutils.o `test -f 'src/NESutils.c' || echo '$(srcdir)/'`src/NESutils.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/NESutils.Tpo $(DEPDIR)/NESutils.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/NESutils.c' object='NESutils.o' libtool=no @AMDEPBACKSLASH@
+nesutils.o: src/nesutils.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT nesutils.o -MD -MP -MF $(DEPDIR)/nesutils.Tpo -c -o nesutils.o `test -f 'src/nesutils.c' || echo '$(srcdir)/'`src/nesutils.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/nesutils.Tpo $(DEPDIR)/nesutils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/nesutils.c' object='nesutils.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o NESutils.o `test -f 'src/NESutils.c' || echo '$(srcdir)/'`src/NESutils.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o nesutils.o `test -f 'src/nesutils.c' || echo '$(srcdir)/'`src/nesutils.c
 
-NESutils.obj: src/NESutils.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT NESutils.obj -MD -MP -MF $(DEPDIR)/NESutils.Tpo -c -o NESutils.obj `if test -f 'src/NESutils.c'; then $(CYGPATH_W) 'src/NESutils.c'; else $(CYGPATH_W) '$(srcdir)/src/NESutils.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/NESutils.Tpo $(DEPDIR)/NESutils.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/NESutils.c' object='NESutils.obj' libtool=no @AMDEPBACKSLASH@
+nesutils.obj: src/nesutils.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT nesutils.obj -MD -MP -MF $(DEPDIR)/nesutils.Tpo -c -o nesutils.obj `if test -f 'src/nesutils.c'; then $(CYGPATH_W) 'src/nesutils.c'; else $(CYGPATH_W) '$(srcdir)/src/nesutils.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/nesutils.Tpo $(DEPDIR)/nesutils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/nesutils.c' object='nesutils.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o NESutils.obj `if test -f 'src/NESutils.c'; then $(CYGPATH_W) 'src/NESutils.c'; else $(CYGPATH_W) '$(srcdir)/src/NESutils.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o nesutils.obj `if test -f 'src/nesutils.c'; then $(CYGPATH_W) 'src/nesutils.c'; else $(CYGPATH_W) '$(srcdir)/src/nesutils.c'; fi`
 
 types.o: src/types.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT types.o -MD -MP -MF $(DEPDIR)/types.Tpo -c -o types.o `test -f 'src/types.c' || echo '$(srcdir)/'`src/types.c

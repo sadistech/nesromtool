@@ -14,7 +14,7 @@
 
 #include "types.h"
 #include "commandline.h" /* for commandline parsing */
-#include "NESutils.h"
+#include "nesutils.h"
 #include "functions.h"
 #include "formats.h"
 #include "verbosity.h"
