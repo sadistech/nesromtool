@@ -48,9 +48,10 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_nesromtool_OBJECTS = main.$(OBJEXT) nesutils.$(OBJEXT) \
-	types.$(OBJEXT) pathfunc.$(OBJEXT) functions.$(OBJEXT) \
-	formats.$(OBJEXT) verbosity.$(OBJEXT) ips.$(OBJEXT)
+am_nesromtool_OBJECTS = main.$(OBJEXT) actions.$(OBJEXT) \
+	help.$(OBJEXT) nesutils.$(OBJEXT) types.$(OBJEXT) \
+	pathfunc.$(OBJEXT) functions.$(OBJEXT) formats.$(OBJEXT) \
+	verbosity.$(OBJEXT) ips.$(OBJEXT)
 nesromtool_OBJECTS = $(am_nesromtool_OBJECTS)
 nesromtool_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.
@@ -158,8 +159,13 @@ top_builddir = .
 top_srcdir = .
 nesromtool_SOURCES = \
 	src/main.c \
-	src/nesutils.c \
+	src/nesromtool.h \
+	src/actions.h \
+	src/actions.c \
+	src/help.h \
+	src/help.c \
 	src/nesutils.h \
+	src/nesutils.c \
 	src/types.h \
 	src/types.c \
 	src/commandline.h \
@@ -264,8 +270,10 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+include ./$(DEPDIR)/actions.Po
 include ./$(DEPDIR)/formats.Po
 include ./$(DEPDIR)/functions.Po
+include ./$(DEPDIR)/help.Po
 include ./$(DEPDIR)/ips.Po
 include ./$(DEPDIR)/main.Po
 include ./$(DEPDIR)/nesutils.Po
@@ -300,6 +308,34 @@ main.obj: src/main.c
 #	source='src/main.c' object='main.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o main.obj `if test -f 'src/main.c'; then $(CYGPATH_W) 'src/main.c'; else $(CYGPATH_W) '$(srcdir)/src/main.c'; fi`
+
+actions.o: src/actions.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT actions.o -MD -MP -MF $(DEPDIR)/actions.Tpo -c -o actions.o `test -f 'src/actions.c' || echo '$(srcdir)/'`src/actions.c
+	mv -f $(DEPDIR)/actions.Tpo $(DEPDIR)/actions.Po
+#	source='src/actions.c' object='actions.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o actions.o `test -f 'src/actions.c' || echo '$(srcdir)/'`src/actions.c
+
+actions.obj: src/actions.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT actions.obj -MD -MP -MF $(DEPDIR)/actions.Tpo -c -o actions.obj `if test -f 'src/actions.c'; then $(CYGPATH_W) 'src/actions.c'; else $(CYGPATH_W) '$(srcdir)/src/actions.c'; fi`
+	mv -f $(DEPDIR)/actions.Tpo $(DEPDIR)/actions.Po
+#	source='src/actions.c' object='actions.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o actions.obj `if test -f 'src/actions.c'; then $(CYGPATH_W) 'src/actions.c'; else $(CYGPATH_W) '$(srcdir)/src/actions.c'; fi`
+
+help.o: src/help.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT help.o -MD -MP -MF $(DEPDIR)/help.Tpo -c -o help.o `test -f 'src/help.c' || echo '$(srcdir)/'`src/help.c
+	mv -f $(DEPDIR)/help.Tpo $(DEPDIR)/help.Po
+#	source='src/help.c' object='help.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o help.o `test -f 'src/help.c' || echo '$(srcdir)/'`src/help.c
+
+help.obj: src/help.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT help.obj -MD -MP -MF $(DEPDIR)/help.Tpo -c -o help.obj `if test -f 'src/help.c'; then $(CYGPATH_W) 'src/help.c'; else $(CYGPATH_W) '$(srcdir)/src/help.c'; fi`
+	mv -f $(DEPDIR)/help.Tpo $(DEPDIR)/help.Po
+#	source='src/help.c' object='help.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o help.obj `if test -f 'src/help.c'; then $(CYGPATH_W) 'src/help.c'; else $(CYGPATH_W) '$(srcdir)/src/help.c'; fi`
 
 nesutils.o: src/nesutils.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT nesutils.o -MD -MP -MF $(DEPDIR)/nesutils.Tpo -c -o nesutils.o `test -f 'src/nesutils.c' || echo '$(srcdir)/'`src/nesutils.c

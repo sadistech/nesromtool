@@ -1,8 +1,13 @@
 bin_PROGRAMS = nesromtool
 nesromtool_SOURCES = \
 	src/main.c \
-	src/nesutils.c \
+	src/nesromtool.h \
+	src/actions.h \
+	src/actions.c \
+	src/help.h \
+	src/help.c \
 	src/nesutils.h \
+	src/nesutils.c \
 	src/types.h \
 	src/types.c \
 	src/commandline.h \
