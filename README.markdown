@@ -1,18 +1,16 @@
 # NESRomTool
 
-JUST migrated this over from sourceforge. This documentation is OUT OF DATE. I will update it soon.
+The NESRomTool is a utility for the extraction and injection of sprite and program data for NES (regular Nintendo) ROM files (.nes).
+
+In its current form, it is console only, but since the project contains some utility functions in a header, one could easily build a GUI wrapper for it. Anyone interested in creating a Windows, X, Classic MacOS, BeOS, or other GUI is welcome to fork the project.
+
+Run the program with no arguments to print the usage. Man files are coming soon. Additional usage documentation is coming soon, as well.
 
 ## About
 __Me__:               spike grobstein (<spike@sadistech.com>)    
 __Homepage__:         http://sadistech.com/nesromtool    
 __Project Homepage__: https://github.com/spikegrobstein/nesromtool    
 __My Homepage__:      http://sadistech.com    
-
-The NESRomTool is a utility for the extraction and injection of sprite and program data for NES (regular Nintendo) ROM files (.nes).
-
-In its current form, it is console only, but since the project contains some utility functions in a header, one could easily build a GUI wrapper for it. Anyone interested in creating a Windows, X, Classic MacOS, BeOS, or other GUI is welcome to fork the project.
-
-Run the program with no arguments to print the usage. Man files are coming soon. Additional usage documentation is coming soon, as well.
 
 ## Usage
 
