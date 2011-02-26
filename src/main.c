@@ -128,7 +128,7 @@ void print_usage(bool extended) {
 	printf("USAGE: %s [ options ] <action> [ action-options ... ] <file> [ <file> ... ]\n\n", program_name);
 
 	if (extended) {
-		printf("INSERT EXTENDED HELP HERE...\n\n");
+		printf("TODO: INSERT EXTENDED HELP HERE...\n\n");
 	} else {
 		printf("  Run '%s -?' for additional usage help\n\n", program_name);
 	}
